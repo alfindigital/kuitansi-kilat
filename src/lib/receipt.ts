@@ -36,6 +36,7 @@ function padBetween(left: string, right: string, width: number): string {
 }
 
 export async function renderReceiptPNG(node: HTMLElement): Promise<string> {
+  const { toPng } = await import("html-to-image");
   return await toPng(node, {
     pixelRatio: 2,
     cacheBust: true,
