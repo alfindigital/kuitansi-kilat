@@ -63,8 +63,8 @@ export async function sharePNG(dataUrl: string, filename: string, text?: string)
   try {
     const blob = await (await fetch(dataUrl)).blob();
     const file = new File([blob], filename, { type: "image/png" });
-    // @ts-expect-error - canShare on navigator
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+    if (nav.canShare && nav.canShare({ files: [file] })) {
       await navigator.share({ files: [file], text });
       return true;
     }
