@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
+import { AppShell } from "@/components/AppShell";
 
 import appCss from "../styles.css?url";
 
@@ -96,7 +97,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <AppShell />
       <Toaster position="top-center" />
     </QueryClientProvider>
   );
