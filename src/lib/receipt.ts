@@ -1,4 +1,4 @@
-import { toPng } from "html-to-image";
+// html-to-image touches `window` at module init — import lazily on the client only.
 import type { Business, Note } from "./storage";
 import { formatIDR, formatDateTime } from "./format";
 
@@ -36,6 +36,7 @@ function padBetween(left: string, right: string, width: number): string {
 }
 
 export async function renderReceiptPNG(node: HTMLElement): Promise<string> {
+  const { toPng } = await import("html-to-image");
   return await toPng(node, {
     pixelRatio: 2,
     cacheBust: true,
