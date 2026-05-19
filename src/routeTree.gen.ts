@@ -9,38 +9,104 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RiwayatRouteImport } from './routes/riwayat'
+import { Route as PengaturanRouteImport } from './routes/pengaturan'
+import { Route as BuatRouteImport } from './routes/buat'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RiwayatNoteIdRouteImport } from './routes/riwayat.$noteId'
 
+const RiwayatRoute = RiwayatRouteImport.update({
+  id: '/riwayat',
+  path: '/riwayat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PengaturanRoute = PengaturanRouteImport.update({
+  id: '/pengaturan',
+  path: '/pengaturan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuatRoute = BuatRouteImport.update({
+  id: '/buat',
+  path: '/buat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RiwayatNoteIdRoute = RiwayatNoteIdRouteImport.update({
+  id: '/$noteId',
+  path: '/$noteId',
+  getParentRoute: () => RiwayatRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/buat': typeof BuatRoute
+  '/pengaturan': typeof PengaturanRoute
+  '/riwayat': typeof RiwayatRouteWithChildren
+  '/riwayat/$noteId': typeof RiwayatNoteIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/buat': typeof BuatRoute
+  '/pengaturan': typeof PengaturanRoute
+  '/riwayat': typeof RiwayatRouteWithChildren
+  '/riwayat/$noteId': typeof RiwayatNoteIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/buat': typeof BuatRoute
+  '/pengaturan': typeof PengaturanRoute
+  '/riwayat': typeof RiwayatRouteWithChildren
+  '/riwayat/$noteId': typeof RiwayatNoteIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/buat' | '/pengaturan' | '/riwayat' | '/riwayat/$noteId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/buat' | '/pengaturan' | '/riwayat' | '/riwayat/$noteId'
+  id:
+    | '__root__'
+    | '/'
+    | '/buat'
+    | '/pengaturan'
+    | '/riwayat'
+    | '/riwayat/$noteId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BuatRoute: typeof BuatRoute
+  PengaturanRoute: typeof PengaturanRoute
+  RiwayatRoute: typeof RiwayatRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/riwayat': {
+      id: '/riwayat'
+      path: '/riwayat'
+      fullPath: '/riwayat'
+      preLoaderRoute: typeof RiwayatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pengaturan': {
+      id: '/pengaturan'
+      path: '/pengaturan'
+      fullPath: '/pengaturan'
+      preLoaderRoute: typeof PengaturanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buat': {
+      id: '/buat'
+      path: '/buat'
+      fullPath: '/buat'
+      preLoaderRoute: typeof BuatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +114,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/riwayat/$noteId': {
+      id: '/riwayat/$noteId'
+      path: '/$noteId'
+      fullPath: '/riwayat/$noteId'
+      preLoaderRoute: typeof RiwayatNoteIdRouteImport
+      parentRoute: typeof RiwayatRoute
+    }
   }
 }
 
+interface RiwayatRouteChildren {
+  RiwayatNoteIdRoute: typeof RiwayatNoteIdRoute
+}
+
+const RiwayatRouteChildren: RiwayatRouteChildren = {
+  RiwayatNoteIdRoute: RiwayatNoteIdRoute,
+}
+
+const RiwayatRouteWithChildren =
+  RiwayatRoute._addFileChildren(RiwayatRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BuatRoute: BuatRoute,
+  PengaturanRoute: PengaturanRoute,
+  RiwayatRoute: RiwayatRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
