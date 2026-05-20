@@ -8,7 +8,6 @@ import { db } from "@/lib/storage";
 import { formatIDR, formatDateTime } from "@/lib/format";
 import { buildReceiptText, renderReceiptPNG, sharePNG, waLink } from "@/lib/receipt";
 import { Receipt as ReceiptCard } from "@/components/Receipt";
-import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/riwayat/$noteId")({
   head: () => ({
@@ -33,9 +32,7 @@ function NoteDetail() {
   const text = useMemo(() => (note && business ? buildReceiptText(note, business) : ""), [note, business]);
 
   const del = useMutation({
-    mutationFn: async () => {
-      await db.setNotes(notes.filter((n) => n.id !== noteId));
-    },
+    mutationFn: async () => { await db.setNotes(notes.filter((n) => n.id !== noteId)); },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["notes"] });
       navigate({ to: "/riwayat" });
@@ -69,65 +66,62 @@ function NoteDetail() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 pb-4">
       <div className="flex items-center justify-between">
         <BackLink />
         <button
           onClick={() => { if (confirm("Hapus nota ini?")) del.mutate(); }}
-          className="text-muted-foreground hover:text-destructive inline-flex items-center gap-1 text-sm"
+          className="tap text-muted-foreground hover:text-destructive inline-flex items-center gap-1 text-sm rounded-full px-3 py-1.5"
         >
           <Trash2 className="h-4 w-4" /> Hapus
         </button>
       </div>
 
       <div>
-        <h1 className="text-2xl font-semibold">{note.number}</h1>
-        <p className="text-sm text-muted-foreground">{formatDateTime(note.date)}</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{note.number}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{formatDateTime(note.date)}</p>
       </div>
 
       {note.customerName && (
-        <div className="rounded-lg border border-border bg-card p-3 text-sm">
-          <div className="text-xs text-muted-foreground">Pelanggan</div>
-          <div className="font-medium">{note.customerName}</div>
-          {note.customerPhone && <div className="text-muted-foreground">{note.customerPhone}</div>}
+        <div className="rounded-2xl bg-card border border-border shadow-soft p-4">
+          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Pelanggan</div>
+          <div className="font-medium mt-1">{note.customerName}</div>
+          {note.customerPhone && <div className="text-sm text-muted-foreground">{note.customerPhone}</div>}
         </div>
       )}
 
-      <ul className="rounded-lg border border-border bg-card divide-y divide-border">
+      <ul className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
         {note.items.map((it, i) => (
-          <li key={i} className="p-3 flex justify-between text-sm">
-            <div>
-              <div className="font-medium">{it.name}</div>
-              <div className="text-xs text-muted-foreground">{it.qty} × {formatIDR(it.price)}</div>
+          <li key={i} className="px-4 py-3 flex justify-between text-sm">
+            <div className="min-w-0">
+              <div className="font-medium truncate">{it.name}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">{it.qty} × {formatIDR(it.price)}</div>
             </div>
             <div className="font-medium">{formatIDR(it.qty * it.price)}</div>
           </li>
         ))}
       </ul>
 
-      <div className="rounded-lg border border-border bg-card p-3 space-y-1 text-sm">
+      <div className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
         <Row label="Subtotal" value={formatIDR(note.subtotal)} muted />
         {note.subtotal !== note.total && (
           <Row
             label={note.discountType === "percent" ? `Diskon ${note.discountValue}%` : "Diskon"}
-            value={"- " + formatIDR(note.subtotal - note.total)}
+            value={"− " + formatIDR(note.subtotal - note.total)}
             muted
           />
         )}
-        <Row label={<span className="font-semibold">Total</span>} value={<span className="font-display font-semibold">{formatIDR(note.total)}</span>} />
+        <div className="h-px bg-border my-1" />
+        <div className="flex items-end justify-between">
+          <span className="text-muted-foreground">Total</span>
+          <span className="font-display font-semibold text-2xl tracking-tight">{formatIDR(note.total)}</span>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <Button variant="outline" onClick={shareImage} disabled={busy}>
-          <ImageIcon className="h-4 w-4" /> Bagikan PNG
-        </Button>
-        <Button variant="outline" onClick={copyText}>
-          <Copy className="h-4 w-4" /> Salin teks
-        </Button>
-        <Button className="col-span-2" onClick={sendWA}>
-          <MessageCircle className="h-4 w-4" />
-          {note.customerPhone ? `Kirim WA ke ${note.customerName || note.customerPhone}` : "Buka WhatsApp"}
-        </Button>
+      <div className="grid grid-cols-3 gap-2 pt-2">
+        <ActionTile icon={<ImageIcon className="h-5 w-5" />} label="PNG" onClick={shareImage} loading={busy} />
+        <ActionTile icon={<Copy className="h-5 w-5" />} label="Salin" onClick={copyText} />
+        <ActionTile icon={<MessageCircle className="h-5 w-5" />} label="WA" onClick={sendWA} />
       </div>
 
       <div style={{ position: "fixed", left: -10000, top: 0 }}>
@@ -139,7 +133,10 @@ function NoteDetail() {
 
 function BackLink() {
   return (
-    <Link to="/riwayat" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+    <Link
+      to="/riwayat"
+      className="tap inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground rounded-full px-3 py-1.5"
+    >
       <ArrowLeft className="h-4 w-4" /> Riwayat
     </Link>
   );
@@ -149,5 +146,19 @@ function Row({ label, value, muted }: { label: React.ReactNode; value: React.Rea
     <div className={`flex justify-between ${muted ? "text-muted-foreground" : ""}`}>
       <span>{label}</span><span>{value}</span>
     </div>
+  );
+}
+function ActionTile({
+  icon, label, onClick, loading,
+}: { icon: React.ReactNode; label: string; onClick: () => void; loading?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      className="tap flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-card border border-border shadow-soft py-4 text-sm disabled:opacity-60"
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
   );
 }
