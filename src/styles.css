@@ -48,7 +48,32 @@
 
 /* Paper & Ink palette */
 :root {
-  --radius: 0.5rem;
+  --radius: 0.875rem;
+  --background: oklch(0.97 0.006 85);       /* paper */
+  --surface: oklch(0.94 0.008 85);
+  --foreground: oklch(0.16 0 0);
+  --card: oklch(0.995 0.003 85);            /* lebih putih = mengapung */
+  --card-foreground: oklch(0.16 0 0);
+  --popover: oklch(0.995 0.003 85);
+  --popover-foreground: oklch(0.16 0 0);
+  --primary: oklch(0.16 0 0);
+  --primary-foreground: oklch(0.99 0.003 85);
+  --secondary: oklch(0.93 0.008 85);
+  --secondary-foreground: oklch(0.16 0 0);
+  --muted: oklch(0.93 0.008 85);
+  --muted-foreground: oklch(0.5 0.005 85);
+  --accent: oklch(0.91 0.01 85);
+  --accent-foreground: oklch(0.16 0 0);
+  --destructive: oklch(0.55 0.18 27);
+  --destructive-foreground: oklch(0.99 0.003 85);
+  --border: oklch(0.9 0.008 85);
+  --input: oklch(0.9 0.008 85);
+  --ring: oklch(0.16 0 0);
+
+  --shadow-soft: 0 1px 2px oklch(0.16 0 0 / 0.04), 0 4px 16px oklch(0.16 0 0 / 0.05);
+  --shadow-pop: 0 6px 24px oklch(0.16 0 0 / 0.12), 0 2px 6px oklch(0.16 0 0 / 0.06);
+  --shadow-nav: 0 10px 30px oklch(0.16 0 0 / 0.10), 0 2px 8px oklch(0.16 0 0 / 0.05);
+
   --background: oklch(0.967 0.006 85);      /* #f5f3ee paper */
   --surface: oklch(0.93 0.008 85);          /* #e8e4dd warm hairline */
   --foreground: oklch(0.18 0 0);            /* #0d0d0d ink */
