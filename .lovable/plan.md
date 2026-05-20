@@ -1,81 +1,65 @@
-# Notaku — Plan MVP
+# Refresh tampilan Notaku — modern minimalis, mobile-first
 
-App mobile-first (PWA) untuk UMKM: bikin nota cepat, share struk ke WA, simpan riwayat & pelanggan. Semua data tersimpan **lokal di HP** (tanpa login, tanpa cloud).
+Tampilan sekarang masih kaku: header tebal, bottom nav datar, kartu border tipis, tombol persegi, tipografi belum punya hierarchy. Goal: kesan iOS-class — bersih, lapang, ada depth halus, gesture-friendly di HP, tetap rapi di desktop.
 
-## Prinsip
-- Sat-set: 3 tap untuk bikin nota.
-- 3 tab utama saja: **Buat · Riwayat · Pengaturan**.
-- Tanpa fitur ribet (tanpa pajak, tanpa multi-currency, tanpa login).
-- Mobile-first; desktop tetap rapi.
+Catatan: URL referensi `struk.replit.app` saat ini menampilkan "App isn't live yet", jadi arah desain mengacu pada brief minimalis modern + palette **Paper & Ink** yang sudah disepakati. Tidak ada perubahan logika/fitur — murni presentational.
 
-## Halaman & Fitur
+## Arah desain
+- **Surface bertingkat**: background paper, kartu sedikit lebih terang dengan shadow ultra-soft (bukan border keras) → kesan "kartu mengapung".
+- **Spacing lebih lapang**: padding kartu naik, jarak antar-section naik, max-width tetap mobile-first.
+- **Tipografi punya ritme**: Sora display besar + tracking ketat untuk angka total, label kecil uppercase tipis, body Manrope.
+- **Tombol pill** (rounded-full) untuk aksi utama, ghost button minimalis untuk aksi sekunder.
+- **Bottom nav floating**: pill mengambang dengan blur + shadow, ikon aktif diberi background lembut (bukan sekadar warna), bukan bar full-width yang nempel.
+- **Header tipis & sticky** dengan blur, judul halaman tampil di header saat di-scroll.
+- **Micro-interaction**: transisi active state, tap feedback (scale-95), focus ring halus.
+- **Input "borderless"**: garis bawah / fill ringan, bukan kotak border tegas — terasa lebih modern di HP.
 
-### 1. Buat Nota (home)
-- Field nama pelanggan (opsional) dengan **auto-suggest** dari nota lama → otomatis isi nomor HP-nya.
-- Tanggal (default hari ini, bisa diubah).
-- Daftar item: nama, qty, harga. Tombol **Tambah baris** & **Preset** (chip item siap pakai).
-- **Diskon** (toggle): nominal atau persen.
-- Total live di tombol **Simpan**.
-- Setelah simpan → sheet aksi: **Share PNG**, **Salin teks WA**, **Kirim ke pelanggan via WA** (kalau ada nomor), **Selesai**.
+## Yang akan diubah (frontend only)
 
-### 2. Riwayat
-- Kartu performa: **Hari ini** & **Bulan ini** (omset, jumlah nota, total qty).
-- Search (nama/nomor nota) + filter tanggal (Dari–Sampai).
-- List nota → tap untuk lihat / edit / hapus / share ulang.
+1. **`src/styles.css`**
+   - Tambah token: `--shadow-soft`, `--shadow-pop`, `--surface-elevated`.
+   - Sedikit hangatkan card surface biar kontras dengan background.
+   - Tambah utility `.tap` (active:scale-[0.98] transition) untuk tombol.
+   - Naikkan `--radius` ke 0.75rem (radius default lebih bulat).
 
-### 3. Pengaturan
-- **Identitas Bisnis**: logo, nama, telepon, alamat, prefix nota (mis. `NT-2026-0001`).
-- **Preset Item**: tambah/hapus item siap pakai.
-- **Pelanggan**: list singkat dari nota (auto, tidak perlu input manual) — hanya muncul kalau ada datanya, dengan tombol kirim WA cepat.
-- **Backup & Restore**: export/import JSON.
-- **Reset data**.
+2. **`src/components/AppShell.tsx`**
+   - Header tipis, transparan + blur, judul halaman dinamis per route.
+   - Bottom nav: pill floating (mx-4 mb-4), shadow halus, active item dapat pill background, label kecil.
+   - Container `max-w-md` di mobile, `max-w-2xl` di tablet+.
 
-## Output Struk
-- **PNG** (render dari komponen struk via `html-to-image`) — ukuran mirip struk thermal, ringan untuk WA.
-- **Teks polos** siap salin-tempel ke WA (header bisnis, item, total, terima kasih).
-- Tombol "Kirim ke WA" → buka `wa.me/<nomor>` dengan teks struk terisi otomatis.
+3. **`src/routes/buat.tsx`**
+   - Header section: title besar + chip tanggal di kanan (bukan input telanjang).
+   - Customer & item dibungkus card elevated, label uppercase mungil.
+   - Item row redesign: nama jadi heading row, qty × harga di bawah, tombol hapus icon-only mengambang.
+   - Diskon pakai segmented control modern (track abu, thumb bergeser).
+   - Summary card jadi "ringkasan biaya" dengan total besar di kanan.
+   - CTA bawah: pill mengambang full-width, sticky di atas bottom nav, ada ikon → kontras tinggi.
+   - ShareSheet: handle indikator, tombol aksi jadi grid dengan ikon besar di atas + label di bawah.
 
-## Tampilan
-Akan saya refresh minimalis baru. Setelah plan ini disetujui, saya akan:
-1. Tanya 3 preferensi visual (palette, typografi, layout) dengan opsi visual.
-2. Generate 3 design direction yang sudah dirender.
-3. Kamu pilih satu, baru saya implement.
+4. **`src/routes/riwayat.tsx`**
+   - Stats jadi 2 chip ringkas (hari ini · bulan ini) dengan angka display font besar.
+   - Search bar pill dengan ikon kiri.
+   - Feed item: card elevated, nomor nota kecil di atas, customer + tanggal, total kanan besar — tap = buka detail.
+   - Empty state ramah (ilustrasi tipografi + CTA "Buat nota pertama").
 
-## Detail Teknis
+5. **`src/routes/riwayat.$noteId.tsx`**
+   - Back button pill, kartu nota model "receipt" dengan tepi zig-zag halus.
+   - Action row sticky di bawah (WA, PNG, Salin, Hapus).
 
-**Stack**: TanStack Start (existing), React 19, Tailwind v4, shadcn/ui. Tanpa Lovable Cloud.
+6. **`src/routes/pengaturan.tsx`**
+   - Section header gaya iOS Settings (label kecil di atas group card).
+   - Group card dengan divider tipis antar baris.
+   - Preset list: row dengan drag handle visual + tombol hapus.
 
-**Storage**: IndexedDB via `idb-keyval` (lebih aman dari localStorage untuk data + logo image base64). Schema:
-- `business` — identitas bisnis + prefix
-- `presets[]` — item siap pakai
-- `notes[]` — `{ id, number, date, customerName?, customerPhone?, items[], discount, total }`
-- Pelanggan **diturunkan** dari notes (tidak ada tabel terpisah) → auto-suggest pakai `Map` by phone/name.
+7. **`src/components/Receipt.tsx`** (output PNG)
+   - Sedikit poles: tipografi konsisten, jarak rapi — visual struk tetap "kertas" netral biar enak dibagikan ke WA.
 
-**Routes** (file-based, `src/routes/`):
-- `index.tsx` → redirect ke `/buat`
-- `buat.tsx`, `riwayat.tsx`, `riwayat.$noteId.tsx`, `pengaturan.tsx`
-- Layout dengan bottom tab bar (Buat / Riwayat / Pengaturan).
+## Yang TIDAK diubah
+- Storage, routing, fitur, format data, alur simpan/share.
+- Tidak menambah library baru.
+- Tidak mengubah palette (tetap Paper & Ink) atau font (tetap Sora/Manrope).
 
-**Utilitas**:
-- `formatIDR(n)` → `Rp 25.000`
-- `parseIDRInput` → terima ketik bebas, simpan integer
-- `generateNoteNumber(prefix, lastSeq)` → `NT-2026-0001`
-- `buildWhatsAppText(note, business)` → teks struk
-- `renderReceiptPNG(ref)` via `html-to-image`
-- Validasi input pakai `zod` (nama max 100, phone digit-only max 20, item name max 80, harga ≥ 0, qty 1–9999, max 100 item per nota).
-
-**PWA**: manifest + icon + theme-color hijau (sementara, akan diganti dari direction terpilih). Service worker via `vite-plugin-pwa` agar bisa diinstall di HP & jalan offline.
-
-**Dependencies tambahan**: `idb-keyval`, `html-to-image`, `vite-plugin-pwa`, `zod` (kemungkinan sudah ada).
-
-**Out of scope MVP**: cloud sync, multi-user, pajak, multi-currency, print thermal langsung (Bluetooth), kategori produk, stok.
-
-## Urutan Build
-1. Routing + bottom tab + layout shell.
-2. Storage layer (idb-keyval + helpers + zod schema).
-3. Halaman Buat (form + preset + diskon + simpan).
-4. Share sheet (PNG + teks WA + wa.me).
-5. Halaman Riwayat (rekap + search + filter + detail).
-6. Halaman Pengaturan (identitas + preset + backup/restore).
-7. PWA manifest + install prompt.
-8. Polish + empty states + micro-interactions sesuai design direction terpilih.
+## Verifikasi
+- Cek visual di viewport mobile (375px) dan desktop (≥1024px).
+- Pastikan bottom nav floating tidak menutupi CTA simpan di halaman Buat.
+- Pastikan tidak ada regresi: simpan nota, share PNG, kirim WA, edit preset.
