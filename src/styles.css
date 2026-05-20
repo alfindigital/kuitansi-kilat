@@ -123,8 +123,13 @@
 @utility shadow-soft { box-shadow: var(--shadow-soft); }
 @utility shadow-pop { box-shadow: var(--shadow-pop); }
 @utility shadow-nav { box-shadow: var(--shadow-nav); }
-@utility tap {
-  transition: transform 120ms ease, background-color 120ms ease, color 120ms ease;
+
+.tap {
+  transition: transform 120ms ease, background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
 }
-@utility tap:active { transform: scale(0.97); }
+.tap:active { transform: scale(0.97); }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 
