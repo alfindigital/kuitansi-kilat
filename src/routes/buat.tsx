@@ -1,7 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, X, Check, MessageCircle, Image as ImageIcon, Copy, ChevronDown } from "lucide-react";
+import {
+  Plus, Trash2, X, Check, MessageCircle,
+  Image as ImageIcon, Copy, ChevronDown, Calendar,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -14,7 +17,6 @@ import { Receipt as ReceiptCard } from "@/components/Receipt";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -30,6 +32,14 @@ export const Route = createFileRoute("/buat")({
 });
 
 type Discount = { type: "none" | "amount" | "percent"; value: number };
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="px-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+      {children}
+    </div>
+  );
+}
 
 function BuatPage() {
   const qc = useQueryClient();
@@ -122,60 +132,71 @@ function BuatPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-baseline justify-between">
-        <h1 className="text-2xl font-semibold">Buat nota</h1>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="bg-transparent text-sm text-muted-foreground border-0 focus:outline-none"
-        />
+    <div className="space-y-6">
+      {/* Title row */}
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Nota baru</h1>
+          <p className="text-sm text-muted-foreground mt-1">Catat, simpan, bagikan.</p>
+        </div>
+        <label className="relative tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-xs text-muted-foreground shadow-soft">
+          <Calendar className="h-3.5 w-3.5" />
+          <span>{new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}</span>
+          <input
+            type="date" value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="absolute inset-0 opacity-0 cursor-pointer"
+          />
+        </label>
       </div>
 
       {/* Customer */}
       <section className="space-y-2">
-        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Pelanggan (opsional)</Label>
-        <div className="relative">
-          <Input
-            placeholder="Nama"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            maxLength={80}
+        <SectionLabel>Pelanggan (opsional)</SectionLabel>
+        <div className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
+          <div className="relative">
+            <input
+              placeholder="Nama"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              maxLength={80}
+              className="w-full bg-transparent px-4 h-11 text-[15px] placeholder:text-muted-foreground/70 focus:outline-none"
+            />
+            {suggestions.length > 0 && (
+              <div className="absolute z-10 mt-1 left-2 right-2 rounded-xl border border-border bg-popover shadow-pop overflow-hidden">
+                {suggestions.map((s, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-accent flex justify-between"
+                    onClick={() => { setCustomerName(s.name); setCustomerPhone(s.phone || ""); }}
+                  >
+                    <span>{s.name}</span>
+                    {s.phone && <span className="text-muted-foreground">{s.phone}</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <input
+            placeholder="No. WhatsApp"
+            inputMode="tel"
+            value={customerPhone}
+            onChange={(e) => setCustomerPhone(e.target.value.replace(/[^\d+]/g, ""))}
+            maxLength={20}
+            className="w-full bg-transparent px-4 h-11 text-[15px] placeholder:text-muted-foreground/70 focus:outline-none"
           />
-          {suggestions.length > 0 && (
-            <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-popover shadow-sm">
-              {suggestions.map((s, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-accent flex justify-between"
-                  onClick={() => { setCustomerName(s.name); setCustomerPhone(s.phone || ""); }}
-                >
-                  <span>{s.name}</span>
-                  {s.phone && <span className="text-muted-foreground">{s.phone}</span>}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
-        <Input
-          placeholder="No. HP (WA)"
-          inputMode="tel"
-          value={customerPhone}
-          onChange={(e) => setCustomerPhone(e.target.value.replace(/[^\d+]/g, ""))}
-          maxLength={20}
-        />
       </section>
 
       {/* Items */}
       <section className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Item</Label>
+        <div className="flex items-center justify-between px-1">
+          <SectionLabel>Item</SectionLabel>
           {presets.length > 0 && (
             <Popover>
               <PopoverTrigger asChild>
-                <button className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+                <button className="tap text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 rounded-full px-2 py-1">
                   Preset <ChevronDown className="h-3 w-3" />
                 </button>
               </PopoverTrigger>
@@ -185,7 +206,7 @@ function BuatPage() {
                     <button
                       key={p.id}
                       onClick={() => addPreset(p)}
-                      className="w-full text-left px-2 py-2 text-sm rounded hover:bg-accent flex justify-between"
+                      className="tap w-full text-left px-2 py-2 text-sm rounded-lg hover:bg-accent flex justify-between"
                     >
                       <span className="truncate">{p.name}</span>
                       <span className="text-muted-foreground">{formatIDR(p.price)}</span>
@@ -210,7 +231,7 @@ function BuatPage() {
         <button
           type="button"
           onClick={addRow}
-          className="w-full inline-flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground hover:text-foreground"
+          className="tap w-full inline-flex items-center justify-center gap-2 py-3 text-sm text-muted-foreground hover:text-foreground rounded-2xl border border-dashed border-border"
         >
           <Plus className="h-4 w-4" /> Tambah baris
         </button>
@@ -218,21 +239,21 @@ function BuatPage() {
 
       {/* Discount */}
       <section className="space-y-2">
-        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Diskon</Label>
-        <div className="flex gap-2">
+        <SectionLabel>Diskon</SectionLabel>
+        <div className="relative grid grid-cols-3 rounded-full bg-surface p-1 text-sm">
           {(["none", "amount", "percent"] as const).map((t) => (
             <button
               key={t}
               type="button"
               onClick={() => setDiscount({ type: t, value: t === "none" ? 0 : discount.value })}
               className={cn(
-                "flex-1 py-2 text-sm rounded-md border transition-colors",
+                "tap py-2 rounded-full font-medium",
                 discount.type === t
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-card hover:bg-accent",
+                  ? "bg-card text-foreground shadow-soft"
+                  : "text-muted-foreground",
               )}
             >
-              {t === "none" ? "Tidak ada" : t === "amount" ? "Rp" : "%"}
+              {t === "none" ? "—" : t === "amount" ? "Rp" : "%"}
             </button>
           ))}
         </div>
@@ -245,22 +266,31 @@ function BuatPage() {
               const v = parseIDRInput(e.target.value);
               setDiscount({ type: discount.type, value: discount.type === "percent" ? Math.min(100, v) : v });
             }}
+            className="h-11 rounded-xl border-border bg-card shadow-soft"
           />
         )}
       </section>
 
       {/* Summary */}
-      <div className="rounded-lg border border-border bg-card p-4 space-y-1 text-sm">
+      <div className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
         <Row label="Subtotal" value={formatIDR(subtotal)} muted />
-        {subtotal !== total && <Row label="Diskon" value={"- " + formatIDR(subtotal - total)} muted />}
-        <Row label={<span className="font-semibold">Total</span>} value={<span className="font-display font-semibold text-base">{formatIDR(total)}</span>} />
+        {subtotal !== total && <Row label="Diskon" value={"− " + formatIDR(subtotal - total)} muted />}
+        <div className="h-px bg-border my-1" />
+        <div className="flex items-end justify-between">
+          <span className="text-muted-foreground">Total</span>
+          <span className="font-display font-semibold text-2xl tracking-tight">{formatIDR(total)}</span>
+        </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-16 px-4 pb-3 pointer-events-none">
-        <div className="mx-auto max-w-2xl pointer-events-auto">
+      {/* Floating CTA above bottom nav */}
+      <div
+        className="fixed inset-x-0 z-30 px-5 pointer-events-none"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + 84px)" }}
+      >
+        <div className="mx-auto max-w-md sm:max-w-2xl pointer-events-auto">
           <Button
             size="lg"
-            className="w-full h-12 rounded-full shadow-lg"
+            className="tap w-full h-12 rounded-full shadow-pop text-[15px] font-semibold"
             disabled={saveMutation.isPending}
             onClick={() => saveMutation.mutate()}
           >
@@ -295,45 +325,61 @@ function ItemRow({
   item, onChange, onRemove,
 }: { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-3 space-y-2">
-      <div className="flex items-center gap-2">
-        <Input
-          placeholder="Nama produk / jasa"
-          value={item.name}
-          onChange={(e) => onChange({ name: e.target.value })}
-          maxLength={80}
-          className="border-0 px-0 shadow-none focus-visible:ring-0"
-        />
-        {onRemove && (
+    <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-10 space-y-1.5">
+      <input
+        placeholder="Nama item"
+        value={item.name}
+        onChange={(e) => onChange({ name: e.target.value })}
+        maxLength={80}
+        className="w-full bg-transparent text-[15px] font-medium placeholder:text-muted-foreground/70 focus:outline-none"
+      />
+      <div className="flex items-center gap-2 text-sm">
+        <div className="inline-flex items-center rounded-full bg-surface">
           <button
             type="button"
-            onClick={onRemove}
-            className="text-muted-foreground hover:text-destructive p-1"
-            aria-label="Hapus baris"
+            onClick={() => onChange({ qty: Math.max(1, item.qty - 1) })}
+            className="tap w-8 h-8 grid place-items-center text-muted-foreground"
+            aria-label="Kurangi"
           >
-            <Trash2 className="h-4 w-4" />
+            −
           </button>
-        )}
-      </div>
-      <div className="flex items-center gap-2">
-        <Input
-          inputMode="numeric"
-          value={item.qty}
-          onChange={(e) => onChange({ qty: Math.max(1, parseInt(e.target.value.replace(/\D/g, "") || "1", 10)) })}
-          className="w-16 text-center"
-        />
+          <input
+            inputMode="numeric"
+            value={item.qty}
+            onChange={(e) => onChange({ qty: Math.max(1, parseInt(e.target.value.replace(/\D/g, "") || "1", 10)) })}
+            className="w-8 text-center bg-transparent focus:outline-none font-medium"
+          />
+          <button
+            type="button"
+            onClick={() => onChange({ qty: item.qty + 1 })}
+            className="tap w-8 h-8 grid place-items-center text-muted-foreground"
+            aria-label="Tambah"
+          >
+            +
+          </button>
+        </div>
         <span className="text-muted-foreground">×</span>
         <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Rp</span>
-          <Input
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
+          <input
             inputMode="numeric"
             placeholder="0"
             value={formatIDRInput(item.price)}
             onChange={(e) => onChange({ price: parseIDRInput(e.target.value) })}
-            className="pl-9"
+            className="w-full h-9 pl-8 pr-2 bg-surface rounded-full text-right text-sm focus:outline-none"
           />
         </div>
       </div>
+      {onRemove && (
+        <button
+          type="button"
+          onClick={onRemove}
+          className="tap absolute top-2 right-2 text-muted-foreground hover:text-destructive p-1.5 rounded-full"
+          aria-label="Hapus baris"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 }
@@ -366,45 +412,53 @@ function ShareSheet({
 
   return (
     <Sheet open onOpenChange={(o) => !o && onClose()}>
-      <SheetContent side="bottom" className="rounded-t-2xl">
-        <SheetHeader>
-          <SheetTitle>Nota tersimpan · {note.number}</SheetTitle>
+      <SheetContent side="bottom" className="rounded-t-3xl border-border">
+        <div className="mx-auto h-1 w-10 rounded-full bg-border mb-3" />
+        <SheetHeader className="text-left">
+          <SheetTitle className="font-display tracking-tight">Nota tersimpan</SheetTitle>
+          <p className="text-xs text-muted-foreground">{note.number}</p>
         </SheetHeader>
-        <div className="py-4 space-y-3">
-          <div className="rounded-lg border border-border bg-card p-3 text-sm">
-            Total <span className="font-semibold">{formatIDR(note.total)}</span>
-            {note.customerName ? <> · untuk <span className="font-medium">{note.customerName}</span></> : null}
+        <div className="py-4 space-y-4">
+          <div className="rounded-2xl bg-surface p-4">
+            <div className="text-xs text-muted-foreground">Total</div>
+            <div className="font-display font-semibold text-2xl tracking-tight">{formatIDR(note.total)}</div>
+            {note.customerName && (
+              <div className="text-xs text-muted-foreground mt-1">untuk {note.customerName}</div>
+            )}
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" onClick={shareImage} disabled={busy === "img"}>
-              <ImageIcon className="h-4 w-4" /> Bagikan PNG
-            </Button>
-            <Button variant="outline" onClick={copyText}>
-              <Copy className="h-4 w-4" /> Salin teks
-            </Button>
-            <Button
-              className="col-span-2"
-              onClick={sendWA}
-              disabled={!note.customerPhone && !navigator}
-            >
-              <MessageCircle className="h-4 w-4" />
-              {note.customerPhone ? `Kirim WA ke ${note.customerName || note.customerPhone}` : "Buka WhatsApp"}
-            </Button>
+          <div className="grid grid-cols-3 gap-2">
+            <ActionTile icon={<ImageIcon className="h-5 w-5" />} label="PNG" onClick={shareImage} loading={busy === "img"} />
+            <ActionTile icon={<Copy className="h-5 w-5" />} label="Salin" onClick={copyText} />
+            <ActionTile icon={<MessageCircle className="h-5 w-5" />} label="WhatsApp" onClick={sendWA} />
           </div>
-          <div className="flex justify-between pt-2">
-            <button onClick={onOpenDetail} className="text-sm text-muted-foreground hover:text-foreground">
+          <div className="flex justify-between pt-1">
+            <button onClick={onOpenDetail} className="tap text-sm text-muted-foreground hover:text-foreground">
               Lihat detail
             </button>
-            <button onClick={onClose} className="text-sm inline-flex items-center gap-1">
-              <X className="h-4 w-4" /> Buat nota baru
+            <button onClick={onClose} className="tap text-sm inline-flex items-center gap-1 font-medium">
+              <X className="h-4 w-4" /> Nota baru
             </button>
           </div>
         </div>
-        {/* Off-screen receipt for capture */}
         <div style={{ position: "fixed", left: -10000, top: 0 }}>
           <ReceiptCard ref={ref} note={note} business={business} />
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+function ActionTile({
+  icon, label, onClick, loading,
+}: { icon: React.ReactNode; label: string; onClick: () => void; loading?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      className="tap flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-card border border-border shadow-soft py-4 text-sm disabled:opacity-60"
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
   );
 }
