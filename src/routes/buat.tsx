@@ -290,7 +290,7 @@ function BuatPage() {
         <div className="mx-auto max-w-md sm:max-w-2xl pointer-events-auto">
           <Button
             size="lg"
-            className="tap w-full h-13 rounded-full shadow-pop text-[15px] font-semibold"
+            className="tap w-full h-12 rounded-full shadow-pop text-[15px] font-semibold"
             disabled={saveMutation.isPending}
             onClick={() => saveMutation.mutate()}
           >
