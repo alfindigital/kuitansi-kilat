@@ -174,6 +174,8 @@ function BuatPage() {
     },
     onSuccess: (note) => {
       qc.invalidateQueries({ queryKey: ["notes"] });
+      if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
+      setDraftSavedAt(null);
       setSavedNote(note);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -185,6 +187,8 @@ function BuatPage() {
     setItems([{ name: "", qty: 1, price: 0 }]);
     setDiscount({ type: "none", value: 0 });
     setDate(toDateInput(new Date().toISOString()));
+    if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
+    setDraftSavedAt(null);
   }
 
   return (
