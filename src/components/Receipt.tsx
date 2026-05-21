@@ -11,8 +11,8 @@ export const Receipt = forwardRef<HTMLDivElement, Props>(function Receipt({ note
       ref={ref}
       style={{
         width: 360,
-        background: "#ffffff",
-        color: "#0d0d0d",
+        background: "#fbf6ec",
+        color: "#1a2a4a",
         fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
         padding: 20,
         fontSize: 12,

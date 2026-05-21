@@ -134,11 +134,8 @@ function BuatPage() {
   return (
     <div className="space-y-6">
       {/* Title row */}
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Nota baru</h1>
-          <p className="text-sm text-muted-foreground mt-1">Catat, simpan, bagikan.</p>
-        </div>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-display font-semibold tracking-tight">Nota baru</h1>
         <label className="relative tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-xs text-muted-foreground shadow-soft">
           <Calendar className="h-3.5 w-3.5" />
           <span>{new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}</span>
@@ -152,7 +149,7 @@ function BuatPage() {
 
       {/* Customer */}
       <section className="space-y-2">
-        <SectionLabel>Pelanggan (opsional)</SectionLabel>
+        <SectionLabel>Pelanggan</SectionLabel>
         <div className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
           <div className="relative">
             <input
@@ -233,7 +230,7 @@ function BuatPage() {
           onClick={addRow}
           className="tap w-full inline-flex items-center justify-center gap-2 py-3 text-sm text-muted-foreground hover:text-foreground rounded-2xl border border-dashed border-border"
         >
-          <Plus className="h-4 w-4" /> Tambah baris
+          <Plus className="h-4 w-4" /> Tambah
         </button>
       </section>
 
@@ -415,13 +412,13 @@ function ShareSheet({
       <SheetContent side="bottom" className="rounded-t-3xl border-border">
         <div className="mx-auto h-1 w-10 rounded-full bg-border mb-3" />
         <SheetHeader className="text-left">
-          <SheetTitle className="font-display tracking-tight">Nota tersimpan</SheetTitle>
+          <SheetTitle className="font-display tracking-tight text-lg">Tersimpan</SheetTitle>
           <p className="text-xs text-muted-foreground">{note.number}</p>
         </SheetHeader>
         <div className="py-4 space-y-4">
           <div className="rounded-2xl bg-surface p-4">
-            <div className="text-xs text-muted-foreground">Total</div>
-            <div className="font-display font-semibold text-2xl tracking-tight">{formatIDR(note.total)}</div>
+            <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">Total</div>
+            <div className="font-display font-semibold text-2xl tracking-tight mt-1">{formatIDR(note.total)}</div>
             {note.customerName && (
               <div className="text-xs text-muted-foreground mt-1">untuk {note.customerName}</div>
             )}
@@ -429,14 +426,14 @@ function ShareSheet({
           <div className="grid grid-cols-3 gap-2">
             <ActionTile icon={<ImageIcon className="h-5 w-5" />} label="PNG" onClick={shareImage} loading={busy === "img"} />
             <ActionTile icon={<Copy className="h-5 w-5" />} label="Salin" onClick={copyText} />
-            <ActionTile icon={<MessageCircle className="h-5 w-5" />} label="WhatsApp" onClick={sendWA} />
+            <ActionTile icon={<MessageCircle className="h-5 w-5" />} label="WA" onClick={sendWA} />
           </div>
           <div className="flex justify-between pt-1">
             <button onClick={onOpenDetail} className="tap text-sm text-muted-foreground hover:text-foreground">
-              Lihat detail
+              Detail
             </button>
             <button onClick={onClose} className="tap text-sm inline-flex items-center gap-1 font-medium">
-              <X className="h-4 w-4" /> Nota baru
+              <X className="h-4 w-4" /> Baru
             </button>
           </div>
         </div>

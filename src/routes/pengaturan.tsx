@@ -25,10 +25,7 @@ export const Route = createFileRoute("/pengaturan")({
 function PengaturanPage() {
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Pengaturan</h1>
-        <p className="text-sm text-muted-foreground mt-1">Identitas, preset, dan backup.</p>
-      </div>
+      <h1 className="text-2xl font-display font-semibold tracking-tight">Pengaturan</h1>
       <BusinessSection />
       <PresetSection />
       <CustomerSection />
@@ -37,12 +34,11 @@ function PengaturanPage() {
   );
 }
 
-function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+function Section({ title, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
     <section className="space-y-2">
       <div className="px-1">
         <h2 className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{title}</h2>
-        {hint && <p className="text-xs text-muted-foreground/80 mt-0.5">{hint}</p>}
       </div>
       {children}
     </section>
@@ -77,7 +73,7 @@ function BusinessSection() {
   }
 
   return (
-    <Section title="Identitas bisnis" hint="Tampil di header struk.">
+    <Section title="Bisnis">
       <Card className="p-4 space-y-4">
         <div className="flex gap-4">
           <label className="w-20 h-20 rounded-2xl border border-dashed border-border flex items-center justify-center overflow-hidden cursor-pointer bg-surface tap">
@@ -153,7 +149,7 @@ function PresetSection() {
   function remove(id: string) { save.mutate(presets.filter((p) => p.id !== id)); }
 
   return (
-    <Section title="Preset item" hint="Item siap pakai saat buat nota.">
+    <Section title="Preset">
       <Card className="p-3 space-y-3">
         <div className="flex gap-2">
           <Input placeholder="Nama" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} className="h-10 rounded-xl" />
@@ -198,7 +194,7 @@ function CustomerSection() {
   if (customers.length === 0) return null;
 
   return (
-    <Section title="Pelanggan" hint="Otomatis dari nota. Klik WA untuk follow-up.">
+    <Section title="Pelanggan">
       <Card>
         <ul className="divide-y divide-border">
           {customers.map((c, i) => (
@@ -251,7 +247,7 @@ function BackupSection() {
   }
 
   return (
-    <Section title="Backup & restore" hint="Simpan atau pulihkan data (JSON).">
+    <Section title="Cadangan">
       <Card className="p-3 space-y-2">
         <div className="grid grid-cols-2 gap-2">
           <Button variant="outline" onClick={doExport} className="tap rounded-xl"><Download className="h-4 w-4" /> Export</Button>
