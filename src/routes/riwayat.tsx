@@ -63,10 +63,7 @@ function RiwayatList() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Riwayat</h1>
-        <p className="text-sm text-muted-foreground mt-1">Rekap omset dan daftar nota.</p>
-      </div>
+      <h1 className="text-2xl font-display font-semibold tracking-tight">Riwayat</h1>
 
       <div className="grid grid-cols-2 gap-3">
         <StatCard label="Hari ini" amount={stats.dayOm} count={stats.dayCount} />
@@ -87,10 +84,9 @@ function RiwayatList() {
         <div className="rounded-2xl border border-dashed border-border p-10 text-center">
           <FileText className="h-7 w-7 mx-auto mb-3 text-muted-foreground/60" />
           <p className="font-medium">Belum ada nota</p>
-          <p className="text-xs text-muted-foreground mt-1">Mulai dari tab Buat.</p>
           <Link
             to="/buat"
-            className="tap inline-flex items-center gap-1.5 mt-4 rounded-full bg-foreground text-background px-4 py-2 text-sm font-medium"
+            className="tap inline-flex items-center gap-1.5 mt-4 rounded-full bg-primary text-primary-foreground px-4 py-2 text-sm font-medium shadow-soft"
           >
             <Plus className="h-4 w-4" /> Buat nota
           </Link>

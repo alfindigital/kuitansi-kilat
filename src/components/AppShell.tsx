@@ -12,16 +12,16 @@ export function AppShell() {
   const { pathname } = useLocation();
   return (
     <div className="min-h-dvh flex flex-col bg-background text-foreground">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/70 border-b border-border/60">
-        <div className="mx-auto max-w-md sm:max-w-2xl px-5 h-14 flex items-center gap-2">
-          <div className="h-8 w-8 rounded-xl bg-foreground text-background grid place-items-center">
+      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/75 border-b border-border/60">
+        <div className="mx-auto max-w-md sm:max-w-2xl px-4 sm:px-6 h-14 flex items-center gap-2">
+          <div className="h-8 w-8 rounded-xl bg-primary text-primary-foreground grid place-items-center shadow-soft">
             <Receipt className="h-4 w-4" />
           </div>
           <span className="font-display font-semibold tracking-tight text-[15px]">Notaku</span>
         </div>
       </header>
 
-      <main className="flex-1 mx-auto w-full max-w-md sm:max-w-2xl px-5 pt-5 pb-32">
+      <main className="flex-1 mx-auto w-full max-w-md sm:max-w-2xl px-4 sm:px-6 pt-5 pb-32">
         <Outlet />
       </main>
 
@@ -41,7 +41,7 @@ export function AppShell() {
                   className={cn(
                     "tap flex items-center justify-center gap-1.5 py-2.5 rounded-full text-xs font-medium",
                     active
-                      ? "bg-foreground text-background"
+                      ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
