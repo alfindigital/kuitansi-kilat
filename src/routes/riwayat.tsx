@@ -6,6 +6,14 @@ import { Search, FileText, ChevronRight, Plus } from "lucide-react";
 import { db, type Note } from "@/lib/storage";
 import { formatIDR, formatDate } from "@/lib/format";
 
+type Period = "all" | "day" | "week" | "month";
+const PERIODS: { id: Period; label: string }[] = [
+  { id: "all", label: "Semua" },
+  { id: "day", label: "Hari ini" },
+  { id: "week", label: "Minggu" },
+  { id: "month", label: "Bulan" },
+];
+
 export const Route = createFileRoute("/riwayat")({
   head: () => ({
     meta: [
@@ -22,14 +30,6 @@ function RiwayatPage() {
   if (isDetail) return <Outlet />;
   return <RiwayatList />;
 }
-
-type Period = "all" | "day" | "week" | "month";
-const PERIODS: { id: Period; label: string }[] = [
-  { id: "all", label: "Semua" },
-  { id: "day", label: "Hari ini" },
-  { id: "week", label: "Minggu" },
-  { id: "month", label: "Bulan" },
-];
 
 function RiwayatList() {
   const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
