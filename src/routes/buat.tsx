@@ -41,6 +41,33 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+const DRAFT_KEY = "notaku:buat-draft:v1";
+
+type Draft = {
+  date: string;
+  customerName: string;
+  customerPhone: string;
+  items: NoteItem[];
+  discount: Discount;
+  updatedAt: number;
+};
+
+function loadDraft(): Draft | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw) as Draft;
+    if (!d || !Array.isArray(d.items)) return null;
+    return d;
+  } catch { return null; }
+}
+
+function isDraftEmpty(d: { customerName: string; customerPhone: string; items: NoteItem[]; discount: Discount }) {
+  const hasItem = d.items.some((it) => it.name.trim() || it.price > 0);
+  return !d.customerName.trim() && !d.customerPhone.trim() && !hasItem && d.discount.type === "none";
+}
+
 function BuatPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -48,12 +75,41 @@ function BuatPage() {
   const { data: presets = [] } = useQuery({ queryKey: ["presets"], queryFn: () => db.getPresets() });
   const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
 
-  const [date, setDate] = useState<string>(() => toDateInput(new Date().toISOString()));
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [items, setItems] = useState<NoteItem[]>([{ name: "", qty: 1, price: 0 }]);
-  const [discount, setDiscount] = useState<Discount>({ type: "none", value: 0 });
+  const initial = typeof window !== "undefined" ? loadDraft() : null;
+  const [date, setDate] = useState<string>(() => initial?.date ?? toDateInput(new Date().toISOString()));
+  const [customerName, setCustomerName] = useState(initial?.customerName ?? "");
+  const [customerPhone, setCustomerPhone] = useState(initial?.customerPhone ?? "");
+  const [items, setItems] = useState<NoteItem[]>(initial?.items?.length ? initial.items : [{ name: "", qty: 1, price: 0 }]);
+  const [discount, setDiscount] = useState<Discount>(initial?.discount ?? { type: "none", value: 0 });
   const [savedNote, setSavedNote] = useState<Note | null>(null);
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(initial?.updatedAt ?? null);
+  const hadInitialDraft = useRef(!!initial && !isDraftEmpty(initial));
+
+  // Autosave draft (debounced)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (savedNote) return; // pause while share sheet is open
+    const draft = { date, customerName, customerPhone, items, discount };
+    const t = setTimeout(() => {
+      if (isDraftEmpty(draft)) {
+        localStorage.removeItem(DRAFT_KEY);
+        setDraftSavedAt(null);
+      } else {
+        const updatedAt = Date.now();
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...draft, updatedAt }));
+        setDraftSavedAt(updatedAt);
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [date, customerName, customerPhone, items, discount, savedNote]);
+
+  useEffect(() => {
+    if (hadInitialDraft.current) {
+      toast.success("Draf dipulihkan");
+      hadInitialDraft.current = false;
+    }
+  }, []);
+
 
   const customers = useMemo(() => {
     const map = new Map<string, { name: string; phone?: string }>();
