@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plus, Trash2, X, Check, MessageCircle,
@@ -41,6 +41,33 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+const DRAFT_KEY = "notaku:buat-draft:v1";
+
+type Draft = {
+  date: string;
+  customerName: string;
+  customerPhone: string;
+  items: NoteItem[];
+  discount: Discount;
+  updatedAt: number;
+};
+
+function loadDraft(): Draft | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw) as Draft;
+    if (!d || !Array.isArray(d.items)) return null;
+    return d;
+  } catch { return null; }
+}
+
+function isDraftEmpty(d: { customerName: string; customerPhone: string; items: NoteItem[]; discount: Discount }) {
+  const hasItem = d.items.some((it) => it.name.trim() || it.price > 0);
+  return !d.customerName.trim() && !d.customerPhone.trim() && !hasItem && d.discount.type === "none";
+}
+
 function BuatPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -48,12 +75,41 @@ function BuatPage() {
   const { data: presets = [] } = useQuery({ queryKey: ["presets"], queryFn: () => db.getPresets() });
   const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
 
-  const [date, setDate] = useState<string>(() => toDateInput(new Date().toISOString()));
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [items, setItems] = useState<NoteItem[]>([{ name: "", qty: 1, price: 0 }]);
-  const [discount, setDiscount] = useState<Discount>({ type: "none", value: 0 });
+  const initial = typeof window !== "undefined" ? loadDraft() : null;
+  const [date, setDate] = useState<string>(() => initial?.date ?? toDateInput(new Date().toISOString()));
+  const [customerName, setCustomerName] = useState(initial?.customerName ?? "");
+  const [customerPhone, setCustomerPhone] = useState(initial?.customerPhone ?? "");
+  const [items, setItems] = useState<NoteItem[]>(initial?.items?.length ? initial.items : [{ name: "", qty: 1, price: 0 }]);
+  const [discount, setDiscount] = useState<Discount>(initial?.discount ?? { type: "none", value: 0 });
   const [savedNote, setSavedNote] = useState<Note | null>(null);
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(initial?.updatedAt ?? null);
+  const hadInitialDraft = useRef(!!initial && !isDraftEmpty(initial));
+
+  // Autosave draft (debounced)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (savedNote) return; // pause while share sheet is open
+    const draft = { date, customerName, customerPhone, items, discount };
+    const t = setTimeout(() => {
+      if (isDraftEmpty(draft)) {
+        localStorage.removeItem(DRAFT_KEY);
+        setDraftSavedAt(null);
+      } else {
+        const updatedAt = Date.now();
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...draft, updatedAt }));
+        setDraftSavedAt(updatedAt);
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [date, customerName, customerPhone, items, discount, savedNote]);
+
+  useEffect(() => {
+    if (hadInitialDraft.current) {
+      toast.success("Draf dipulihkan");
+      hadInitialDraft.current = false;
+    }
+  }, []);
+
 
   const customers = useMemo(() => {
     const map = new Map<string, { name: string; phone?: string }>();
@@ -118,6 +174,8 @@ function BuatPage() {
     },
     onSuccess: (note) => {
       qc.invalidateQueries({ queryKey: ["notes"] });
+      if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
+      setDraftSavedAt(null);
       setSavedNote(note);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -129,13 +187,22 @@ function BuatPage() {
     setItems([{ name: "", qty: 1, price: 0 }]);
     setDiscount({ type: "none", value: 0 });
     setDate(toDateInput(new Date().toISOString()));
+    if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
+    setDraftSavedAt(null);
   }
 
   return (
     <div className="space-y-6">
       {/* Title row */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-display font-semibold tracking-tight">Nota baru</h1>
+        <div>
+          <h1 className="text-2xl font-display font-semibold tracking-tight">Nota baru</h1>
+          {draftSavedAt && (
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Draf tersimpan otomatis
+            </p>
+          )}
+        </div>
         <label className="relative tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-xs text-muted-foreground shadow-soft">
           <Calendar className="h-3.5 w-3.5" />
           <span>{new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}</span>
