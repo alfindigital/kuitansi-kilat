@@ -1,65 +1,68 @@
-# Refresh tampilan Notaku — modern minimalis, mobile-first
+# Rebrand Notaku — Navy & Cream
 
-Tampilan sekarang masih kaku: header tebal, bottom nav datar, kartu border tipis, tombol persegi, tipografi belum punya hierarchy. Goal: kesan iOS-class — bersih, lapang, ada depth halus, gesture-friendly di HP, tetap rapi di desktop.
+Ganti palette monokrom jadi brand **navy biru + cream**, samakan tipografi/ukuran di semua halaman, dan pangkas kata-kata yang tidak perlu. Tidak ada perubahan fitur/logic — hanya tampilan.
 
-Catatan: URL referensi `struk.replit.app` saat ini menampilkan "App isn't live yet", jadi arah desain mengacu pada brief minimalis modern + palette **Paper & Ink** yang sudah disepakati. Tidak ada perubahan logika/fitur — murni presentational.
+## 1. Design tokens (src/styles.css)
 
-## Arah desain
-- **Surface bertingkat**: background paper, kartu sedikit lebih terang dengan shadow ultra-soft (bukan border keras) → kesan "kartu mengapung".
-- **Spacing lebih lapang**: padding kartu naik, jarak antar-section naik, max-width tetap mobile-first.
-- **Tipografi punya ritme**: Sora display besar + tracking ketat untuk angka total, label kecil uppercase tipis, body Manrope.
-- **Tombol pill** (rounded-full) untuk aksi utama, ghost button minimalis untuk aksi sekunder.
-- **Bottom nav floating**: pill mengambang dengan blur + shadow, ikon aktif diberi background lembut (bukan sekadar warna), bukan bar full-width yang nempel.
-- **Header tipis & sticky** dengan blur, judul halaman tampil di header saat di-scroll.
-- **Micro-interaction**: transisi active state, tap feedback (scale-95), focus ring halus.
-- **Input "borderless"**: garis bawah / fill ringan, bukan kotak border tegas — terasa lebih modern di HP.
+Palette baru (oklch):
+- `--background` cream lembut (≈ `oklch(0.97 0.025 85)`)
+- `--surface` cream sedikit lebih dalam untuk chip/segmented
+- `--card` cream paling terang (mengapung di atas background)
+- `--foreground` navy gelap (≈ `oklch(0.22 0.06 255)`)
+- `--primary` navy brand (≈ `oklch(0.34 0.11 258)`) + `--primary-foreground` cream
+- `--accent` navy soft tint untuk hover/active nav
+- `--border` cream warm (≈ `oklch(0.88 0.02 85)`)
+- `--ring` navy brand
+- `--muted-foreground` navy ke-50% untuk label sekunder
+- Shadow tetap (soft/pop/nav) tapi warna shadow pakai navy alpha rendah agar terasa premium, bukan abu netral
+- Dark mode: navy gelap sebagai background, cream sebagai foreground (kebalikan)
 
-## Yang akan diubah (frontend only)
+## 2. Skala tipografi konsisten (dipakai di semua route)
 
-1. **`src/styles.css`**
-   - Tambah token: `--shadow-soft`, `--shadow-pop`, `--surface-elevated`.
-   - Sedikit hangatkan card surface biar kontras dengan background.
-   - Tambah utility `.tap` (active:scale-[0.98] transition) untuk tombol.
-   - Naikkan `--radius` ke 0.75rem (radius default lebih bulat).
+Satu skala, dipatuhi di semua halaman:
+- Page title: `text-2xl font-display font-semibold tracking-tight` (turun dari 3xl agar muat di mobile)
+- Section label uppercase: `text-[11px] tracking-[0.12em] text-muted-foreground` (sudah ada — disamakan dipakai konsisten)
+- Body input/teks utama: `text-[15px]`
+- Helper/secondary: `text-xs text-muted-foreground`
+- Angka total besar: `font-display font-semibold text-2xl`
+- Tinggi input/tombol seragam: `h-11` (form), `h-12` (CTA utama)
+- Radius card: `rounded-2xl`; pill/segmented/CTA: `rounded-full`
 
-2. **`src/components/AppShell.tsx`**
-   - Header tipis, transparan + blur, judul halaman dinamis per route.
-   - Bottom nav: pill floating (mx-4 mb-4), shadow halus, active item dapat pill background, label kecil.
-   - Container `max-w-md` di mobile, `max-w-2xl` di tablet+.
+Penegasan: hilangkan ukuran ad-hoc lain (`text-3xl` di Buat, ukuran header berbeda di Riwayat/Pengaturan/Detail).
 
-3. **`src/routes/buat.tsx`**
-   - Header section: title besar + chip tanggal di kanan (bukan input telanjang).
-   - Customer & item dibungkus card elevated, label uppercase mungil.
-   - Item row redesign: nama jadi heading row, qty × harga di bawah, tombol hapus icon-only mengambang.
-   - Diskon pakai segmented control modern (track abu, thumb bergeser).
-   - Summary card jadi "ringkasan biaya" dengan total besar di kanan.
-   - CTA bawah: pill mengambang full-width, sticky di atas bottom nav, ada ikon → kontras tinggi.
-   - ShareSheet: handle indikator, tombol aksi jadi grid dengan ikon besar di atas + label di bawah.
+## 3. Pangkas copy
 
-4. **`src/routes/riwayat.tsx`**
-   - Stats jadi 2 chip ringkas (hari ini · bulan ini) dengan angka display font besar.
-   - Search bar pill dengan ikon kiri.
-   - Feed item: card elevated, nomor nota kecil di atas, customer + tanggal, total kanan besar — tap = buka detail.
-   - Empty state ramah (ilustrasi tipografi + CTA "Buat nota pertama").
+- Buat Nota: hapus subtitle "Catat, simpan, bagikan." → cukup judul "Nota baru". Label "Pelanggan (opsional)" → "Pelanggan". Tombol "Tambah baris" → "Tambah". CTA "Simpan · Rp …" → tetap (informatif).
+- ShareSheet: "Nota tersimpan" → "Tersimpan". Tombol "Lihat detail" → "Detail". "Nota baru" → "Baru".
+- Riwayat: title cukup "Riwayat", stat chip pakai label pendek "Hari ini" / "Bulan ini" tanpa kalimat panjang. Empty state 1 baris.
+- Detail nota: hilangkan label tile ganda; cukup ikon + 1 kata (PNG, Salin, WA).
+- Pengaturan: heading section pendek (Bisnis, Preset, Cadangan). Hapus deskripsi panjang.
 
-5. **`src/routes/riwayat.$noteId.tsx`**
-   - Back button pill, kartu nota model "receipt" dengan tepi zig-zag halus.
-   - Action row sticky di bawah (WA, PNG, Salin, Hapus).
+## 4. Komponen yang disentuh (frontend only)
 
-6. **`src/routes/pengaturan.tsx`**
-   - Section header gaya iOS Settings (label kecil di atas group card).
-   - Group card dengan divider tipis antar baris.
-   - Preset list: row dengan drag handle visual + tombol hapus.
+- `src/styles.css` — token warna + shadow navy alpha
+- `src/components/AppShell.tsx` — header tipis pakai brand, bottom nav active state pakai navy soft (`bg-accent text-primary`)
+- `src/routes/index.tsx` — landing/redirect samakan styling
+- `src/routes/buat.tsx` — skala tipografi, pangkas copy, segmented & CTA pakai primary navy
+- `src/routes/riwayat.tsx` — stat chip cream/navy, search pill konsisten, judul kecil
+- `src/routes/riwayat.$noteId.tsx` — heading + action tiles seragam, sticky action row pakai primary
+- `src/routes/pengaturan.tsx` — section title pendek, divider konsisten
+- `src/components/Receipt.tsx` — header struk pakai navy ink di atas cream
 
-7. **`src/components/Receipt.tsx`** (output PNG)
-   - Sedikit poles: tipografi konsisten, jarak rapi — visual struk tetap "kertas" netral biar enak dibagikan ke WA.
+## 5. Mobile responsive
 
-## Yang TIDAK diubah
-- Storage, routing, fitur, format data, alur simpan/share.
-- Tidak menambah library baru.
-- Tidak mengubah palette (tetap Paper & Ink) atau font (tetap Sora/Manrope).
+- Semua halaman pakai container `max-w-md` (mobile) → `sm:max-w-2xl`
+- Padding horizontal `px-4` mobile, `sm:px-6`
+- CTA mengambang sudah `max-w-md sm:max-w-2xl` — pertahankan
+- Tap target ≥ 40px (`h-10`/`h-11`/`h-12`)
+- Bottom nav `safe-area-inset-bottom` (sudah ada — verifikasi)
 
-## Verifikasi
-- Cek visual di viewport mobile (375px) dan desktop (≥1024px).
-- Pastikan bottom nav floating tidak menutupi CTA simpan di halaman Buat.
-- Pastikan tidak ada regresi: simpan nota, share PNG, kirim WA, edit preset.
+## 6. Acceptance
+
+- Tidak ada teks hex/warna mentah di komponen — semua via token
+- Semua judul halaman pakai kelas yang sama
+- Tombol primer = navy brand, teks cream
+- Kontras teks/background lulus WCAG AA di light & dark
+- Tidak ada fitur baru atau perubahan storage/format
+
+Setelah disetujui, saya implement langsung tanpa lib baru.
