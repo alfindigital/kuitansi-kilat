@@ -261,12 +261,14 @@ function BuatPage() {
       {/* Title row */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-semibold tracking-tight">Nota baru</h1>
-          {draftSavedAt && (
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              Draf tersimpan otomatis
-            </p>
-          )}
+          <h1 className="text-2xl font-display font-semibold tracking-tight">
+            {editingId ? "Edit nota" : "Nota baru"}
+          </h1>
+          {editingId && editingNumber ? (
+            <p className="text-[11px] text-muted-foreground mt-0.5">{editingNumber}</p>
+          ) : draftSavedAt ? (
+            <p className="text-[11px] text-muted-foreground mt-0.5">Draf tersimpan otomatis</p>
+          ) : null}
         </div>
         <label className="relative tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-xs text-muted-foreground shadow-soft">
           <Calendar className="h-3.5 w-3.5" />
@@ -275,6 +277,7 @@ function BuatPage() {
             type="date" value={date}
             onChange={(e) => setDate(e.target.value)}
             className="absolute inset-0 opacity-0 cursor-pointer"
+            disabled={!!editingId}
           />
         </label>
       </div>
@@ -283,37 +286,22 @@ function BuatPage() {
       <section className="space-y-2">
         <SectionLabel>Pelanggan</SectionLabel>
         <div className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
-          <div className="relative">
-            <input
-              placeholder="Nama"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              maxLength={80}
-              className="w-full bg-transparent px-4 h-11 text-[15px] placeholder:text-muted-foreground/70 focus:outline-none"
-            />
-            {suggestions.length > 0 && (
-              <div className="absolute z-10 mt-1 left-2 right-2 rounded-xl border border-border bg-popover shadow-pop overflow-hidden">
-                {suggestions.map((s, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-accent flex justify-between"
-                    onClick={() => { setCustomerName(s.name); setCustomerPhone(s.phone || ""); }}
-                  >
-                    <span>{s.name}</span>
-                    {s.phone && <span className="text-muted-foreground">{s.phone}</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <input
+          <CustomerSuggestInput
+            placeholder="Nama"
+            value={customerName}
+            onChange={setCustomerName}
+            suggestions={nameSuggestions}
+            onPick={(c) => { setCustomerName(c.name); setCustomerPhone(c.phone || ""); }}
+            maxLength={80}
+          />
+          <CustomerSuggestInput
             placeholder="No. WhatsApp"
-            inputMode="tel"
             value={customerPhone}
-            onChange={(e) => setCustomerPhone(e.target.value.replace(/[^\d+]/g, ""))}
+            onChange={(v) => setCustomerPhone(v.replace(/[^\d+]/g, ""))}
+            suggestions={phoneSuggestions}
+            onPick={(c) => { setCustomerName(c.name); setCustomerPhone(c.phone || ""); }}
             maxLength={20}
-            className="w-full bg-transparent px-4 h-11 text-[15px] placeholder:text-muted-foreground/70 focus:outline-none"
+            inputMode="tel"
           />
         </div>
       </section>
