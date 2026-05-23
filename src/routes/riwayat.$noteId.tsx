@@ -114,13 +114,7 @@ function NoteDetail() {
         </div>
       )}
 
-      {note.customerName && (
-        <div className="rounded-2xl bg-card border border-border shadow-soft p-4">
-          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Pelanggan</div>
-          <div className="font-medium mt-1">{note.customerName}</div>
-          {note.customerPhone && <div className="text-sm text-muted-foreground">{note.customerPhone}</div>}
-        </div>
-      )}
+
 
       <ul className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
         {note.items.map((it, i) => (
