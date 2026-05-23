@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Trash2, MessageCircle, Image as ImageIcon, Copy } from "lucide-react";
+import { ArrowLeft, Trash2, MessageCircle, Image as ImageIcon, Copy, Pencil, CopyPlus } from "lucide-react";
 import { toast } from "sonner";
+
 
 import { db } from "@/lib/storage";
 import { formatIDR, formatDateTime } from "@/lib/format";
