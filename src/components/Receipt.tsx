@@ -50,6 +50,9 @@ export const Receipt = forwardRef<HTMLDivElement, Props>(function Receipt({ note
       ) : null}
       <Row left={<strong>TOTAL</strong>} right={<strong>{formatIDR(note.total)}</strong>} bold />
       <Divider />
+      {note.notes ? (
+        <div style={{ marginTop: 4, fontStyle: "italic" }}>Catatan: {note.notes}</div>
+      ) : null}
       {business.footer ? (
         <div style={{ textAlign: "center", marginTop: 6 }}>{business.footer}</div>
       ) : null}

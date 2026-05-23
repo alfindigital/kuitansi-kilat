@@ -8,7 +8,7 @@ import {
 import { toast } from "sonner";
 
 import {
-  db, calcTotals, generateNoteNumber, uid,
+  db, calcTotals, deriveCustomers, generateNoteNumber, uid,
   type Note, type NoteItem, type Preset,
 } from "@/lib/storage";
 import { formatIDR, formatIDRInput, parseIDRInput, toDateInput } from "@/lib/format";
@@ -17,11 +17,18 @@ import { Receipt as ReceiptCard } from "@/components/Receipt";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
+type SearchParams = { edit?: string; from?: string };
+
 export const Route = createFileRoute("/buat")({
+  validateSearch: (s: Record<string, unknown>): SearchParams => ({
+    edit: typeof s.edit === "string" ? s.edit : undefined,
+    from: typeof s.from === "string" ? s.from : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Buat Nota — Notaku" },
@@ -49,6 +56,7 @@ type Draft = {
   customerPhone: string;
   items: NoteItem[];
   discount: Discount;
+  noteText: string;
   updatedAt: number;
 };
 
@@ -63,33 +71,62 @@ function loadDraft(): Draft | null {
   } catch { return null; }
 }
 
-function isDraftEmpty(d: { customerName: string; customerPhone: string; items: NoteItem[]; discount: Discount }) {
+function isDraftEmpty(d: { customerName: string; customerPhone: string; items: NoteItem[]; discount: Discount; noteText: string }) {
   const hasItem = d.items.some((it) => it.name.trim() || it.price > 0);
-  return !d.customerName.trim() && !d.customerPhone.trim() && !hasItem && d.discount.type === "none";
+  return !d.customerName.trim() && !d.customerPhone.trim() && !d.noteText.trim() && !hasItem && d.discount.type === "none";
 }
 
 function BuatPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const search = Route.useSearch();
+  const editingId = search.edit;
+  const fromId = search.from;
   const { data: business } = useQuery({ queryKey: ["business"], queryFn: () => db.getBusiness() });
   const { data: presets = [] } = useQuery({ queryKey: ["presets"], queryFn: () => db.getPresets() });
   const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
 
-  const initial = typeof window !== "undefined" ? loadDraft() : null;
+  // Skip draft when editing/duplicating
+  const initial = typeof window !== "undefined" && !editingId && !fromId ? loadDraft() : null;
   const [date, setDate] = useState<string>(() => initial?.date ?? toDateInput(new Date().toISOString()));
   const [customerName, setCustomerName] = useState(initial?.customerName ?? "");
   const [customerPhone, setCustomerPhone] = useState(initial?.customerPhone ?? "");
   const [items, setItems] = useState<NoteItem[]>(initial?.items?.length ? initial.items : [{ name: "", qty: 1, price: 0 }]);
   const [discount, setDiscount] = useState<Discount>(initial?.discount ?? { type: "none", value: 0 });
+  const [noteText, setNoteText] = useState(initial?.noteText ?? "");
   const [savedNote, setSavedNote] = useState<Note | null>(null);
   const [draftSavedAt, setDraftSavedAt] = useState<number | null>(initial?.updatedAt ?? null);
-  const hadInitialDraft = useRef(!!initial && !isDraftEmpty(initial));
+  const hadInitialDraft = useRef(!!initial && !isDraftEmpty({ ...initial, noteText: initial.noteText ?? "" }));
+  const [editingNumber, setEditingNumber] = useState<string | null>(null);
+  const loadedKeyRef = useRef<string | null>(null);
 
-  // Autosave draft (debounced)
+  // Load from existing note (edit/from)
+  useEffect(() => {
+    const key = editingId ? `e:${editingId}` : fromId ? `f:${fromId}` : null;
+    if (!key || loadedKeyRef.current === key || !notes.length) return;
+    const src = notes.find((n) => n.id === (editingId || fromId));
+    if (!src) return;
+    loadedKeyRef.current = key;
+    if (editingId) {
+      setDate(toDateInput(src.date));
+      setEditingNumber(src.number);
+    } else {
+      setDate(toDateInput(new Date().toISOString()));
+      setEditingNumber(null);
+      toast.success(`Disalin dari ${src.number}`);
+    }
+    setCustomerName(src.customerName ?? "");
+    setCustomerPhone(src.customerPhone ?? "");
+    setItems(src.items.map((it) => ({ ...it })));
+    setDiscount({ type: src.discountType, value: src.discountValue });
+    setNoteText(src.notes ?? "");
+  }, [editingId, fromId, notes]);
+
+  // Autosave draft (debounced) — disabled in edit/duplicate mode
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (savedNote) return; // pause while share sheet is open
-    const draft = { date, customerName, customerPhone, items, discount };
+    if (savedNote || editingId || fromId) return;
+    const draft = { date, customerName, customerPhone, items, discount, noteText };
     const t = setTimeout(() => {
       if (isDraftEmpty(draft)) {
         localStorage.removeItem(DRAFT_KEY);
@@ -101,7 +138,7 @@ function BuatPage() {
       }
     }, 400);
     return () => clearTimeout(t);
-  }, [date, customerName, customerPhone, items, discount, savedNote]);
+  }, [date, customerName, customerPhone, items, discount, noteText, savedNote, editingId, fromId]);
 
   useEffect(() => {
     if (hadInitialDraft.current) {
@@ -111,22 +148,24 @@ function BuatPage() {
   }, []);
 
 
-  const customers = useMemo(() => {
-    const map = new Map<string, { name: string; phone?: string }>();
-    for (const n of notes) {
-      const nm = n.customerName?.trim();
-      if (!nm) continue;
-      const key = (n.customerPhone || nm).toLowerCase();
-      if (!map.has(key)) map.set(key, { name: nm, phone: n.customerPhone });
-    }
-    return [...map.values()];
-  }, [notes]);
+  const customers = useMemo(() => deriveCustomers(notes), [notes]);
 
-  const suggestions = useMemo(() => {
-    const q = customerName.trim().toLowerCase();
-    if (!q) return [];
-    return customers.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 5);
-  }, [customers, customerName]);
+  function matchCustomer(q: string, c: { name: string; phone?: string }) {
+    const s = q.trim().toLowerCase();
+    if (!s) return false;
+    if (c.name.toLowerCase().includes(s)) return true;
+    const digits = s.replace(/\D/g, "");
+    if (digits && c.phone && c.phone.replace(/\D/g, "").includes(digits)) return true;
+    return false;
+  }
+  const nameSuggestions = useMemo(
+    () => (customerName.trim() ? customers.filter((c) => matchCustomer(customerName, c)).slice(0, 5) : []),
+    [customers, customerName],
+  );
+  const phoneSuggestions = useMemo(
+    () => (customerPhone.trim() ? customers.filter((c) => matchCustomer(customerPhone, c)).slice(0, 5) : []),
+    [customers, customerPhone],
+  );
 
   const { subtotal, total } = useMemo(
     () => calcTotals(items, discount.type, discount.value),
@@ -153,9 +192,28 @@ function BuatPage() {
     mutationFn: async (): Promise<Note> => {
       const cleaned = items.map((it) => ({ ...it, name: it.name.trim() })).filter((it) => it.name);
       if (!cleaned.length) throw new Error("Tambahkan minimal 1 item dengan nama.");
+      const totals = calcTotals(cleaned, discount.type, discount.value);
+
+      if (editingId) {
+        const existing = notes.find((n) => n.id === editingId);
+        if (!existing) throw new Error("Nota tidak ditemukan.");
+        const updated: Note = {
+          ...existing,
+          customerName: customerName.trim() || undefined,
+          customerPhone: customerPhone.trim() || undefined,
+          items: cleaned,
+          discountType: discount.type,
+          discountValue: discount.type === "none" ? 0 : discount.value,
+          subtotal: totals.subtotal,
+          total: totals.total,
+          notes: noteText.trim() || undefined,
+        };
+        await db.setNotes(notes.map((n) => (n.id === editingId ? updated : n)));
+        return updated;
+      }
+
       const seq = (await db.getSeq()) + 1;
       const number = generateNoteNumber(business?.prefix || "NT", seq, new Date(date));
-      const totals = calcTotals(cleaned, discount.type, discount.value);
       const note: Note = {
         id: uid(),
         number,
@@ -167,6 +225,7 @@ function BuatPage() {
         discountValue: discount.type === "none" ? 0 : discount.value,
         subtotal: totals.subtotal,
         total: totals.total,
+        notes: noteText.trim() || undefined,
       };
       await db.setSeq(seq);
       await db.setNotes([note, ...notes]);
@@ -176,7 +235,12 @@ function BuatPage() {
       qc.invalidateQueries({ queryKey: ["notes"] });
       if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
       setDraftSavedAt(null);
-      setSavedNote(note);
+      if (editingId) {
+        toast.success("Perubahan disimpan");
+        navigate({ to: "/riwayat/$noteId", params: { noteId: note.id } });
+      } else {
+        setSavedNote(note);
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -186,6 +250,7 @@ function BuatPage() {
     setCustomerName(""); setCustomerPhone("");
     setItems([{ name: "", qty: 1, price: 0 }]);
     setDiscount({ type: "none", value: 0 });
+    setNoteText("");
     setDate(toDateInput(new Date().toISOString()));
     if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
     setDraftSavedAt(null);
@@ -196,12 +261,14 @@ function BuatPage() {
       {/* Title row */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-semibold tracking-tight">Nota baru</h1>
-          {draftSavedAt && (
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              Draf tersimpan otomatis
-            </p>
-          )}
+          <h1 className="text-2xl font-display font-semibold tracking-tight">
+            {editingId ? "Edit nota" : "Nota baru"}
+          </h1>
+          {editingId && editingNumber ? (
+            <p className="text-[11px] text-muted-foreground mt-0.5">{editingNumber}</p>
+          ) : draftSavedAt ? (
+            <p className="text-[11px] text-muted-foreground mt-0.5">Draf tersimpan otomatis</p>
+          ) : null}
         </div>
         <label className="relative tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-xs text-muted-foreground shadow-soft">
           <Calendar className="h-3.5 w-3.5" />
@@ -210,6 +277,7 @@ function BuatPage() {
             type="date" value={date}
             onChange={(e) => setDate(e.target.value)}
             className="absolute inset-0 opacity-0 cursor-pointer"
+            disabled={!!editingId}
           />
         </label>
       </div>
@@ -218,37 +286,22 @@ function BuatPage() {
       <section className="space-y-2">
         <SectionLabel>Pelanggan</SectionLabel>
         <div className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
-          <div className="relative">
-            <input
-              placeholder="Nama"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              maxLength={80}
-              className="w-full bg-transparent px-4 h-11 text-[15px] placeholder:text-muted-foreground/70 focus:outline-none"
-            />
-            {suggestions.length > 0 && (
-              <div className="absolute z-10 mt-1 left-2 right-2 rounded-xl border border-border bg-popover shadow-pop overflow-hidden">
-                {suggestions.map((s, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-accent flex justify-between"
-                    onClick={() => { setCustomerName(s.name); setCustomerPhone(s.phone || ""); }}
-                  >
-                    <span>{s.name}</span>
-                    {s.phone && <span className="text-muted-foreground">{s.phone}</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <input
+          <CustomerSuggestInput
+            placeholder="Nama"
+            value={customerName}
+            onChange={setCustomerName}
+            suggestions={nameSuggestions}
+            onPick={(c) => { setCustomerName(c.name); setCustomerPhone(c.phone || ""); }}
+            maxLength={80}
+          />
+          <CustomerSuggestInput
             placeholder="No. WhatsApp"
-            inputMode="tel"
             value={customerPhone}
-            onChange={(e) => setCustomerPhone(e.target.value.replace(/[^\d+]/g, ""))}
+            onChange={(v) => setCustomerPhone(v.replace(/[^\d+]/g, ""))}
+            suggestions={phoneSuggestions}
+            onPick={(c) => { setCustomerName(c.name); setCustomerPhone(c.phone || ""); }}
             maxLength={20}
-            className="w-full bg-transparent px-4 h-11 text-[15px] placeholder:text-muted-foreground/70 focus:outline-none"
+            inputMode="tel"
           />
         </div>
       </section>
@@ -335,6 +388,24 @@ function BuatPage() {
         )}
       </section>
 
+      {/* Catatan */}
+      <section className="space-y-2">
+        <SectionLabel>Catatan</SectionLabel>
+        <div className="relative">
+          <Textarea
+            rows={2}
+            value={noteText}
+            onChange={(e) => setNoteText(e.target.value.slice(0, 200))}
+            maxLength={200}
+            placeholder="Mis. lunas cash, DP 50rb…"
+            className="rounded-2xl border-border bg-card shadow-soft pr-14"
+          />
+          <span className="absolute bottom-2 right-3 text-[10px] text-muted-foreground tabular-nums">
+            {noteText.length}/200
+          </span>
+        </div>
+      </section>
+
       {/* Summary */}
       <div className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
         <Row label="Subtotal" value={formatIDR(subtotal)} muted />
@@ -359,7 +430,7 @@ function BuatPage() {
             onClick={() => saveMutation.mutate()}
           >
             <Check className="h-4 w-4" />
-            Simpan · {formatIDR(total)}
+            {editingId ? "Simpan perubahan" : `Simpan · ${formatIDR(total)}`}
           </Button>
         </div>
       </div>
@@ -402,7 +473,7 @@ function ItemRow({
           <button
             type="button"
             onClick={() => onChange({ qty: Math.max(1, item.qty - 1) })}
-            className="tap w-8 h-8 grid place-items-center text-muted-foreground"
+            className="tap w-11 h-11 sm:w-8 sm:h-8 grid place-items-center text-muted-foreground text-lg sm:text-base active:scale-95 select-none"
             aria-label="Kurangi"
           >
             −
@@ -411,12 +482,12 @@ function ItemRow({
             inputMode="numeric"
             value={item.qty}
             onChange={(e) => onChange({ qty: Math.max(1, parseInt(e.target.value.replace(/\D/g, "") || "1", 10)) })}
-            className="w-8 text-center bg-transparent focus:outline-none font-medium"
+            className="w-10 sm:w-8 text-center bg-transparent focus:outline-none font-medium tabular-nums text-base sm:text-sm"
           />
           <button
             type="button"
             onClick={() => onChange({ qty: item.qty + 1 })}
-            className="tap w-8 h-8 grid place-items-center text-muted-foreground"
+            className="tap w-11 h-11 sm:w-8 sm:h-8 grid place-items-center text-muted-foreground text-lg sm:text-base active:scale-95 select-none"
             aria-label="Tambah"
           >
             +
@@ -430,7 +501,7 @@ function ItemRow({
             placeholder="0"
             value={formatIDRInput(item.price)}
             onChange={(e) => onChange({ price: parseIDRInput(e.target.value) })}
-            className="w-full h-9 pl-8 pr-2 bg-surface rounded-full text-right text-sm focus:outline-none"
+            className="w-full h-11 sm:h-9 pl-8 pr-2 bg-surface rounded-full text-right text-sm focus:outline-none"
           />
         </div>
       </div>
@@ -524,5 +595,59 @@ function ActionTile({
       {icon}
       <span>{label}</span>
     </button>
+  );
+}
+
+type CustomerLite = { name: string; phone?: string; count?: number };
+
+function CustomerSuggestInput({
+  placeholder, value, onChange, suggestions, onPick, maxLength, inputMode,
+}: {
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  suggestions: CustomerLite[];
+  onPick: (c: CustomerLite) => void;
+  maxLength?: number;
+  inputMode?: "tel" | "text" | "numeric";
+}) {
+  const [focused, setFocused] = useState(false);
+  const [open, setOpen] = useState(true);
+  const show = focused && open && suggestions.length > 0;
+  return (
+    <div className="relative">
+      <input
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => { setFocused(true); setOpen(true); }}
+        onBlur={() => setTimeout(() => setFocused(false), 120)}
+        onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); }}
+        maxLength={maxLength}
+        inputMode={inputMode}
+        className="w-full bg-transparent px-4 h-11 text-[15px] placeholder:text-muted-foreground/70 focus:outline-none"
+      />
+      {show && (
+        <div className="absolute z-20 mt-1 left-2 right-2 rounded-xl border border-border bg-popover shadow-pop overflow-hidden">
+          {suggestions.map((s, i) => (
+            <button
+              key={i}
+              type="button"
+              className="tap w-full text-left px-3 py-2 text-sm hover:bg-accent flex items-center justify-between gap-2"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => { onPick(s); setOpen(false); }}
+            >
+              <span className="truncate">
+                <span className="font-medium">{s.name}</span>
+                {s.phone && <span className="text-muted-foreground ml-2">{s.phone}</span>}
+              </span>
+              {typeof s.count === "number" && (
+                <span className="text-[10px] text-muted-foreground shrink-0">{s.count}× nota</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

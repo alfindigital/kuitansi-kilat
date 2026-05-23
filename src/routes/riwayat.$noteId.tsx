@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Trash2, MessageCircle, Image as ImageIcon, Copy } from "lucide-react";
+import { ArrowLeft, Trash2, MessageCircle, Image as ImageIcon, Copy, Pencil, CopyPlus } from "lucide-react";
 import { toast } from "sonner";
+
 
 import { db } from "@/lib/storage";
 import { formatIDR, formatDateTime } from "@/lib/format";
@@ -69,12 +70,28 @@ function NoteDetail() {
     <div className="space-y-5 pb-4">
       <div className="flex items-center justify-between">
         <BackLink />
-        <button
-          onClick={() => { if (confirm("Hapus nota ini?")) del.mutate(); }}
-          className="tap text-muted-foreground hover:text-destructive inline-flex items-center gap-1 text-sm rounded-full px-3 py-1.5"
-        >
-          <Trash2 className="h-4 w-4" /> Hapus
-        </button>
+        <div className="flex items-center gap-1">
+          <Link
+            to="/buat"
+            search={{ from: note.id }}
+            className="tap text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm rounded-full px-3 py-1.5"
+          >
+            <CopyPlus className="h-4 w-4" /> Buat ulang
+          </Link>
+          <Link
+            to="/buat"
+            search={{ edit: note.id }}
+            className="tap text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm rounded-full px-3 py-1.5"
+          >
+            <Pencil className="h-4 w-4" /> Edit
+          </Link>
+          <button
+            onClick={() => { if (confirm("Hapus nota ini?")) del.mutate(); }}
+            className="tap text-muted-foreground hover:text-destructive inline-flex items-center gap-1 text-sm rounded-full px-3 py-1.5"
+          >
+            <Trash2 className="h-4 w-4" /> Hapus
+          </button>
+        </div>
       </div>
 
       <div>
@@ -89,6 +106,15 @@ function NoteDetail() {
           {note.customerPhone && <div className="text-sm text-muted-foreground">{note.customerPhone}</div>}
         </div>
       )}
+
+      {note.notes && (
+        <div className="rounded-2xl bg-card border border-border shadow-soft p-4">
+          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Catatan</div>
+          <div className="text-sm mt-1 whitespace-pre-wrap">{note.notes}</div>
+        </div>
+      )}
+
+
 
       <ul className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
         {note.items.map((it, i) => (
