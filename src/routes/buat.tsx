@@ -597,3 +597,57 @@ function ActionTile({
     </button>
   );
 }
+
+type CustomerLite = { name: string; phone?: string; count?: number };
+
+function CustomerSuggestInput({
+  placeholder, value, onChange, suggestions, onPick, maxLength, inputMode,
+}: {
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  suggestions: CustomerLite[];
+  onPick: (c: CustomerLite) => void;
+  maxLength?: number;
+  inputMode?: "tel" | "text" | "numeric";
+}) {
+  const [focused, setFocused] = useState(false);
+  const [open, setOpen] = useState(true);
+  const show = focused && open && suggestions.length > 0;
+  return (
+    <div className="relative">
+      <input
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => { setFocused(true); setOpen(true); }}
+        onBlur={() => setTimeout(() => setFocused(false), 120)}
+        onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); }}
+        maxLength={maxLength}
+        inputMode={inputMode}
+        className="w-full bg-transparent px-4 h-11 text-[15px] placeholder:text-muted-foreground/70 focus:outline-none"
+      />
+      {show && (
+        <div className="absolute z-20 mt-1 left-2 right-2 rounded-xl border border-border bg-popover shadow-pop overflow-hidden">
+          {suggestions.map((s, i) => (
+            <button
+              key={i}
+              type="button"
+              className="tap w-full text-left px-3 py-2 text-sm hover:bg-accent flex items-center justify-between gap-2"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => { onPick(s); setOpen(false); }}
+            >
+              <span className="truncate">
+                <span className="font-medium">{s.name}</span>
+                {s.phone && <span className="text-muted-foreground ml-2">{s.phone}</span>}
+              </span>
+              {typeof s.count === "number" && (
+                <span className="text-[10px] text-muted-foreground shrink-0">{s.count}× nota</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
