@@ -18,7 +18,9 @@ export const Route = createFileRoute("/riwayat")({
   head: () => ({
     meta: [
       { title: "Riwayat — Notaku" },
-      { name: "description", content: "Riwayat nota dan rekap omset UMKM." },
+      { name: "description", content: "Riwayat nota tersimpan, rekap omset harian dan bulanan, serta pencarian cepat pelanggan UMKM." },
+      { property: "og:title", content: "Riwayat — Notaku" },
+      { property: "og:description", content: "Lihat semua nota tersimpan dan rekap omset harian/bulanan untuk usaha kecilmu." },
     ],
   }),
   component: RiwayatPage,

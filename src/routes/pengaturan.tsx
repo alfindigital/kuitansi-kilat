@@ -16,7 +16,9 @@ export const Route = createFileRoute("/pengaturan")({
   head: () => ({
     meta: [
       { title: "Pengaturan — Notaku" },
-      { name: "description", content: "Atur identitas bisnis, preset item, dan backup data." },
+      { name: "description", content: "Atur identitas bisnis, logo, preset item, daftar pelanggan, dan cadangan data Notaku." },
+      { property: "og:title", content: "Pengaturan — Notaku" },
+      { property: "og:description", content: "Kelola profil bisnis, preset item, pelanggan, dan backup data lokal Notaku." },
     ],
   }),
   component: PengaturanPage,
