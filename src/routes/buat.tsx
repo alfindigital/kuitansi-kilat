@@ -388,6 +388,24 @@ function BuatPage() {
         )}
       </section>
 
+      {/* Catatan */}
+      <section className="space-y-2">
+        <SectionLabel>Catatan</SectionLabel>
+        <div className="relative">
+          <Textarea
+            rows={2}
+            value={noteText}
+            onChange={(e) => setNoteText(e.target.value.slice(0, 200))}
+            maxLength={200}
+            placeholder="Mis. lunas cash, DP 50rb…"
+            className="rounded-2xl border-border bg-card shadow-soft pr-14"
+          />
+          <span className="absolute bottom-2 right-3 text-[10px] text-muted-foreground tabular-nums">
+            {noteText.length}/200
+          </span>
+        </div>
+      </section>
+
       {/* Summary */}
       <div className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
         <Row label="Subtotal" value={formatIDR(subtotal)} muted />
@@ -412,7 +430,7 @@ function BuatPage() {
             onClick={() => saveMutation.mutate()}
           >
             <Check className="h-4 w-4" />
-            Simpan · {formatIDR(total)}
+            {editingId ? "Simpan perubahan" : `Simpan · ${formatIDR(total)}`}
           </Button>
         </div>
       </div>
