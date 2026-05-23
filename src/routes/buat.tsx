@@ -473,7 +473,7 @@ function ItemRow({
           <button
             type="button"
             onClick={() => onChange({ qty: Math.max(1, item.qty - 1) })}
-            className="tap w-8 h-8 grid place-items-center text-muted-foreground"
+            className="tap w-11 h-11 sm:w-8 sm:h-8 grid place-items-center text-muted-foreground text-lg sm:text-base active:scale-95 select-none"
             aria-label="Kurangi"
           >
             −
@@ -482,12 +482,12 @@ function ItemRow({
             inputMode="numeric"
             value={item.qty}
             onChange={(e) => onChange({ qty: Math.max(1, parseInt(e.target.value.replace(/\D/g, "") || "1", 10)) })}
-            className="w-8 text-center bg-transparent focus:outline-none font-medium"
+            className="w-10 sm:w-8 text-center bg-transparent focus:outline-none font-medium tabular-nums text-base sm:text-sm"
           />
           <button
             type="button"
             onClick={() => onChange({ qty: item.qty + 1 })}
-            className="tap w-8 h-8 grid place-items-center text-muted-foreground"
+            className="tap w-11 h-11 sm:w-8 sm:h-8 grid place-items-center text-muted-foreground text-lg sm:text-base active:scale-95 select-none"
             aria-label="Tambah"
           >
             +
@@ -501,7 +501,7 @@ function ItemRow({
             placeholder="0"
             value={formatIDRInput(item.price)}
             onChange={(e) => onChange({ price: parseIDRInput(e.target.value) })}
-            className="w-full h-9 pl-8 pr-2 bg-surface rounded-full text-right text-sm focus:outline-none"
+            className="w-full h-11 sm:h-9 pl-8 pr-2 bg-surface rounded-full text-right text-sm focus:outline-none"
           />
         </div>
       </div>
