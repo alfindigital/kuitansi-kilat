@@ -148,7 +148,7 @@ function NoteDetail() {
           <span className="text-muted-foreground">Total</span>
           <span className="font-display font-semibold text-2xl tracking-tight">{formatIDR(note.total)}</span>
         </div>
-      </div>
+      </section>
 
       <div className="grid grid-cols-3 gap-2 pt-2">
         <ActionTile icon={<ImageIcon className="h-5 w-5" />} label="PNG" onClick={shareImage} loading={busy} />
