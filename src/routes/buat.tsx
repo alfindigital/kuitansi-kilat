@@ -93,15 +93,40 @@ function BuatPage() {
   const [customerPhone, setCustomerPhone] = useState(initial?.customerPhone ?? "");
   const [items, setItems] = useState<NoteItem[]>(initial?.items?.length ? initial.items : [{ name: "", qty: 1, price: 0 }]);
   const [discount, setDiscount] = useState<Discount>(initial?.discount ?? { type: "none", value: 0 });
+  const [noteText, setNoteText] = useState(initial?.noteText ?? "");
   const [savedNote, setSavedNote] = useState<Note | null>(null);
   const [draftSavedAt, setDraftSavedAt] = useState<number | null>(initial?.updatedAt ?? null);
-  const hadInitialDraft = useRef(!!initial && !isDraftEmpty(initial));
+  const hadInitialDraft = useRef(!!initial && !isDraftEmpty({ ...initial, noteText: initial.noteText ?? "" }));
+  const [editingNumber, setEditingNumber] = useState<string | null>(null);
+  const loadedKeyRef = useRef<string | null>(null);
 
-  // Autosave draft (debounced)
+  // Load from existing note (edit/from)
+  useEffect(() => {
+    const key = editingId ? `e:${editingId}` : fromId ? `f:${fromId}` : null;
+    if (!key || loadedKeyRef.current === key || !notes.length) return;
+    const src = notes.find((n) => n.id === (editingId || fromId));
+    if (!src) return;
+    loadedKeyRef.current = key;
+    if (editingId) {
+      setDate(toDateInput(src.date));
+      setEditingNumber(src.number);
+    } else {
+      setDate(toDateInput(new Date().toISOString()));
+      setEditingNumber(null);
+      toast.success(`Disalin dari ${src.number}`);
+    }
+    setCustomerName(src.customerName ?? "");
+    setCustomerPhone(src.customerPhone ?? "");
+    setItems(src.items.map((it) => ({ ...it })));
+    setDiscount({ type: src.discountType, value: src.discountValue });
+    setNoteText(src.notes ?? "");
+  }, [editingId, fromId, notes]);
+
+  // Autosave draft (debounced) — disabled in edit/duplicate mode
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (savedNote) return; // pause while share sheet is open
-    const draft = { date, customerName, customerPhone, items, discount };
+    if (savedNote || editingId || fromId) return;
+    const draft = { date, customerName, customerPhone, items, discount, noteText };
     const t = setTimeout(() => {
       if (isDraftEmpty(draft)) {
         localStorage.removeItem(DRAFT_KEY);
@@ -113,7 +138,7 @@ function BuatPage() {
       }
     }, 400);
     return () => clearTimeout(t);
-  }, [date, customerName, customerPhone, items, discount, savedNote]);
+  }, [date, customerName, customerPhone, items, discount, noteText, savedNote, editingId, fromId]);
 
   useEffect(() => {
     if (hadInitialDraft.current) {
@@ -123,22 +148,24 @@ function BuatPage() {
   }, []);
 
 
-  const customers = useMemo(() => {
-    const map = new Map<string, { name: string; phone?: string }>();
-    for (const n of notes) {
-      const nm = n.customerName?.trim();
-      if (!nm) continue;
-      const key = (n.customerPhone || nm).toLowerCase();
-      if (!map.has(key)) map.set(key, { name: nm, phone: n.customerPhone });
-    }
-    return [...map.values()];
-  }, [notes]);
+  const customers = useMemo(() => deriveCustomers(notes), [notes]);
 
-  const suggestions = useMemo(() => {
-    const q = customerName.trim().toLowerCase();
-    if (!q) return [];
-    return customers.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 5);
-  }, [customers, customerName]);
+  function matchCustomer(q: string, c: { name: string; phone?: string }) {
+    const s = q.trim().toLowerCase();
+    if (!s) return false;
+    if (c.name.toLowerCase().includes(s)) return true;
+    const digits = s.replace(/\D/g, "");
+    if (digits && c.phone && c.phone.replace(/\D/g, "").includes(digits)) return true;
+    return false;
+  }
+  const nameSuggestions = useMemo(
+    () => (customerName.trim() ? customers.filter((c) => matchCustomer(customerName, c)).slice(0, 5) : []),
+    [customers, customerName],
+  );
+  const phoneSuggestions = useMemo(
+    () => (customerPhone.trim() ? customers.filter((c) => matchCustomer(customerPhone, c)).slice(0, 5) : []),
+    [customers, customerPhone],
+  );
 
   const { subtotal, total } = useMemo(
     () => calcTotals(items, discount.type, discount.value),
