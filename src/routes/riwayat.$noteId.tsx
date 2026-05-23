@@ -118,19 +118,23 @@ function NoteDetail() {
 
 
 
-      <ul className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
-        {note.items.map((it, i) => (
-          <li key={i} className="px-4 py-3 flex justify-between text-sm">
-            <div className="min-w-0">
-              <div className="font-medium truncate">{it.name}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{it.qty} × {formatIDR(it.price)}</div>
-            </div>
-            <div className="font-medium">{formatIDR(it.qty * it.price)}</div>
-          </li>
-        ))}
-      </ul>
+      <section aria-labelledby="nota-items">
+        <h2 id="nota-items" className="sr-only">Item</h2>
+        <ul className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
+          {note.items.map((it, i) => (
+            <li key={i} className="px-4 py-3 flex justify-between text-sm">
+              <div className="min-w-0">
+                <div className="font-medium truncate">{it.name}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{it.qty} × {formatIDR(it.price)}</div>
+              </div>
+              <div className="font-medium">{formatIDR(it.qty * it.price)}</div>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-      <div className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
+      <section aria-labelledby="nota-ringkasan" className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
+        <h2 id="nota-ringkasan" className="sr-only">Ringkasan</h2>
         <Row label="Subtotal" value={formatIDR(note.subtotal)} muted />
         {note.subtotal !== note.total && (
           <Row
