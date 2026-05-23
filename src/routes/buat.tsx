@@ -192,9 +192,28 @@ function BuatPage() {
     mutationFn: async (): Promise<Note> => {
       const cleaned = items.map((it) => ({ ...it, name: it.name.trim() })).filter((it) => it.name);
       if (!cleaned.length) throw new Error("Tambahkan minimal 1 item dengan nama.");
+      const totals = calcTotals(cleaned, discount.type, discount.value);
+
+      if (editingId) {
+        const existing = notes.find((n) => n.id === editingId);
+        if (!existing) throw new Error("Nota tidak ditemukan.");
+        const updated: Note = {
+          ...existing,
+          customerName: customerName.trim() || undefined,
+          customerPhone: customerPhone.trim() || undefined,
+          items: cleaned,
+          discountType: discount.type,
+          discountValue: discount.type === "none" ? 0 : discount.value,
+          subtotal: totals.subtotal,
+          total: totals.total,
+          notes: noteText.trim() || undefined,
+        };
+        await db.setNotes(notes.map((n) => (n.id === editingId ? updated : n)));
+        return updated;
+      }
+
       const seq = (await db.getSeq()) + 1;
       const number = generateNoteNumber(business?.prefix || "NT", seq, new Date(date));
-      const totals = calcTotals(cleaned, discount.type, discount.value);
       const note: Note = {
         id: uid(),
         number,
@@ -206,6 +225,7 @@ function BuatPage() {
         discountValue: discount.type === "none" ? 0 : discount.value,
         subtotal: totals.subtotal,
         total: totals.total,
+        notes: noteText.trim() || undefined,
       };
       await db.setSeq(seq);
       await db.setNotes([note, ...notes]);
@@ -215,7 +235,12 @@ function BuatPage() {
       qc.invalidateQueries({ queryKey: ["notes"] });
       if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
       setDraftSavedAt(null);
-      setSavedNote(note);
+      if (editingId) {
+        toast.success("Perubahan disimpan");
+        navigate({ to: "/riwayat/$noteId", params: { noteId: note.id } });
+      } else {
+        setSavedNote(note);
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -225,6 +250,7 @@ function BuatPage() {
     setCustomerName(""); setCustomerPhone("");
     setItems([{ name: "", qty: 1, price: 0 }]);
     setDiscount({ type: "none", value: 0 });
+    setNoteText("");
     setDate(toDateInput(new Date().toISOString()));
     if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
     setDraftSavedAt(null);
