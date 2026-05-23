@@ -56,6 +56,7 @@ type Draft = {
   customerPhone: string;
   items: NoteItem[];
   discount: Discount;
+  noteText: string;
   updatedAt: number;
 };
 
@@ -70,19 +71,23 @@ function loadDraft(): Draft | null {
   } catch { return null; }
 }
 
-function isDraftEmpty(d: { customerName: string; customerPhone: string; items: NoteItem[]; discount: Discount }) {
+function isDraftEmpty(d: { customerName: string; customerPhone: string; items: NoteItem[]; discount: Discount; noteText: string }) {
   const hasItem = d.items.some((it) => it.name.trim() || it.price > 0);
-  return !d.customerName.trim() && !d.customerPhone.trim() && !hasItem && d.discount.type === "none";
+  return !d.customerName.trim() && !d.customerPhone.trim() && !d.noteText.trim() && !hasItem && d.discount.type === "none";
 }
 
 function BuatPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const search = Route.useSearch();
+  const editingId = search.edit;
+  const fromId = search.from;
   const { data: business } = useQuery({ queryKey: ["business"], queryFn: () => db.getBusiness() });
   const { data: presets = [] } = useQuery({ queryKey: ["presets"], queryFn: () => db.getPresets() });
   const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
 
-  const initial = typeof window !== "undefined" ? loadDraft() : null;
+  // Skip draft when editing/duplicating
+  const initial = typeof window !== "undefined" && !editingId && !fromId ? loadDraft() : null;
   const [date, setDate] = useState<string>(() => initial?.date ?? toDateInput(new Date().toISOString()));
   const [customerName, setCustomerName] = useState(initial?.customerName ?? "");
   const [customerPhone, setCustomerPhone] = useState(initial?.customerPhone ?? "");
