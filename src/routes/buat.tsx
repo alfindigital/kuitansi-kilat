@@ -8,7 +8,7 @@ import {
 import { toast } from "sonner";
 
 import {
-  db, calcTotals, generateNoteNumber, uid,
+  db, calcTotals, deriveCustomers, generateNoteNumber, uid,
   type Note, type NoteItem, type Preset,
 } from "@/lib/storage";
 import { formatIDR, formatIDRInput, parseIDRInput, toDateInput } from "@/lib/format";
@@ -17,11 +17,18 @@ import { Receipt as ReceiptCard } from "@/components/Receipt";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
+type SearchParams = { edit?: string; from?: string };
+
 export const Route = createFileRoute("/buat")({
+  validateSearch: (s: Record<string, unknown>): SearchParams => ({
+    edit: typeof s.edit === "string" ? s.edit : undefined,
+    from: typeof s.from === "string" ? s.from : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Buat Nota — Notaku" },
