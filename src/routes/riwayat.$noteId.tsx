@@ -14,7 +14,9 @@ export const Route = createFileRoute("/riwayat/$noteId")({
   head: () => ({
     meta: [
       { title: "Detail nota — Notaku" },
-      { name: "description", content: "Detail nota tersimpan." },
+      { name: "description", content: "Lihat detail nota tersimpan: item, total, catatan, dan kirim ulang struk ke pelanggan via WhatsApp." },
+      { property: "og:title", content: "Detail nota — Notaku" },
+      { property: "og:description", content: "Detail nota UMKM dengan opsi cetak struk, salin teks, dan kirim WhatsApp." },
     ],
   }),
   component: NoteDetail,
@@ -100,35 +102,39 @@ function NoteDetail() {
       </div>
 
       {note.customerName && (
-        <div className="rounded-2xl bg-card border border-border shadow-soft p-4">
-          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Pelanggan</div>
+        <section className="rounded-2xl bg-card border border-border shadow-soft p-4">
+          <h2 className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Pelanggan</h2>
           <div className="font-medium mt-1">{note.customerName}</div>
           {note.customerPhone && <div className="text-sm text-muted-foreground">{note.customerPhone}</div>}
-        </div>
+        </section>
       )}
 
       {note.notes && (
-        <div className="rounded-2xl bg-card border border-border shadow-soft p-4">
-          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Catatan</div>
+        <section className="rounded-2xl bg-card border border-border shadow-soft p-4">
+          <h2 className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Catatan</h2>
           <div className="text-sm mt-1 whitespace-pre-wrap">{note.notes}</div>
-        </div>
+        </section>
       )}
 
 
 
-      <ul className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
-        {note.items.map((it, i) => (
-          <li key={i} className="px-4 py-3 flex justify-between text-sm">
-            <div className="min-w-0">
-              <div className="font-medium truncate">{it.name}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{it.qty} × {formatIDR(it.price)}</div>
-            </div>
-            <div className="font-medium">{formatIDR(it.qty * it.price)}</div>
-          </li>
-        ))}
-      </ul>
+      <section aria-labelledby="nota-items">
+        <h2 id="nota-items" className="sr-only">Item</h2>
+        <ul className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
+          {note.items.map((it, i) => (
+            <li key={i} className="px-4 py-3 flex justify-between text-sm">
+              <div className="min-w-0">
+                <div className="font-medium truncate">{it.name}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{it.qty} × {formatIDR(it.price)}</div>
+              </div>
+              <div className="font-medium">{formatIDR(it.qty * it.price)}</div>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-      <div className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
+      <section aria-labelledby="nota-ringkasan" className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
+        <h2 id="nota-ringkasan" className="sr-only">Ringkasan</h2>
         <Row label="Subtotal" value={formatIDR(note.subtotal)} muted />
         {note.subtotal !== note.total && (
           <Row
@@ -142,7 +148,7 @@ function NoteDetail() {
           <span className="text-muted-foreground">Total</span>
           <span className="font-display font-semibold text-2xl tracking-tight">{formatIDR(note.total)}</span>
         </div>
-      </div>
+      </section>
 
       <div className="grid grid-cols-3 gap-2 pt-2">
         <ActionTile icon={<ImageIcon className="h-5 w-5" />} label="PNG" onClick={shareImage} loading={busy} />

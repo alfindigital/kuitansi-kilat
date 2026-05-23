@@ -1,0 +1,11 @@
+# Notaku
+
+> Aplikasi sat-set untuk UMKM Indonesia: bikin nota, cetak struk, dan simpan riwayat pelanggan langsung dari HP — tanpa login, semua data tersimpan di perangkat.
+
+Notaku membantu pelaku usaha kecil mencatat transaksi, membuat struk siap kirim via WhatsApp, dan merekap omset harian/bulanan dengan antarmuka mobile-first yang offline-friendly.
+
+## Pages
+
+- [Buat Nota](/buat): Form cepat untuk membuat nota baru, menambah item, diskon, dan catatan pelanggan.
+- [Riwayat](/riwayat): Daftar semua nota tersimpan beserta rekap omset hari ini dan bulan ini.
+- [Pengaturan](/pengaturan): Atur identitas bisnis, logo, preset item, daftar pelanggan, dan cadangan data.

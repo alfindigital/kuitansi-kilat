@@ -32,7 +32,9 @@ export const Route = createFileRoute("/buat")({
   head: () => ({
     meta: [
       { title: "Buat Nota — Notaku" },
-      { name: "description", content: "Bikin nota dan struk dalam hitungan detik." },
+      { name: "description", content: "Bikin nota dan struk untuk pelanggan UMKM dalam hitungan detik, lengkap dengan diskon, catatan, dan kirim WhatsApp." },
+      { property: "og:title", content: "Buat Nota — Notaku" },
+      { property: "og:description", content: "Form cepat membuat nota dan struk UMKM: tambah item, diskon, catatan, dan langsung bagikan via WhatsApp." },
     ],
   }),
   component: BuatPage,
@@ -42,9 +44,9 @@ type Discount = { type: "none" | "amount" | "percent"; value: number };
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+    <h2 className="px-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
       {children}
-    </div>
+    </h2>
   );
 }
 
@@ -362,6 +364,8 @@ function BuatPage() {
             <button
               key={t}
               type="button"
+              aria-label={t === "none" ? "Tanpa diskon" : t === "amount" ? "Diskon nominal rupiah" : "Diskon persen"}
+              aria-pressed={discount.type === t}
               onClick={() => setDiscount({ type: t, value: t === "none" ? 0 : discount.value })}
               className={cn(
                 "tap py-2 rounded-full font-medium",

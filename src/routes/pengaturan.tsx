@@ -16,7 +16,9 @@ export const Route = createFileRoute("/pengaturan")({
   head: () => ({
     meta: [
       { title: "Pengaturan — Notaku" },
-      { name: "description", content: "Atur identitas bisnis, preset item, dan backup data." },
+      { name: "description", content: "Atur identitas bisnis, logo, preset item, daftar pelanggan, dan cadangan data Notaku." },
+      { property: "og:title", content: "Pengaturan — Notaku" },
+      { property: "og:description", content: "Kelola profil bisnis, preset item, pelanggan, dan backup data lokal Notaku." },
     ],
   }),
   component: PengaturanPage,
@@ -76,11 +78,11 @@ function BusinessSection() {
     <Section title="Bisnis">
       <Card className="p-4 space-y-4">
         <div className="flex gap-4">
-          <label className="w-20 h-20 rounded-2xl border border-dashed border-border flex items-center justify-center overflow-hidden cursor-pointer bg-surface tap">
+          <label className="w-20 h-20 rounded-2xl border border-dashed border-border flex items-center justify-center overflow-hidden cursor-pointer bg-surface tap" aria-label="Unggah logo bisnis">
             {form.logo ? (
-              <img src={form.logo} alt="logo" className="w-full h-full object-contain" />
+              <img src={form.logo} alt={form.name ? `Logo ${form.name}` : "Logo bisnis"} className="w-full h-full object-contain" />
             ) : (
-              <Upload className="h-5 w-5 text-muted-foreground" />
+              <Upload className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
             )}
             <input
               type="file" accept="image/*" className="hidden"
@@ -162,8 +164,8 @@ function PresetSection() {
               className="h-10 rounded-xl pl-9"
             />
           </div>
-          <Button variant="outline" onClick={add} className="tap rounded-xl h-10 w-10 p-0">
-            <Plus className="h-4 w-4" />
+          <Button variant="outline" onClick={add} aria-label="Tambah preset item" className="tap rounded-xl h-10 w-10 p-0">
+            <Plus className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
         {presets.length === 0 ? (
@@ -176,8 +178,8 @@ function PresetSection() {
                   <div className="text-sm font-medium">{p.name}</div>
                   <div className="text-xs text-muted-foreground">{formatIDR(p.price)}</div>
                 </div>
-                <button onClick={() => remove(p.id)} className="tap text-muted-foreground hover:text-destructive p-2 rounded-full">
-                  <Trash2 className="h-4 w-4" />
+                <button onClick={() => remove(p.id)} aria-label={`Hapus preset ${p.name}`} className="tap text-muted-foreground hover:text-destructive p-2 rounded-full">
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
               </li>
             ))}

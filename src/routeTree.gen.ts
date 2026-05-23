@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RiwayatRouteImport } from './routes/riwayat'
 import { Route as PengaturanRouteImport } from './routes/pengaturan'
 import { Route as BuatRouteImport } from './routes/buat'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RiwayatNoteIdRouteImport } from './routes/riwayat.$noteId'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RiwayatRoute = RiwayatRouteImport.update({
   id: '/riwayat',
   path: '/riwayat',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/buat': typeof BuatRoute
   '/pengaturan': typeof PengaturanRoute
   '/riwayat': typeof RiwayatRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/riwayat/$noteId': typeof RiwayatNoteIdRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/buat': typeof BuatRoute
   '/pengaturan': typeof PengaturanRoute
   '/riwayat': typeof RiwayatRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/riwayat/$noteId': typeof RiwayatNoteIdRoute
 }
 export interface FileRoutesById {
@@ -61,19 +69,33 @@ export interface FileRoutesById {
   '/buat': typeof BuatRoute
   '/pengaturan': typeof PengaturanRoute
   '/riwayat': typeof RiwayatRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/riwayat/$noteId': typeof RiwayatNoteIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/buat' | '/pengaturan' | '/riwayat' | '/riwayat/$noteId'
+  fullPaths:
+    | '/'
+    | '/buat'
+    | '/pengaturan'
+    | '/riwayat'
+    | '/sitemap.xml'
+    | '/riwayat/$noteId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/buat' | '/pengaturan' | '/riwayat' | '/riwayat/$noteId'
+  to:
+    | '/'
+    | '/buat'
+    | '/pengaturan'
+    | '/riwayat'
+    | '/sitemap.xml'
+    | '/riwayat/$noteId'
   id:
     | '__root__'
     | '/'
     | '/buat'
     | '/pengaturan'
     | '/riwayat'
+    | '/sitemap.xml'
     | '/riwayat/$noteId'
   fileRoutesById: FileRoutesById
 }
@@ -82,10 +104,18 @@ export interface RootRouteChildren {
   BuatRoute: typeof BuatRoute
   PengaturanRoute: typeof PengaturanRoute
   RiwayatRoute: typeof RiwayatRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/riwayat': {
       id: '/riwayat'
       path: '/riwayat'
@@ -140,6 +170,7 @@ const rootRouteChildren: RootRouteChildren = {
   BuatRoute: BuatRoute,
   PengaturanRoute: PengaturanRoute,
   RiwayatRoute: RiwayatRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

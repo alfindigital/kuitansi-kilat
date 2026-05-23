@@ -18,7 +18,9 @@ export const Route = createFileRoute("/riwayat")({
   head: () => ({
     meta: [
       { title: "Riwayat — Notaku" },
-      { name: "description", content: "Riwayat nota dan rekap omset UMKM." },
+      { name: "description", content: "Riwayat nota tersimpan, rekap omset harian dan bulanan, serta pencarian cepat pelanggan UMKM." },
+      { property: "og:title", content: "Riwayat — Notaku" },
+      { property: "og:description", content: "Lihat semua nota tersimpan dan rekap omset harian/bulanan untuk usaha kecilmu." },
     ],
   }),
   component: RiwayatPage,
@@ -86,14 +88,21 @@ function RiwayatList() {
     <div className="space-y-6">
       <h1 className="text-2xl font-display font-semibold tracking-tight">Riwayat</h1>
 
-      <div className="grid grid-cols-2 gap-3">
-        <StatCard label="Hari ini" amount={stats.dayOm} count={stats.dayCount} />
-        <StatCard label="Bulan ini" amount={stats.monOm} count={stats.monCount} />
-      </div>
+      <section aria-labelledby="riwayat-rekap" className="space-y-2">
+        <h2 id="riwayat-rekap" className="sr-only">Rekap omset</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard label="Hari ini" amount={stats.dayOm} count={stats.dayCount} />
+          <StatCard label="Bulan ini" amount={stats.monOm} count={stats.monCount} />
+        </div>
+      </section>
 
+      <h2 className="sr-only">Cari & filter nota</h2>
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+        <label htmlFor="riwayat-search" className="sr-only">Cari nota</label>
         <input
+          id="riwayat-search"
+          aria-label="Cari nota berdasarkan nama, nomor, atau nomor HP"
           placeholder="Cari nama, nomor, atau HP…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -132,11 +141,12 @@ function RiwayatList() {
         </div>
       ) : (
         <div className="space-y-4">
+          <h2 className="sr-only">Daftar nota</h2>
           {groups.map(([dateKey, items]) => (
             <div key={dateKey} className="space-y-2">
-              <div className="px-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              <h3 className="px-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
                 {formatDate(dateKey + "T00:00:00")}
-              </div>
+              </h3>
               <ul className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
                 {items.map((n) => (
                   <li key={n.id}>
