@@ -46,6 +46,7 @@ export const NoteSchema = z.object({
   discountValue: z.number().min(0).max(1_000_000_000).default(0),
   subtotal: z.number().int().min(0),
   total: z.number().int().min(0),
+  notes: z.string().trim().max(200).optional(),
 });
 export type Note = z.infer<typeof NoteSchema>;
 

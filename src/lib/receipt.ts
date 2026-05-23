@@ -26,6 +26,7 @@ export function buildReceiptText(note: Note, business: Business): string {
   }
   lines.push(padBetween("*TOTAL*", `*${formatIDR(note.total)}*`, 32));
   lines.push("--------------------------------");
+  if (note.notes) lines.push(`Catatan: ${note.notes}`);
   if (business.footer) lines.push(business.footer);
   return lines.join("\n");
 }
