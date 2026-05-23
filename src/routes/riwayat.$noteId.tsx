@@ -102,18 +102,18 @@ function NoteDetail() {
       </div>
 
       {note.customerName && (
-        <div className="rounded-2xl bg-card border border-border shadow-soft p-4">
-          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Pelanggan</div>
+        <section className="rounded-2xl bg-card border border-border shadow-soft p-4">
+          <h2 className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Pelanggan</h2>
           <div className="font-medium mt-1">{note.customerName}</div>
           {note.customerPhone && <div className="text-sm text-muted-foreground">{note.customerPhone}</div>}
-        </div>
+        </section>
       )}
 
       {note.notes && (
-        <div className="rounded-2xl bg-card border border-border shadow-soft p-4">
-          <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Catatan</div>
+        <section className="rounded-2xl bg-card border border-border shadow-soft p-4">
+          <h2 className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Catatan</h2>
           <div className="text-sm mt-1 whitespace-pre-wrap">{note.notes}</div>
-        </div>
+        </section>
       )}
 
 
