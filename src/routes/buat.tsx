@@ -602,7 +602,7 @@ function ActionTile({
 }: { icon: React.ReactNode; label: string; onClick: () => void; loading?: boolean }) {
   return (
     <button
-      onClick={onClick}
+      onClick={() => { tapHaptic(); onClick(); }}
       disabled={loading}
       className="tap flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-card border border-border shadow-soft py-4 text-sm disabled:opacity-60"
     >
