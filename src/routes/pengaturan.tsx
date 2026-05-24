@@ -179,7 +179,7 @@ function PresetSection() {
                   <div className="text-sm font-medium">{p.name}</div>
                   <div className="text-xs text-muted-foreground">{formatIDR(p.price)}</div>
                 </div>
-                <button onClick={() => remove(p.id)} aria-label={`Hapus preset ${p.name}`} className="tap text-muted-foreground hover:text-destructive p-2 rounded-full">
+                <button onClick={() => remove(p.id)} aria-label={`Hapus preset ${p.name}`} className="tap tap-target inline-flex items-center justify-center text-muted-foreground hover:text-destructive rounded-full">
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
               </li>
