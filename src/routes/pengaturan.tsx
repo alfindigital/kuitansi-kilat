@@ -96,7 +96,7 @@ function BusinessSection() {
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Telepon</Label>
-              <Input value={form.phone} maxLength={20} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="08xx" className="h-10 rounded-xl mt-1" />
+              <Input value={form.phone} maxLength={20} inputMode="tel" enterKeyHint="done" onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="08xx" className="h-10 rounded-xl mt-1" />
             </div>
           </div>
         </div>
@@ -154,17 +154,18 @@ function PresetSection() {
     <Section title="Preset">
       <Card className="p-3 space-y-3">
         <div className="flex gap-2">
-          <Input placeholder="Nama" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} className="h-10 rounded-xl" />
+          <Input placeholder="Nama" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} enterKeyHint="next" className="h-11 rounded-xl" />
           <div className="relative w-32">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Rp</span>
             <Input
-              inputMode="numeric" placeholder="0"
+              inputMode="decimal" enterKeyHint="done" placeholder="0"
               value={formatIDRInput(price)}
               onChange={(e) => setPrice(parseIDRInput(e.target.value))}
-              className="h-10 rounded-xl pl-9"
+              onFocus={(e) => e.target.select()}
+              className="h-11 rounded-xl pl-9"
             />
           </div>
-          <Button variant="outline" onClick={add} aria-label="Tambah preset item" className="tap rounded-xl h-10 w-10 p-0">
+          <Button variant="outline" onClick={add} aria-label="Tambah preset item" className="tap rounded-xl h-11 w-11 p-0">
             <Plus className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
@@ -178,7 +179,7 @@ function PresetSection() {
                   <div className="text-sm font-medium">{p.name}</div>
                   <div className="text-xs text-muted-foreground">{formatIDR(p.price)}</div>
                 </div>
-                <button onClick={() => remove(p.id)} aria-label={`Hapus preset ${p.name}`} className="tap text-muted-foreground hover:text-destructive p-2 rounded-full">
+                <button onClick={() => remove(p.id)} aria-label={`Hapus preset ${p.name}`} className="tap tap-target inline-flex items-center justify-center text-muted-foreground hover:text-destructive rounded-full">
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
               </li>

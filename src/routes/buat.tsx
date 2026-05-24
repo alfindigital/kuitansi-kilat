@@ -13,6 +13,7 @@ import {
 } from "@/lib/storage";
 import { formatIDR, formatIDRInput, parseIDRInput, toDateInput } from "@/lib/format";
 import { buildReceiptText, renderReceiptPNG, sharePNG, waLink } from "@/lib/receipt";
+import { tapHaptic } from "@/lib/haptic";
 import { Receipt as ReceiptCard } from "@/components/Receipt";
 
 import { Button } from "@/components/ui/button";
@@ -237,6 +238,7 @@ function BuatPage() {
       qc.invalidateQueries({ queryKey: ["notes"] });
       if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
       setDraftSavedAt(null);
+      tapHaptic(20);
       if (editingId) {
         toast.success("Perubahan disimpan");
         navigate({ to: "/riwayat/$noteId", params: { noteId: note.id } });
@@ -366,9 +368,9 @@ function BuatPage() {
               type="button"
               aria-label={t === "none" ? "Tanpa diskon" : t === "amount" ? "Diskon nominal rupiah" : "Diskon persen"}
               aria-pressed={discount.type === t}
-              onClick={() => setDiscount({ type: t, value: t === "none" ? 0 : discount.value })}
+              onClick={() => { tapHaptic(); setDiscount({ type: t, value: t === "none" ? 0 : discount.value }); }}
               className={cn(
-                "tap py-2 rounded-full font-medium",
+                "tap min-h-11 rounded-full font-medium",
                 discount.type === t
                   ? "bg-card text-foreground shadow-soft"
                   : "text-muted-foreground",
@@ -380,13 +382,15 @@ function BuatPage() {
         </div>
         {discount.type !== "none" && (
           <Input
-            inputMode="numeric"
+            inputMode="decimal"
+            enterKeyHint="done"
             placeholder={discount.type === "percent" ? "0–100" : "0"}
             value={discount.value || ""}
             onChange={(e) => {
               const v = parseIDRInput(e.target.value);
               setDiscount({ type: discount.type, value: discount.type === "percent" ? Math.min(100, v) : v });
             }}
+            onFocus={(e) => e.target.select()}
             className="h-11 rounded-xl border-border bg-card shadow-soft"
           />
         )}
@@ -400,6 +404,7 @@ function BuatPage() {
             rows={2}
             value={noteText}
             onChange={(e) => setNoteText(e.target.value.slice(0, 200))}
+            enterKeyHint="done"
             maxLength={200}
             placeholder="Mis. lunas cash, DP 50rb…"
             className="rounded-2xl border-border bg-card shadow-soft pr-14"
@@ -464,19 +469,20 @@ function ItemRow({
   item, onChange, onRemove,
 }: { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void }) {
   return (
-    <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-10 space-y-1.5">
+    <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-1.5">
       <input
         placeholder="Nama item"
         value={item.name}
         onChange={(e) => onChange({ name: e.target.value })}
         maxLength={80}
+        enterKeyHint="next"
         className="w-full bg-transparent text-[15px] font-medium placeholder:text-muted-foreground/70 focus:outline-none"
       />
       <div className="flex items-center gap-2 text-sm">
         <div className="inline-flex items-center rounded-full bg-surface">
           <button
             type="button"
-            onClick={() => onChange({ qty: Math.max(1, item.qty - 1) })}
+            onClick={() => { tapHaptic(); onChange({ qty: Math.max(1, item.qty - 1) }); }}
             className="tap w-11 h-11 sm:w-8 sm:h-8 grid place-items-center text-muted-foreground text-lg sm:text-base active:scale-95 select-none"
             aria-label="Kurangi"
           >
@@ -484,13 +490,15 @@ function ItemRow({
           </button>
           <input
             inputMode="numeric"
+            enterKeyHint="next"
             value={item.qty}
             onChange={(e) => onChange({ qty: Math.max(1, parseInt(e.target.value.replace(/\D/g, "") || "1", 10)) })}
+            onFocus={(e) => e.target.select()}
             className="w-10 sm:w-8 text-center bg-transparent focus:outline-none font-medium tabular-nums text-base sm:text-sm"
           />
           <button
             type="button"
-            onClick={() => onChange({ qty: item.qty + 1 })}
+            onClick={() => { tapHaptic(); onChange({ qty: item.qty + 1 }); }}
             className="tap w-11 h-11 sm:w-8 sm:h-8 grid place-items-center text-muted-foreground text-lg sm:text-base active:scale-95 select-none"
             aria-label="Tambah"
           >
@@ -501,10 +509,12 @@ function ItemRow({
         <div className="relative flex-1">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
           <input
-            inputMode="numeric"
+            inputMode="decimal"
+            enterKeyHint="next"
             placeholder="0"
             value={formatIDRInput(item.price)}
             onChange={(e) => onChange({ price: parseIDRInput(e.target.value) })}
+            onFocus={(e) => e.target.select()}
             className="w-full h-11 sm:h-9 pl-8 pr-2 bg-surface rounded-full text-right text-sm focus:outline-none"
           />
         </div>
@@ -512,8 +522,8 @@ function ItemRow({
       {onRemove && (
         <button
           type="button"
-          onClick={onRemove}
-          className="tap absolute top-2 right-2 text-muted-foreground hover:text-destructive p-1.5 rounded-full"
+          onClick={() => { tapHaptic(); onRemove(); }}
+          className="tap tap-target absolute top-1 right-1 inline-flex items-center justify-center text-muted-foreground hover:text-destructive rounded-full"
           aria-label="Hapus baris"
         >
           <Trash2 className="h-4 w-4" />
@@ -592,7 +602,7 @@ function ActionTile({
 }: { icon: React.ReactNode; label: string; onClick: () => void; loading?: boolean }) {
   return (
     <button
-      onClick={onClick}
+      onClick={() => { tapHaptic(); onClick(); }}
       disabled={loading}
       className="tap flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-card border border-border shadow-soft py-4 text-sm disabled:opacity-60"
     >
@@ -629,6 +639,7 @@ function CustomerSuggestInput({
         onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); }}
         maxLength={maxLength}
         inputMode={inputMode}
+        enterKeyHint="next"
         className="w-full bg-transparent px-4 h-11 text-[15px] placeholder:text-muted-foreground/70 focus:outline-none"
       />
       {show && (

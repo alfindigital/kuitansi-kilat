@@ -132,4 +132,12 @@
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* iOS safe-area utilities */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.pt-safe { padding-top: env(safe-area-inset-top); }
+
+/* 44px minimum tap target (Apple HIG) */
+.tap-target { min-height: 44px; min-width: 44px; }
+
+
 
