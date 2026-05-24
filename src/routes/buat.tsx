@@ -469,19 +469,20 @@ function ItemRow({
   item, onChange, onRemove,
 }: { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void }) {
   return (
-    <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-10 space-y-1.5">
+    <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-1.5">
       <input
         placeholder="Nama item"
         value={item.name}
         onChange={(e) => onChange({ name: e.target.value })}
         maxLength={80}
+        enterKeyHint="next"
         className="w-full bg-transparent text-[15px] font-medium placeholder:text-muted-foreground/70 focus:outline-none"
       />
       <div className="flex items-center gap-2 text-sm">
         <div className="inline-flex items-center rounded-full bg-surface">
           <button
             type="button"
-            onClick={() => onChange({ qty: Math.max(1, item.qty - 1) })}
+            onClick={() => { tapHaptic(); onChange({ qty: Math.max(1, item.qty - 1) }); }}
             className="tap w-11 h-11 sm:w-8 sm:h-8 grid place-items-center text-muted-foreground text-lg sm:text-base active:scale-95 select-none"
             aria-label="Kurangi"
           >
@@ -489,13 +490,15 @@ function ItemRow({
           </button>
           <input
             inputMode="numeric"
+            enterKeyHint="next"
             value={item.qty}
             onChange={(e) => onChange({ qty: Math.max(1, parseInt(e.target.value.replace(/\D/g, "") || "1", 10)) })}
+            onFocus={(e) => e.target.select()}
             className="w-10 sm:w-8 text-center bg-transparent focus:outline-none font-medium tabular-nums text-base sm:text-sm"
           />
           <button
             type="button"
-            onClick={() => onChange({ qty: item.qty + 1 })}
+            onClick={() => { tapHaptic(); onChange({ qty: item.qty + 1 }); }}
             className="tap w-11 h-11 sm:w-8 sm:h-8 grid place-items-center text-muted-foreground text-lg sm:text-base active:scale-95 select-none"
             aria-label="Tambah"
           >
@@ -506,10 +509,12 @@ function ItemRow({
         <div className="relative flex-1">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
           <input
-            inputMode="numeric"
+            inputMode="decimal"
+            enterKeyHint="next"
             placeholder="0"
             value={formatIDRInput(item.price)}
             onChange={(e) => onChange({ price: parseIDRInput(e.target.value) })}
+            onFocus={(e) => e.target.select()}
             className="w-full h-11 sm:h-9 pl-8 pr-2 bg-surface rounded-full text-right text-sm focus:outline-none"
           />
         </div>
@@ -517,8 +522,8 @@ function ItemRow({
       {onRemove && (
         <button
           type="button"
-          onClick={onRemove}
-          className="tap absolute top-2 right-2 text-muted-foreground hover:text-destructive p-1.5 rounded-full"
+          onClick={() => { tapHaptic(); onRemove(); }}
+          className="tap tap-target absolute top-1 right-1 inline-flex items-center justify-center text-muted-foreground hover:text-destructive rounded-full"
           aria-label="Hapus baris"
         >
           <Trash2 className="h-4 w-4" />
