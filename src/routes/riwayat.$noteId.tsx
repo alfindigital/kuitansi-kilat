@@ -168,7 +168,7 @@ function BackLink() {
   return (
     <Link
       to="/riwayat"
-      className="tap inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground rounded-full px-3 py-1.5"
+      className="tap tap-target inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground rounded-full px-3"
     >
       <ArrowLeft className="h-4 w-4" /> Riwayat
     </Link>
@@ -186,7 +186,7 @@ function ActionTile({
 }: { icon: React.ReactNode; label: string; onClick: () => void; loading?: boolean }) {
   return (
     <button
-      onClick={onClick}
+      onClick={() => { tapHaptic(); onClick(); }}
       disabled={loading}
       className="tap flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-card border border-border shadow-soft py-4 text-sm disabled:opacity-60"
     >
