@@ -404,6 +404,7 @@ function BuatPage() {
             rows={2}
             value={noteText}
             onChange={(e) => setNoteText(e.target.value.slice(0, 200))}
+            enterKeyHint="done"
             maxLength={200}
             placeholder="Mis. lunas cash, DP 50rb…"
             className="rounded-2xl border-border bg-card shadow-soft pr-14"
