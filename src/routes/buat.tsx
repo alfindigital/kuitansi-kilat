@@ -13,6 +13,7 @@ import {
 } from "@/lib/storage";
 import { formatIDR, formatIDRInput, parseIDRInput, toDateInput } from "@/lib/format";
 import { buildReceiptText, renderReceiptPNG, sharePNG, waLink } from "@/lib/receipt";
+import { tapHaptic } from "@/lib/haptic";
 import { Receipt as ReceiptCard } from "@/components/Receipt";
 
 import { Button } from "@/components/ui/button";
