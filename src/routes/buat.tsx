@@ -368,9 +368,9 @@ function BuatPage() {
               type="button"
               aria-label={t === "none" ? "Tanpa diskon" : t === "amount" ? "Diskon nominal rupiah" : "Diskon persen"}
               aria-pressed={discount.type === t}
-              onClick={() => setDiscount({ type: t, value: t === "none" ? 0 : discount.value })}
+              onClick={() => { tapHaptic(); setDiscount({ type: t, value: t === "none" ? 0 : discount.value }); }}
               className={cn(
-                "tap py-2 rounded-full font-medium",
+                "tap min-h-11 rounded-full font-medium",
                 discount.type === t
                   ? "bg-card text-foreground shadow-soft"
                   : "text-muted-foreground",
@@ -382,13 +382,15 @@ function BuatPage() {
         </div>
         {discount.type !== "none" && (
           <Input
-            inputMode="numeric"
+            inputMode="decimal"
+            enterKeyHint="done"
             placeholder={discount.type === "percent" ? "0–100" : "0"}
             value={discount.value || ""}
             onChange={(e) => {
               const v = parseIDRInput(e.target.value);
               setDiscount({ type: discount.type, value: discount.type === "percent" ? Math.min(100, v) : v });
             }}
+            onFocus={(e) => e.target.select()}
             className="h-11 rounded-xl border-border bg-card shadow-soft"
           />
         )}
