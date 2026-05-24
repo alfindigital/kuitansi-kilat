@@ -96,7 +96,7 @@ function BusinessSection() {
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Telepon</Label>
-              <Input value={form.phone} maxLength={20} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="08xx" className="h-10 rounded-xl mt-1" />
+              <Input value={form.phone} maxLength={20} inputMode="tel" enterKeyHint="done" onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="08xx" className="h-10 rounded-xl mt-1" />
             </div>
           </div>
         </div>
