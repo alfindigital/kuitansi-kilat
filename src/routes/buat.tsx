@@ -238,6 +238,7 @@ function BuatPage() {
       qc.invalidateQueries({ queryKey: ["notes"] });
       if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
       setDraftSavedAt(null);
+      tapHaptic(20);
       if (editingId) {
         toast.success("Perubahan disimpan");
         navigate({ to: "/riwayat/$noteId", params: { noteId: note.id } });
