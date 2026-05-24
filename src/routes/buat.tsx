@@ -639,6 +639,7 @@ function CustomerSuggestInput({
         onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); }}
         maxLength={maxLength}
         inputMode={inputMode}
+        enterKeyHint="next"
         className="w-full bg-transparent px-4 h-11 text-[15px] placeholder:text-muted-foreground/70 focus:outline-none"
       />
       {show && (
