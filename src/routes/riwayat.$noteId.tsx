@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { db } from "@/lib/storage";
 import { formatIDR, formatDateTime } from "@/lib/format";
 import { buildReceiptText, renderReceiptPNG, sharePNG, waLink } from "@/lib/receipt";
+import { tapHaptic } from "@/lib/haptic";
 import { Receipt as ReceiptCard } from "@/components/Receipt";
 
 export const Route = createFileRoute("/riwayat/$noteId")({
