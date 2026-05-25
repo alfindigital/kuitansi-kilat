@@ -139,5 +139,21 @@
 /* 44px minimum tap target (Apple HIG) */
 .tap-target { min-height: 44px; min-width: 44px; }
 
+/* ---- Semantic typography (KEEP CONSISTENT ACROSS APP) ---- */
+/* Page title — top of every screen */
+.t-h1 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; font-size: 1.5rem; line-height: 1.15; }
+/* Section / card title */
+.t-h2 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; font-size: 1.125rem; line-height: 1.2; }
+/* Numeric display (totals, big amounts) */
+.t-display { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; font-size: 1.5rem; line-height: 1.1; }
+/* Eyebrow / small caps label above a section */
+.t-eyebrow { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted-foreground); }
+/* Body / item title */
+.t-body { font-size: 15px; line-height: 1.45; }
+/* Caption / helper / meta */
+.t-caption { font-size: 12px; color: var(--muted-foreground); line-height: 1.4; }
+
+
+
 
 
