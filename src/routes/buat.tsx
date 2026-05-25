@@ -421,23 +421,16 @@ function BuatPage() {
         </div>
       </div>
 
-      {/* Floating CTA above bottom nav */}
-      <div
-        className="fixed inset-x-0 z-30 px-5 pointer-events-none"
-        style={{ bottom: "calc(env(safe-area-inset-bottom) + 84px)" }}
+      {/* Inline CTA */}
+      <Button
+        size="lg"
+        className="tap w-full h-12 rounded-full shadow-pop text-[15px] font-semibold"
+        disabled={saveMutation.isPending}
+        onClick={() => saveMutation.mutate()}
       >
-        <div className="mx-auto max-w-md sm:max-w-2xl pointer-events-auto">
-          <Button
-            size="lg"
-            className="tap w-full h-12 rounded-full shadow-pop text-[15px] font-semibold"
-            disabled={saveMutation.isPending}
-            onClick={() => saveMutation.mutate()}
-          >
-            <Check className="h-4 w-4" />
-            {editingId ? "Simpan perubahan" : `Simpan · ${formatIDR(total)}`}
-          </Button>
-        </div>
-      </div>
+        <Check className="h-4 w-4" />
+        {editingId ? "Simpan perubahan" : `Simpan · ${formatIDR(total)}`}
+      </Button>
 
       {savedNote && business && (
         <ShareSheet
