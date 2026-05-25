@@ -29,8 +29,8 @@ export function AppShell() {
         className="fixed bottom-0 inset-x-0 z-40 pointer-events-none"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 12px)" }}
       >
-        <div className="mx-auto max-w-xs px-4 pointer-events-auto">
-          <div className="grid grid-cols-3 gap-1 rounded-full bg-card/95 backdrop-blur-md border border-border shadow-nav p-1.5">
+        <div className="mx-auto max-w-sm px-4 pointer-events-auto">
+          <div className="grid grid-cols-3 gap-1.5 rounded-full bg-card/95 backdrop-blur-md border border-border shadow-nav p-2">
             {tabs.map((t) => {
               const active = pathname === t.to || pathname.startsWith(t.to + "/");
               const Icon = t.icon;
@@ -39,19 +39,20 @@ export function AppShell() {
                   key={t.to}
                   to={t.to}
                   className={cn(
-                    "tap flex items-center justify-center gap-1.5 py-2.5 rounded-full text-xs font-medium",
+                    "tap tap-target flex items-center justify-center gap-2 py-3.5 rounded-full text-sm font-medium",
                     active
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  <Icon className="h-4 w-4" strokeWidth={active ? 2.5 : 2} />
+                  <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
                   <span>{t.label}</span>
                 </Link>
               );
             })}
           </div>
         </div>
+
       </nav>
     </div>
   );
