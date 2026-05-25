@@ -262,21 +262,15 @@ function BuatPage() {
 
   return (
     <div className="space-y-6">
-      {/* Title row */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-display font-semibold tracking-tight">
-            {editingId ? "Edit nota" : "Nota baru"}
-          </h1>
-          {editingId && editingNumber ? (
-            <p className="text-[11px] text-muted-foreground mt-0.5">{editingNumber}</p>
-          ) : draftSavedAt ? (
-            <p className="text-[11px] text-muted-foreground mt-0.5">Draf tersimpan otomatis</p>
-          ) : null}
-        </div>
+      {/* Date chip (compact, no page title) */}
+      <div className="flex justify-end">
         <label className="relative tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-xs text-muted-foreground shadow-soft">
           <Calendar className="h-3.5 w-3.5" />
-          <span>{new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}</span>
+          <span>
+            {editingId && editingNumber
+              ? editingNumber
+              : new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
+          </span>
           <input
             type="date" value={date}
             onChange={(e) => setDate(e.target.value)}
@@ -285,6 +279,7 @@ function BuatPage() {
           />
         </label>
       </div>
+
 
       {/* Customer */}
       <section className="space-y-2">
