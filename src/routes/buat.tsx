@@ -261,29 +261,26 @@ function BuatPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Date chip (compact, no page title) */}
-      <div className="flex justify-end">
-        <label className="relative tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-xs text-muted-foreground shadow-soft">
-          <Calendar className="h-3.5 w-3.5" />
-          <span>
-            {editingId && editingNumber
-              ? editingNumber
-              : new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
-          </span>
-          <input
-            type="date" value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="absolute inset-0 opacity-0 cursor-pointer"
-            disabled={!!editingId}
-          />
-        </label>
-      </div>
-
-
+    <div className="space-y-3.5">
       {/* Customer */}
-      <section className="space-y-2">
-        <SectionLabel>Pelanggan</SectionLabel>
+      <section className="space-y-1.5">
+        <div className="flex items-center justify-between px-1">
+          <SectionLabel>Pelanggan</SectionLabel>
+          <label className="relative tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-2.5 py-1 text-[11px] text-muted-foreground shadow-soft">
+            <Calendar className="h-3 w-3" />
+            <span>
+              {editingId && editingNumber
+                ? editingNumber
+                : new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
+            </span>
+            <input
+              type="date" value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+              disabled={!!editingId}
+            />
+          </label>
+        </div>
         <div className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
           <CustomerSuggestInput
             placeholder="Nama"
