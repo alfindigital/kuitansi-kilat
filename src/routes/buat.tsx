@@ -261,29 +261,26 @@ function BuatPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Date chip (compact, no page title) */}
-      <div className="flex justify-end">
-        <label className="relative tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-xs text-muted-foreground shadow-soft">
-          <Calendar className="h-3.5 w-3.5" />
-          <span>
-            {editingId && editingNumber
-              ? editingNumber
-              : new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
-          </span>
-          <input
-            type="date" value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="absolute inset-0 opacity-0 cursor-pointer"
-            disabled={!!editingId}
-          />
-        </label>
-      </div>
-
-
+    <div className="space-y-3.5">
       {/* Customer */}
-      <section className="space-y-2">
-        <SectionLabel>Pelanggan</SectionLabel>
+      <section className="space-y-1.5">
+        <div className="flex items-center justify-between px-1">
+          <SectionLabel>Pelanggan</SectionLabel>
+          <label className="relative tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-2.5 py-1 text-[11px] text-muted-foreground shadow-soft">
+            <Calendar className="h-3 w-3" />
+            <span>
+              {editingId && editingNumber
+                ? editingNumber
+                : new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
+            </span>
+            <input
+              type="date" value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+              disabled={!!editingId}
+            />
+          </label>
+        </div>
         <div className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
           <CustomerSuggestInput
             placeholder="Nama"
@@ -306,7 +303,7 @@ function BuatPage() {
       </section>
 
       {/* Items */}
-      <section className="space-y-2">
+      <section className="space-y-1.5">
         <div className="flex items-center justify-between px-1">
           <SectionLabel>Item</SectionLabel>
           {presets.length > 0 && (
@@ -347,14 +344,14 @@ function BuatPage() {
         <button
           type="button"
           onClick={addRow}
-          className="tap w-full inline-flex items-center justify-center gap-2 py-3 text-sm text-muted-foreground hover:text-foreground rounded-2xl border border-dashed border-border"
+          className="tap w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm text-muted-foreground hover:text-foreground rounded-2xl border border-dashed border-border"
         >
           <Plus className="h-4 w-4" /> Tambah
         </button>
       </section>
 
       {/* Discount */}
-      <section className="space-y-2">
+      <section className="space-y-1.5">
         <SectionLabel>Diskon</SectionLabel>
         <div className="relative grid grid-cols-3 rounded-full bg-surface p-1 text-sm">
           {(["none", "amount", "percent"] as const).map((t) => (
@@ -365,7 +362,7 @@ function BuatPage() {
               aria-pressed={discount.type === t}
               onClick={() => { tapHaptic(); setDiscount({ type: t, value: t === "none" ? 0 : discount.value }); }}
               className={cn(
-                "tap min-h-11 rounded-full font-medium",
+                "tap min-h-10 rounded-full font-medium",
                 discount.type === t
                   ? "bg-card text-foreground shadow-soft"
                   : "text-muted-foreground",
@@ -386,13 +383,13 @@ function BuatPage() {
               setDiscount({ type: discount.type, value: discount.type === "percent" ? Math.min(100, v) : v });
             }}
             onFocus={(e) => e.target.select()}
-            className="h-11 rounded-xl border-border bg-card shadow-soft"
+            className="h-10 rounded-xl border-border bg-card shadow-soft"
           />
         )}
       </section>
 
       {/* Catatan */}
-      <section className="space-y-2">
+      <section className="space-y-1.5">
         <SectionLabel>Catatan</SectionLabel>
         <div className="relative">
           <Textarea
@@ -411,7 +408,7 @@ function BuatPage() {
       </section>
 
       {/* Summary */}
-      <div className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
+      <div className="rounded-2xl bg-card border border-border shadow-soft p-3 space-y-1.5 text-sm">
         <Row label="Subtotal" value={formatIDR(subtotal)} muted />
         {subtotal !== total && <Row label="Diskon" value={"− " + formatIDR(subtotal - total)} muted />}
         <div className="h-px bg-border my-1" />
