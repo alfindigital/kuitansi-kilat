@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plus, Trash2, X, Check, MessageCircle,
-  Image as ImageIcon, Copy, ChevronDown, Calendar,
+  Image as ImageIcon, Copy, ChevronDown, Calendar, BookmarkPlus,
 } from "lucide-react";
 import { toast } from "sonner";
 
