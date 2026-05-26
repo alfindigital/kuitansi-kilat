@@ -191,6 +191,25 @@ function BuatPage() {
     });
   }
 
+  const savePresetMutation = useMutation({
+    mutationFn: async (it: NoteItem) => {
+      const cur = await db.getPresets();
+      const exists = cur.some(
+        (p) => p.name.trim().toLowerCase() === it.name.trim().toLowerCase() && p.price === it.price,
+      );
+      if (exists) return { skipped: true as const, name: it.name };
+      await db.setPresets([...cur, { id: uid(), name: it.name.trim(), price: it.price }]);
+      return { skipped: false as const, name: it.name };
+    },
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["presets"] });
+      tapHaptic(15);
+      if (r.skipped) toast.info(`"${r.name}" sudah ada di preset`);
+      else toast.success(`"${r.name}" disimpan ke preset`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const saveMutation = useMutation({
     mutationFn: async (): Promise<Note> => {
       const cleaned = items.map((it) => ({ ...it, name: it.name.trim() })).filter((it) => it.name);
