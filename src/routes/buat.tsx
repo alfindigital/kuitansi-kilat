@@ -454,14 +454,14 @@ function ItemRow({
   item, onChange, onRemove,
 }: { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void }) {
   return (
-    <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-1.5">
+    <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-2">
       <input
         placeholder="Nama item"
         value={item.name}
         onChange={(e) => onChange({ name: e.target.value })}
         maxLength={80}
         enterKeyHint="next"
-        className="w-full bg-transparent text-[15px] font-medium placeholder:text-muted-foreground/70 focus:outline-none"
+        className="w-full h-11 sm:h-9 px-3 bg-surface rounded-full text-[15px] font-medium placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-ring/30"
       />
       <div className="flex items-center gap-2 text-sm">
         <div className="inline-flex items-center rounded-full bg-surface">
