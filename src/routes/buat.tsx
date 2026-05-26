@@ -344,14 +344,14 @@ function BuatPage() {
         <button
           type="button"
           onClick={addRow}
-          className="tap w-full inline-flex items-center justify-center gap-2 py-3 text-sm text-muted-foreground hover:text-foreground rounded-2xl border border-dashed border-border"
+          className="tap w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm text-muted-foreground hover:text-foreground rounded-2xl border border-dashed border-border"
         >
           <Plus className="h-4 w-4" /> Tambah
         </button>
       </section>
 
       {/* Discount */}
-      <section className="space-y-2">
+      <section className="space-y-1.5">
         <SectionLabel>Diskon</SectionLabel>
         <div className="relative grid grid-cols-3 rounded-full bg-surface p-1 text-sm">
           {(["none", "amount", "percent"] as const).map((t) => (
@@ -362,7 +362,7 @@ function BuatPage() {
               aria-pressed={discount.type === t}
               onClick={() => { tapHaptic(); setDiscount({ type: t, value: t === "none" ? 0 : discount.value }); }}
               className={cn(
-                "tap min-h-11 rounded-full font-medium",
+                "tap min-h-10 rounded-full font-medium",
                 discount.type === t
                   ? "bg-card text-foreground shadow-soft"
                   : "text-muted-foreground",
@@ -383,13 +383,13 @@ function BuatPage() {
               setDiscount({ type: discount.type, value: discount.type === "percent" ? Math.min(100, v) : v });
             }}
             onFocus={(e) => e.target.select()}
-            className="h-11 rounded-xl border-border bg-card shadow-soft"
+            className="h-10 rounded-xl border-border bg-card shadow-soft"
           />
         )}
       </section>
 
       {/* Catatan */}
-      <section className="space-y-2">
+      <section className="space-y-1.5">
         <SectionLabel>Catatan</SectionLabel>
         <div className="relative">
           <Textarea
