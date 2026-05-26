@@ -303,7 +303,7 @@ function BuatPage() {
       </section>
 
       {/* Items */}
-      <section className="space-y-2">
+      <section className="space-y-1.5">
         <div className="flex items-center justify-between px-1">
           <SectionLabel>Item</SectionLabel>
           {presets.length > 0 && (
