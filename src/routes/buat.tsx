@@ -408,7 +408,7 @@ function BuatPage() {
       </section>
 
       {/* Summary */}
-      <div className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
+      <div className="rounded-2xl bg-card border border-border shadow-soft p-3 space-y-1.5 text-sm">
         <Row label="Subtotal" value={formatIDR(subtotal)} muted />
         {subtotal !== total && <Row label="Diskon" value={"− " + formatIDR(subtotal - total)} muted />}
         <div className="h-px bg-border my-1" />
