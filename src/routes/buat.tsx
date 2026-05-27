@@ -285,19 +285,11 @@ function BuatPage() {
       <section className="space-y-1.5">
         <div className="flex items-center justify-between px-1">
           <SectionLabel>Pelanggan</SectionLabel>
-          <label className="relative tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-2.5 py-1 text-[11px] text-muted-foreground shadow-soft">
-            <Calendar className="h-3 w-3" />
-            <span>
-              {editingId && editingNumber
-                ? editingNumber
-                : new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
-            </span>
-            <input
-              type="date" value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          </label>
+          <DateChip
+            date={date}
+            onChange={setDate}
+            label={editingId && editingNumber ? editingNumber : undefined}
+          />
         </div>
         <div className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
           <CustomerSuggestInput
