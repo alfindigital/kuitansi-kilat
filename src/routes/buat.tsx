@@ -514,7 +514,7 @@ function BuatPage() {
         onClick={() => saveMutation.mutate()}
       >
         <Check className="h-4 w-4" />
-        {editingId ? "Simpan perubahan" : `Simpan · ${formatIDR(total)}`}
+        {editingId ? "Simpan perubahan" : "Simpan"}
       </Button>
 
       {savedNote && business && (
