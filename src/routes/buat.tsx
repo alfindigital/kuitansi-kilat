@@ -296,7 +296,6 @@ function BuatPage() {
               type="date" value={date}
               onChange={(e) => setDate(e.target.value)}
               className="absolute inset-0 opacity-0 cursor-pointer"
-              disabled={!!editingId}
             />
           </label>
         </div>
@@ -463,7 +462,7 @@ function BuatPage() {
             onChange={(e) => setNoteText(e.target.value.slice(0, 200))}
             enterKeyHint="done"
             maxLength={200}
-            placeholder="Mis. lunas cash, DP 50rb…"
+            placeholder=""
             className="rounded-2xl border-border bg-card shadow-soft pr-14"
           />
           <span className="absolute bottom-2 right-3 text-[10px] text-muted-foreground tabular-nums">

@@ -86,7 +86,7 @@ function RiwayatList() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-display font-semibold tracking-tight">Riwayat</h1>
+      <h1 className="sr-only">Riwayat</h1>
 
       <section aria-labelledby="riwayat-rekap" className="space-y-2">
         <h2 id="riwayat-rekap" className="sr-only">Rekap omset</h2>
