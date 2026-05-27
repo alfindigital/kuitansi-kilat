@@ -296,7 +296,6 @@ function BuatPage() {
               type="date" value={date}
               onChange={(e) => setDate(e.target.value)}
               className="absolute inset-0 opacity-0 cursor-pointer"
-              disabled={!!editingId}
             />
           </label>
         </div>
