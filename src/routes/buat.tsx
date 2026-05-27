@@ -51,6 +51,38 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+function DateChip({ date, onChange, label }: { date: string; onChange: (v: string) => void; label?: string }) {
+  const ref = useRef<HTMLInputElement>(null);
+  const text = label ?? new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+  function open() {
+    const el = ref.current;
+    if (!el) return;
+    type WithPicker = HTMLInputElement & { showPicker?: () => void };
+    const p = (el as WithPicker).showPicker;
+    if (typeof p === "function") p.call(el);
+    else el.click();
+  }
+  return (
+    <button
+      type="button"
+      onClick={open}
+      className="tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-[12px] text-foreground shadow-soft hover:bg-accent"
+    >
+      <Calendar className="h-3.5 w-3.5" />
+      <span>{text}</span>
+      <input
+        ref={ref}
+        type="date"
+        value={date}
+        onChange={(e) => onChange(e.target.value)}
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+      />
+    </button>
+  );
+}
+
 const DRAFT_KEY = "notaku:buat-draft:v1";
 
 type Draft = {
