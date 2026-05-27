@@ -27,7 +27,7 @@ export const Route = createFileRoute("/pengaturan")({
 function PengaturanPage() {
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-display font-semibold tracking-tight">Pengaturan</h1>
+      <h1 className="sr-only">Pengaturan</h1>
       <BusinessSection />
       <PresetSection />
       <CustomerSection />
