@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Save, Plus, Trash2, Download, MessageCircle } from "lucide-react";
+import { Upload, Save, Plus, Trash2, Download, MessageCircle, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 import { db, defaultBusiness, deriveCustomers, uid, type Business, type Preset } from "@/lib/storage";
