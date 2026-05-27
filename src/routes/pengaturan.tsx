@@ -252,7 +252,7 @@ function BackupSection() {
   return (
     <Section title="Cadangan">
       <Card className="p-3 space-y-2">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <Button variant="outline" onClick={doExport} className="tap rounded-xl"><Download className="h-4 w-4" /> Export</Button>
           <Button
             variant="outline"
@@ -265,6 +265,16 @@ function BackupSection() {
           >
             <Upload className="h-4 w-4" /> Import
           </Button>
+          <Button
+            variant="outline"
+            className="tap rounded-xl text-destructive hover:text-destructive"
+            onClick={async () => {
+              if (!confirm("Hapus SEMUA data Notaku? Tidak bisa dibatalkan.")) return;
+              await db.wipe(); qc.invalidateQueries(); toast.success("Data direset.");
+            }}
+          >
+            <RotateCcw className="h-4 w-4" /> Reset
+          </Button>
         </div>
         <input
           ref={fileRef} type="file" accept="application/json" className="hidden"
@@ -275,15 +285,6 @@ function BackupSection() {
             e.target.value = "";
           }}
         />
-        <button
-          onClick={async () => {
-            if (!confirm("Hapus SEMUA data Notaku? Tidak bisa dibatalkan.")) return;
-            await db.wipe(); qc.invalidateQueries(); toast.success("Data direset.");
-          }}
-          className="text-xs text-muted-foreground hover:text-destructive pt-1"
-        >
-          Reset semua data
-        </button>
       </Card>
     </Section>
   );
