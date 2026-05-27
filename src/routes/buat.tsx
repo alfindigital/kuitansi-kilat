@@ -51,6 +51,38 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+function DateChip({ date, onChange, label }: { date: string; onChange: (v: string) => void; label?: string }) {
+  const ref = useRef<HTMLInputElement>(null);
+  const text = label ?? new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+  function open() {
+    const el = ref.current;
+    if (!el) return;
+    type WithPicker = HTMLInputElement & { showPicker?: () => void };
+    const p = (el as WithPicker).showPicker;
+    if (typeof p === "function") p.call(el);
+    else el.click();
+  }
+  return (
+    <button
+      type="button"
+      onClick={open}
+      className="tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-[12px] text-foreground shadow-soft hover:bg-accent"
+    >
+      <Calendar className="h-3.5 w-3.5" />
+      <span>{text}</span>
+      <input
+        ref={ref}
+        type="date"
+        value={date}
+        onChange={(e) => onChange(e.target.value)}
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+      />
+    </button>
+  );
+}
+
 const DRAFT_KEY = "notaku:buat-draft:v1";
 
 type Draft = {
@@ -285,19 +317,11 @@ function BuatPage() {
       <section className="space-y-1.5">
         <div className="flex items-center justify-between px-1">
           <SectionLabel>Pelanggan</SectionLabel>
-          <label className="relative tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-2.5 py-1 text-[11px] text-muted-foreground shadow-soft">
-            <Calendar className="h-3 w-3" />
-            <span>
-              {editingId && editingNumber
-                ? editingNumber
-                : new Date(date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
-            </span>
-            <input
-              type="date" value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          </label>
+          <DateChip
+            date={date}
+            onChange={setDate}
+            label={editingId && editingNumber ? editingNumber : undefined}
+          />
         </div>
         <div className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
           <CustomerSuggestInput
@@ -490,7 +514,7 @@ function BuatPage() {
         onClick={() => saveMutation.mutate()}
       >
         <Check className="h-4 w-4" />
-        {editingId ? "Simpan perubahan" : `Simpan · ${formatIDR(total)}`}
+        {editingId ? "Simpan perubahan" : "Simpan"}
       </Button>
 
       {savedNote && business && (
