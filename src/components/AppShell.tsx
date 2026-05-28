@@ -1,31 +1,29 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { FilePlus2, History, Settings, Receipt } from "lucide-react";
+import { Home, History, Users, Plus, Receipt } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 const tabs = [
-  { to: "/buat", label: "Buat", icon: FilePlus2 },
+  { to: "/", label: "Beranda", icon: Home, exact: true },
   { to: "/riwayat", label: "Riwayat", icon: History },
-  { to: "/pengaturan", label: "Atur", icon: Settings },
+  { to: "/pelanggan", label: "Pelanggan", icon: Users },
 ] as const;
 
 export function AppShell() {
   const { pathname } = useLocation();
   return (
-    <div className="min-h-dvh flex flex-col bg-background text-foreground transition-colors duration-300">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/75 border-b border-border/60 transition-colors duration-300">
+    <div className="min-h-dvh flex flex-col bg-background text-foreground">
+      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/80 border-b border-border/60">
         <div className="mx-auto max-w-md sm:max-w-2xl px-4 sm:px-6 h-14 flex items-center gap-2">
-          <div className="h-8 w-8 rounded-xl bg-primary text-primary-foreground grid place-items-center shadow-soft">
-            <Receipt className="h-4 w-4" />
-          </div>
-          <span className="font-display font-semibold tracking-tight text-[15px]">Notaku</span>
-          <div className="ml-auto">
-            <ThemeToggle />
-          </div>
+          <Link to="/" className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-xl bg-primary text-primary-foreground grid place-items-center shadow-soft">
+              <Receipt className="h-4 w-4" />
+            </div>
+            <span className="font-display font-semibold tracking-tight text-[15px]">Notaku</span>
+          </Link>
         </div>
       </header>
 
-      <main className="flex-1 mx-auto w-full max-w-md sm:max-w-2xl px-4 sm:px-6 pt-3 pb-28">
+      <main className="flex-1 mx-auto w-full max-w-md sm:max-w-2xl px-4 sm:px-6 pt-3 pb-32">
         <Outlet />
       </main>
 
@@ -33,30 +31,44 @@ export function AppShell() {
         className="fixed bottom-0 inset-x-0 z-40 pointer-events-none"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}
       >
-        <div className="mx-auto w-full max-w-md sm:max-w-sm px-3 sm:px-4 pointer-events-auto">
-          <div className="grid grid-cols-3 gap-1.5 rounded-full bg-card/95 backdrop-blur-md border border-border shadow-nav p-2">
-            {tabs.map((t) => {
-              const active = pathname === t.to || pathname.startsWith(t.to + "/");
-              const Icon = t.icon;
-              return (
-                <Link
-                  key={t.to}
-                  to={t.to}
-                  className={cn(
-                    "tap tap-target flex items-center justify-center gap-2 py-3.5 rounded-full text-sm font-medium",
-                    active
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
-                  <span>{t.label}</span>
-                </Link>
-              );
-            })}
+        <div className="mx-auto w-full max-w-md px-3 pointer-events-auto">
+          <div className="relative grid grid-cols-3 gap-1 rounded-full bg-card/95 backdrop-blur-md border border-border shadow-nav p-2">
+            <TabButton tab={tabs[0]} pathname={pathname} />
+            <Link
+              to="/buat"
+              aria-label="Buat nota"
+              className={cn(
+                "tap absolute left-1/2 -translate-x-1/2 -top-6",
+                "h-14 w-14 rounded-full bg-primary text-primary-foreground grid place-items-center shadow-pop",
+              )}
+            >
+              <Plus className="h-7 w-7" strokeWidth={2.5} />
+            </Link>
+            <span aria-hidden />
+            <TabButton tab={tabs[1]} pathname={pathname} />
+            <TabButton tab={tabs[2]} pathname={pathname} />
           </div>
         </div>
       </nav>
     </div>
+  );
+}
+
+function TabButton({ tab, pathname }: { tab: typeof tabs[number]; pathname: string }) {
+  const active = "exact" in tab && tab.exact
+    ? pathname === tab.to
+    : pathname === tab.to || pathname.startsWith(tab.to + "/");
+  const Icon = tab.icon;
+  return (
+    <Link
+      to={tab.to}
+      className={cn(
+        "tap flex flex-col items-center justify-center gap-0.5 py-2.5 rounded-2xl text-[11px] font-medium",
+        active ? "text-primary" : "text-muted-foreground",
+      )}
+    >
+      <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
+      <span>{tab.label}</span>
+    </Link>
   );
 }
