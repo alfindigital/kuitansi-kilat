@@ -5,7 +5,7 @@ import { ArrowLeft, Trash2, MessageCircle, Image as ImageIcon, Copy, Pencil, Cop
 import { toast } from "sonner";
 
 
-import { db } from "@/lib/storage";
+import { db, calcNoteTotals } from "@/lib/storage";
 import { formatIDR, formatDateTime } from "@/lib/format";
 import { buildReceiptText, renderReceiptPNG, sharePNG, waLink } from "@/lib/receipt";
 import { tapHaptic } from "@/lib/haptic";
