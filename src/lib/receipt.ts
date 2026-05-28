@@ -1,5 +1,5 @@
-// html-to-image touches `window` at module init — import lazily on the client only.
 import type { Business, Note } from "./storage";
+import { calcNoteTotals } from "./storage";
 import { formatIDR, formatDateTime } from "./format";
 
 export function buildReceiptText(note: Note, business: Business): string {
@@ -12,6 +12,7 @@ export function buildReceiptText(note: Note, business: Business): string {
   lines.push(`Tgl : ${formatDateTime(note.date)}`);
   if (note.customerName) lines.push(`Utk : ${note.customerName}`);
   lines.push("--------------------------------");
+  const totals = calcNoteTotals(note);
   for (const it of note.items) {
     lines.push(it.name);
     const left = `  ${it.qty} x ${formatIDR(it.price)}`;
@@ -19,15 +20,14 @@ export function buildReceiptText(note: Note, business: Business): string {
     lines.push(padBetween(left, right, 32));
   }
   lines.push("--------------------------------");
-  lines.push(padBetween("Subtotal", formatIDR(note.subtotal), 32));
-  if (note.discountType !== "none" && note.discountValue > 0) {
-    const label = note.discountType === "percent" ? `Diskon ${note.discountValue}%` : "Diskon";
-    lines.push(padBetween(label, "- " + formatIDR(note.subtotal - note.total), 32));
+  lines.push(padBetween("Subtotal", formatIDR(totals.subtotal), 32));
+  if (note.discount > 0) {
+    lines.push(padBetween("Diskon", "- " + formatIDR(note.discount), 32));
   }
-  lines.push(padBetween("*TOTAL*", `*${formatIDR(note.total)}*`, 32));
+  lines.push(padBetween("*TOTAL*", `*${formatIDR(totals.total)}*`, 32));
   lines.push("--------------------------------");
-  if (note.notes) lines.push(`Catatan: ${note.notes}`);
-  if (business.footer) lines.push(business.footer);
+  if (note.note) lines.push(`Catatan: ${note.note}`);
+  if (business.receiptFooter) lines.push(business.receiptFooter);
   return lines.join("\n");
 }
 
@@ -38,11 +38,7 @@ function padBetween(left: string, right: string, width: number): string {
 
 export async function renderReceiptPNG(node: HTMLElement): Promise<string> {
   const { toPng } = await import("html-to-image");
-  return await toPng(node, {
-    pixelRatio: 2,
-    cacheBust: true,
-    backgroundColor: "#ffffff",
-  });
+  return await toPng(node, { pixelRatio: 2, cacheBust: true, backgroundColor: "#ffffff" });
 }
 
 export function waLink(phone: string | undefined, text: string): string {
