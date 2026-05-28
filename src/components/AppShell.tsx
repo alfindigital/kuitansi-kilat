@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 
 const tabs = [
   { to: "/", label: "Beranda", icon: Home, exact: true },
+  { to: "/buat", label: "Buat", icon: Plus },
   { to: "/riwayat", label: "Riwayat", icon: History },
   { to: "/pelanggan", label: "Pelanggan", icon: Users },
 ] as const;
@@ -32,21 +33,10 @@ export function AppShell() {
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}
       >
         <div className="mx-auto w-full max-w-md px-3 pointer-events-auto">
-          <div className="relative grid grid-cols-3 gap-1 rounded-full bg-card/95 backdrop-blur-md border border-border shadow-nav p-2">
-            <TabButton tab={tabs[0]} pathname={pathname} />
-            <Link
-              to="/buat"
-              aria-label="Buat nota"
-              className={cn(
-                "tap absolute left-1/2 -translate-x-1/2 -top-6",
-                "h-14 w-14 rounded-full bg-primary text-primary-foreground grid place-items-center shadow-pop",
-              )}
-            >
-              <Plus className="h-7 w-7" strokeWidth={2.5} />
-            </Link>
-            <span aria-hidden />
-            <TabButton tab={tabs[1]} pathname={pathname} />
-            <TabButton tab={tabs[2]} pathname={pathname} />
+          <div className="grid grid-cols-4 gap-1 rounded-full bg-card/95 backdrop-blur-md border border-border shadow-nav p-2">
+            {tabs.map((tab) => (
+              <TabButton key={tab.to} tab={tab} pathname={pathname} />
+            ))}
           </div>
         </div>
       </nav>

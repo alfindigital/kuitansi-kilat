@@ -112,12 +112,12 @@ function BusinessSection() {
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">Footer struk</Label>
-            <Input value={form.footer} maxLength={120} onChange={(e) => setForm({ ...form, footer: e.target.value })} className="h-10 rounded-xl mt-1" />
+            <Input value={form.receiptFooter} maxLength={120} onChange={(e) => setForm({ ...form, receiptFooter: e.target.value })} className="h-10 rounded-xl mt-1" />
           </div>
         </div>
         <div className="flex items-center justify-between pt-1">
           {form.logo ? (
-            <button className="text-xs text-muted-foreground hover:text-destructive" onClick={() => setForm({ ...form, logo: undefined })}>
+            <button className="text-xs text-muted-foreground hover:text-destructive" onClick={() => setForm({ ...form, logo: "" })}>
               Hapus logo
             </button>
           ) : <span />}
@@ -145,7 +145,7 @@ function PresetSection() {
   function add() {
     const nm = name.trim();
     if (!nm) return;
-    save.mutate([...presets, { id: uid(), name: nm, price }]);
+    save.mutate([...presets, { id: uid(), name: nm, price, cost: 0, unit: "" }]);
     setName(""); setPrice(0);
   }
   function remove(id: string) { save.mutate(presets.filter((p) => p.id !== id)); }
