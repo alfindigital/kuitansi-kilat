@@ -1,11 +1,12 @@
 import { forwardRef } from "react";
 import type { Business, Note } from "@/lib/storage";
+import { calcNoteTotals } from "@/lib/storage";
 import { formatIDR, formatDateTime } from "@/lib/format";
 
 interface Props { note: Note; business: Business }
 
 export const Receipt = forwardRef<HTMLDivElement, Props>(function Receipt({ note, business }, ref) {
-  const discount = note.subtotal - note.total;
+  const totals = calcNoteTotals(note);
   return (
     <div
       ref={ref}
@@ -41,20 +42,15 @@ export const Receipt = forwardRef<HTMLDivElement, Props>(function Receipt({ note
         </div>
       ))}
       <Divider />
-      <Row left="Subtotal" right={formatIDR(note.subtotal)} />
-      {discount > 0 ? (
-        <Row
-          left={note.discountType === "percent" ? `Diskon ${note.discountValue}%` : "Diskon"}
-          right={"- " + formatIDR(discount)}
-        />
-      ) : null}
-      <Row left={<strong>TOTAL</strong>} right={<strong>{formatIDR(note.total)}</strong>} bold />
+      <Row left="Subtotal" right={formatIDR(totals.subtotal)} />
+      {note.discount > 0 ? <Row left="Diskon" right={"- " + formatIDR(note.discount)} /> : null}
+      <Row left={<strong>TOTAL</strong>} right={<strong>{formatIDR(totals.total)}</strong>} bold />
       <Divider />
-      {note.notes ? (
-        <div style={{ marginTop: 4, fontStyle: "italic" }}>Catatan: {note.notes}</div>
+      {note.note ? (
+        <div style={{ marginTop: 4, fontStyle: "italic" }}>Catatan: {note.note}</div>
       ) : null}
-      {business.footer ? (
-        <div style={{ textAlign: "center", marginTop: 6 }}>{business.footer}</div>
+      {business.receiptFooter ? (
+        <div style={{ textAlign: "center", marginTop: 6 }}>{business.receiptFooter}</div>
       ) : null}
     </div>
   );
