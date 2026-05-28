@@ -3,11 +3,14 @@ import { z } from "zod";
 
 const store = typeof indexedDB !== "undefined" ? createStore("notaku-db", "kv") : undefined;
 
+export const SCHEMA_VERSION = 1;
+
 const KEYS = {
   business: "business",
   presets: "presets",
   notes: "notes",
   seq: "seq",
+  prefs: "prefs",
 } as const;
 
 // ===== Schemas =====
@@ -16,51 +19,142 @@ export const BusinessSchema = z.object({
   phone: z.string().trim().max(20).default(""),
   address: z.string().trim().max(200).default(""),
   prefix: z.string().trim().min(1).max(10).default("NT"),
-  logo: z.string().max(500_000).optional(), // data URL
-  footer: z.string().trim().max(120).default("Terima kasih"),
+  logo: z.string().max(500_000).default(""),
+  receiptFooter: z.string().trim().max(120).default("Terima kasih sudah belanja"),
+  lastWaNumber: z.string().trim().max(20).default(""),
 });
 export type Business = z.infer<typeof BusinessSchema>;
 
 export const PresetSchema = z.object({
   id: z.string(),
-  name: z.string().trim().min(1).max(80),
+  name: z.string().trim().min(1).max(60),
   price: z.number().int().min(0).max(1_000_000_000),
+  cost: z.number().int().min(0).max(1_000_000_000).default(0),
+  unit: z.string().trim().max(12).default(""),
 });
 export type Preset = z.infer<typeof PresetSchema>;
 
 export const NoteItemSchema = z.object({
-  name: z.string().trim().min(1).max(80),
-  qty: z.number().int().min(1).max(9999),
+  name: z.string().trim().min(1).max(60),
+  qty: z.number().min(0.001).max(99_999),
   price: z.number().int().min(0).max(1_000_000_000),
+  cost: z.number().int().min(0).max(1_000_000_000).default(0),
 });
 export type NoteItem = z.infer<typeof NoteItemSchema>;
 
 export const NoteSchema = z.object({
   id: z.string(),
   number: z.string(),
-  date: z.string(), // ISO
-  customerName: z.string().trim().max(80).optional(),
-  customerPhone: z.string().trim().max(20).optional(),
+  date: z.string(),
+  customerName: z.string().trim().max(60).default(""),
+  customerPhone: z.string().trim().max(20).default(""),
   items: z.array(NoteItemSchema).min(1).max(100),
-  discountType: z.enum(["none", "amount", "percent"]).default("none"),
-  discountValue: z.number().min(0).max(1_000_000_000).default(0),
-  subtotal: z.number().int().min(0),
-  total: z.number().int().min(0),
-  notes: z.string().trim().max(200).optional(),
+  discount: z.number().int().min(0).max(1_000_000_000).default(0),
+  tags: z.array(z.string().trim().min(1).max(20)).default([]),
+  note: z.string().trim().max(200).default(""),
+  createdAt: z.string().default(() => new Date().toISOString()),
+  updatedAt: z.string().default(() => new Date().toISOString()),
 });
 export type Note = z.infer<typeof NoteSchema>;
 
-// ===== Defaults =====
-export const defaultBusiness: Business = {
-  name: "",
-  phone: "",
-  address: "",
-  prefix: "NT",
-  logo: undefined,
-  footer: "Terima kasih",
-};
+export const PrefsSchema = z.object({
+  hideAmounts: z.boolean().default(false),
+});
+export type Prefs = z.infer<typeof PrefsSchema>;
 
-// ===== Generic getter/setter =====
+export const BackupSchema = z.object({
+  app: z.literal("notaku"),
+  version: z.number(),
+  exportedAt: z.string(),
+  data: z.object({
+    business: BusinessSchema,
+    presets: z.array(PresetSchema),
+    notes: z.array(NoteSchema),
+    seq: z.number(),
+    prefs: PrefsSchema,
+  }),
+});
+export type Backup = z.infer<typeof BackupSchema>;
+
+// ===== Defaults =====
+export const defaultBusiness: Business = BusinessSchema.parse({});
+export const defaultPrefs: Prefs = PrefsSchema.parse({});
+
+// ===== Migration helpers =====
+// Old shape had: business.footer, note.discountType/discountValue, note.notes,
+// no cost/tags/unit. Map to new shape on load.
+type Loose = Record<string, unknown>;
+
+function migrateBusiness(raw: unknown): Business {
+  if (!raw || typeof raw !== "object") return defaultBusiness;
+  const r = raw as Loose;
+  const receiptFooter = (r.receiptFooter as string | undefined) ?? (r.footer as string | undefined) ?? "Terima kasih sudah belanja";
+  return BusinessSchema.parse({ ...defaultBusiness, ...r, receiptFooter });
+}
+
+function migrateNote(raw: unknown): Note | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Loose;
+  // discount: legacy discountType+discountValue → integer
+  let discount = 0;
+  if (typeof r.discount === "number") {
+    discount = Math.max(0, Math.round(r.discount));
+  } else if (r.discountType && typeof r.discountValue === "number") {
+    const dt = String(r.discountType);
+    const dv = r.discountValue;
+    const subtotal = Array.isArray(r.items)
+      ? (r.items as Loose[]).reduce((s, it) => s + Number(it.qty || 0) * Number(it.price || 0), 0)
+      : 0;
+    if (dt === "amount") discount = Math.min(dv, subtotal);
+    else if (dt === "percent") discount = Math.round((subtotal * Math.min(dv, 100)) / 100);
+  }
+  const items = Array.isArray(r.items)
+    ? (r.items as Loose[]).map((it) => ({
+        name: String(it.name ?? "").trim(),
+        qty: Number(it.qty ?? 1),
+        price: Math.round(Number(it.price ?? 0)),
+        cost: Math.round(Number(it.cost ?? 0)),
+      })).filter((it) => it.name && it.qty > 0)
+    : [];
+  if (!items.length) return null;
+  const now = new Date().toISOString();
+  const note = {
+    id: String(r.id ?? uid()),
+    number: String(r.number ?? ""),
+    date: String(r.date ?? now),
+    customerName: String(r.customerName ?? "").trim(),
+    customerPhone: String(r.customerPhone ?? "").trim(),
+    items,
+    discount,
+    tags: Array.isArray(r.tags) ? (r.tags as unknown[]).map(String).map((s) => s.trim()).filter(Boolean) : [],
+    note: String(r.note ?? r.notes ?? "").trim(),
+    createdAt: String(r.createdAt ?? r.date ?? now),
+    updatedAt: String(r.updatedAt ?? r.date ?? now),
+  };
+  try {
+    return NoteSchema.parse(note);
+  } catch {
+    return null;
+  }
+}
+
+function migratePreset(raw: unknown): Preset | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Loose;
+  try {
+    return PresetSchema.parse({
+      id: String(r.id ?? uid()),
+      name: String(r.name ?? "").trim(),
+      price: Math.round(Number(r.price ?? 0)),
+      cost: Math.round(Number(r.cost ?? 0)),
+      unit: String(r.unit ?? "").trim(),
+    });
+  } catch {
+    return null;
+  }
+}
+
+// ===== Generic kv =====
 async function kvGet<T>(k: string, fallback: T): Promise<T> {
   if (!store) return fallback;
   try {
@@ -78,22 +172,21 @@ async function kvSet<T>(k: string, v: T): Promise<void> {
 // ===== API =====
 export const db = {
   async getBusiness(): Promise<Business> {
-    const raw = await kvGet<unknown>(KEYS.business, defaultBusiness);
-    return BusinessSchema.parse({ ...defaultBusiness, ...(raw as object) });
+    return migrateBusiness(await kvGet<unknown>(KEYS.business, defaultBusiness));
   },
   async setBusiness(b: Business) {
     await kvSet(KEYS.business, BusinessSchema.parse(b));
   },
   async getPresets(): Promise<Preset[]> {
     const raw = await kvGet<unknown[]>(KEYS.presets, []);
-    return z.array(PresetSchema).parse(raw ?? []);
+    return (raw ?? []).map(migratePreset).filter((x): x is Preset => !!x);
   },
   async setPresets(p: Preset[]) {
     await kvSet(KEYS.presets, z.array(PresetSchema).parse(p));
   },
   async getNotes(): Promise<Note[]> {
     const raw = await kvGet<unknown[]>(KEYS.notes, []);
-    return z.array(NoteSchema).parse(raw ?? []);
+    return (raw ?? []).map(migrateNote).filter((x): x is Note => !!x);
   },
   async setNotes(notes: Note[]) {
     await kvSet(KEYS.notes, z.array(NoteSchema).parse(notes));
@@ -104,45 +197,60 @@ export const db = {
   async setSeq(n: number) {
     await kvSet(KEYS.seq, n);
   },
-  async exportAll() {
-    const [business, presets, notes, seq] = await Promise.all([
+  async getPrefs(): Promise<Prefs> {
+    const raw = await kvGet<unknown>(KEYS.prefs, defaultPrefs);
+    try { return PrefsSchema.parse(raw); } catch { return defaultPrefs; }
+  },
+  async setPrefs(p: Prefs) {
+    await kvSet(KEYS.prefs, PrefsSchema.parse(p));
+  },
+  async exportAll(): Promise<Backup> {
+    const [business, presets, notes, seq, prefs] = await Promise.all([
       this.getBusiness(),
       this.getPresets(),
       this.getNotes(),
       this.getSeq(),
+      this.getPrefs(),
     ]);
-    return { version: 1, business, presets, notes, seq };
+    return {
+      app: "notaku",
+      version: SCHEMA_VERSION,
+      exportedAt: new Date().toISOString(),
+      data: { business, presets, notes, seq, prefs },
+    };
   },
   async importAll(data: unknown, mode: "merge" | "replace" = "replace") {
-    const schema = z.object({
-      version: z.number().optional(),
-      business: BusinessSchema.optional(),
-      presets: z.array(PresetSchema).optional(),
-      notes: z.array(NoteSchema).optional(),
-      seq: z.number().optional(),
-    });
-    const parsed = schema.parse(data);
-    if (mode === "replace") {
-      if (parsed.business) await this.setBusiness(parsed.business);
-      if (parsed.presets) await this.setPresets(parsed.presets);
-      if (parsed.notes) await this.setNotes(parsed.notes);
-      if (typeof parsed.seq === "number") await this.setSeq(parsed.seq);
+    // Be lenient: also accept legacy flat exports.
+    let parsed: Backup["data"];
+    if (data && typeof data === "object" && (data as Loose).app === "notaku" && (data as Loose).data) {
+      parsed = BackupSchema.parse(data).data;
     } else {
-      if (parsed.business) await this.setBusiness(parsed.business);
-      if (parsed.presets) {
-        const cur = await this.getPresets();
-        const ids = new Set(cur.map((x) => x.id));
-        await this.setPresets([...cur, ...parsed.presets.filter((p) => !ids.has(p.id))]);
-      }
-      if (parsed.notes) {
-        const cur = await this.getNotes();
-        const ids = new Set(cur.map((x) => x.id));
-        await this.setNotes([...cur, ...parsed.notes.filter((n) => !ids.has(n.id))]);
-      }
-      if (typeof parsed.seq === "number") {
-        const cur = await this.getSeq();
-        await this.setSeq(Math.max(cur, parsed.seq));
-      }
+      const r = (data ?? {}) as Loose;
+      parsed = {
+        business: migrateBusiness(r.business),
+        presets: Array.isArray(r.presets) ? (r.presets as unknown[]).map(migratePreset).filter((x): x is Preset => !!x) : [],
+        notes: Array.isArray(r.notes) ? (r.notes as unknown[]).map(migrateNote).filter((x): x is Note => !!x) : [],
+        seq: typeof r.seq === "number" ? r.seq : 0,
+        prefs: (() => { try { return PrefsSchema.parse(r.prefs); } catch { return defaultPrefs; } })(),
+      };
+    }
+    if (mode === "replace") {
+      await this.setBusiness(parsed.business);
+      await this.setPresets(parsed.presets);
+      await this.setNotes(parsed.notes);
+      await this.setSeq(parsed.seq);
+      await this.setPrefs(parsed.prefs);
+    } else {
+      await this.setBusiness(parsed.business);
+      await this.setPrefs(parsed.prefs);
+      const curP = await this.getPresets();
+      const pIds = new Set(curP.map((x) => x.id));
+      await this.setPresets([...curP, ...parsed.presets.filter((p) => !pIds.has(p.id))]);
+      const curN = await this.getNotes();
+      const nIds = new Set(curN.map((x) => x.id));
+      await this.setNotes([...curN, ...parsed.notes.filter((n) => !nIds.has(n.id))]);
+      const curS = await this.getSeq();
+      await this.setSeq(Math.max(curS, parsed.seq));
     }
   },
   async wipe() {
@@ -151,6 +259,7 @@ export const db = {
       kvSet(KEYS.presets, []),
       kvSet(KEYS.notes, []),
       kvSet(KEYS.seq, 0),
+      kvSet(KEYS.prefs, defaultPrefs),
     ]);
   },
 };
@@ -164,35 +273,90 @@ export function generateNoteNumber(prefix: string, seq: number, date = new Date(
   return `${prefix || "NT"}-${year}-${String(seq).padStart(4, "0")}`;
 }
 
-export function calcTotals(
-  items: NoteItem[],
-  discountType: Note["discountType"],
-  discountValue: number,
-): { subtotal: number; total: number } {
-  const subtotal = items.reduce((s, it) => s + it.qty * it.price, 0);
-  let discount = 0;
-  if (discountType === "amount") discount = Math.min(discountValue, subtotal);
-  else if (discountType === "percent") discount = Math.round((subtotal * Math.min(discountValue, 100)) / 100);
-  return { subtotal, total: Math.max(0, subtotal - discount) };
+// ===== Derived =====
+export type NoteTotals = { subtotal: number; total: number; modal: number; laba: number };
+export function calcNoteTotals(note: Pick<Note, "items" | "discount">): NoteTotals {
+  const subtotal = note.items.reduce((s, it) => s + it.qty * it.price, 0);
+  const modal = note.items.reduce((s, it) => s + it.qty * (it.cost || 0), 0);
+  const total = Math.max(0, subtotal - (note.discount || 0));
+  const laba = total - modal;
+  return { subtotal, total, modal, laba };
 }
 
-/** Distinct customers derived from notes, latest first. */
-export function deriveCustomers(notes: Note[]): { name: string; phone?: string; lastDate: string; count: number }[] {
-  const map = new Map<string, { name: string; phone?: string; lastDate: string; count: number }>();
+export function hasMissingCost(notes: Note[]): boolean {
+  return notes.some((n) => n.items.some((it) => !it.cost));
+}
+
+export function deriveCustomers(notes: Note[]): { name: string; phone: string; key: string; totalBelanja: number; count: number; lastDate: string }[] {
+  const map = new Map<string, { name: string; phone: string; key: string; totalBelanja: number; count: number; lastDate: string }>();
   for (const n of notes) {
     const name = n.customerName?.trim();
-    if (!name) continue;
-    const key = (n.customerPhone || name).toLowerCase();
+    const phone = n.customerPhone?.trim();
+    if (!name && !phone) continue;
+    const key = (phone || name || "").toLowerCase();
     const cur = map.get(key);
-    if (!cur) map.set(key, { name, phone: n.customerPhone, lastDate: n.date, count: 1 });
+    const total = calcNoteTotals(n).total;
+    if (!cur) map.set(key, { name: name || "Tanpa nama", phone: phone || "", key, totalBelanja: total, count: 1, lastDate: n.date });
     else {
       cur.count += 1;
+      cur.totalBelanja += total;
       if (n.date > cur.lastDate) {
         cur.lastDate = n.date;
-        cur.name = name;
-        cur.phone = n.customerPhone || cur.phone;
+        cur.name = name || cur.name;
+        cur.phone = phone || cur.phone;
       }
     }
   }
-  return [...map.values()].sort((a, b) => (a.lastDate < b.lastDate ? 1 : -1));
+  return [...map.values()];
+}
+
+export function deriveTags(notes: Note[]): { tag: string; count: number }[] {
+  const map = new Map<string, number>();
+  for (const n of notes) for (const t of n.tags) {
+    const k = t.trim(); if (!k) continue;
+    map.set(k, (map.get(k) || 0) + 1);
+  }
+  return [...map.entries()].map(([tag, count]) => ({ tag, count })).sort((a, b) => b.count - a.count);
+}
+
+export type PeriodRange = "today" | "month" | "week" | "all";
+export function periodStart(range: PeriodRange, ref = new Date()): number {
+  const d = new Date(ref);
+  if (range === "today") return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  if (range === "week") {
+    const s = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    return s - ((d.getDay() + 6) % 7) * 86_400_000;
+  }
+  if (range === "month") return new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+  return 0;
+}
+
+export function aggregate(notes: Note[], range: PeriodRange): { omset: number; laba: number; count: number } {
+  const start = periodStart(range);
+  let omset = 0, laba = 0, count = 0;
+  for (const n of notes) {
+    if (new Date(n.date).getTime() < start) continue;
+    const t = calcNoteTotals(n);
+    omset += t.total; laba += t.laba; count += 1;
+  }
+  return { omset, laba, count };
+}
+
+export function dailyBuckets(notes: Note[], days: number): { date: string; omset: number }[] {
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const buckets: { date: string; omset: number }[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(start);
+    d.setDate(d.getDate() - i);
+    buckets.push({ date: d.toISOString().slice(0, 10), omset: 0 });
+  }
+  const idx = new Map(buckets.map((b, i) => [b.date, i]));
+  for (const n of notes) {
+    const k = n.date.slice(0, 10);
+    const i = idx.get(k);
+    if (i == null) continue;
+    buckets[i].omset += calcNoteTotals(n).total;
+  }
+  return buckets;
 }
