@@ -1,51 +1,98 @@
-# Quick Wins — Mobile UX
+# Notaku — Full Rebuild Plan
 
-Lima perbaikan kecil tapi berdampak besar untuk kenyamanan pakai Notaku di HP. Tidak mengubah logika bisnis — murni UI/UX.
+Rebuild the app as a dashboard-first UMKM bookkeeping tool. The existing receipt-builder becomes one feature inside a bigger product. All work is client-side (IndexedDB + Zod), no backend.
 
-## 1. Safe-area iOS (notch & home indicator)
-- Tambah CSS util `pb-safe` / `pt-safe` pakai `env(safe-area-inset-*)`.
-- Pasang `padding-bottom` aman di `AppShell` bottom nav supaya tidak ketabrak home indicator iPhone.
-- Tambahkan `viewport-fit=cover` (sudah ada di `__root.tsx` ✓) dan pastikan body tidak punya bg yang motong.
+## Scope
 
-## 2. Sticky action bar di /buat
-- Tombol primary "Simpan & Cetak" jadi bar floating di bawah viewport (sticky, di atas bottom nav).
-- Selalu terlihat — user tidak perlu scroll panjang setelah isi banyak item.
-- Mirror total nota di bar yang sama supaya konfirmasi cepat sebelum simpan.
+Apply as a major revision to the current project. Reuse what fits (Receipt component, formatters, WA share, html-to-image), rebuild everything else.
 
-## 3. Input keyboard-aware
-Di `buat.tsx` dan field input lain:
-- Field angka (qty, harga, diskon): `inputMode="decimal"` + `enterKeyHint="next"`.
-- Field nama pelanggan / catatan: `enterKeyHint="done"`.
-- Field HP: `inputMode="tel"`.
-- Field harga: auto-select isi saat focus (`onFocus={e => e.target.select()}`) — biar tinggal ketik tanpa hapus.
+## 1. Data layer (`src/lib/storage.ts`)
 
-## 4. Audit tap target ≥ 44×44 px
-Sapuan kecil di komponen yang sekarang masih sempit:
-- Tombol toggle diskon (%/Rp) di /buat.
-- Tombol +/- qty (cek apakah sudah 44px setelah improvement sebelumnya).
-- Icon button hapus item, hapus preset, clear search.
-- Link breadcrumb "Riwayat" di detail nota.
-Tambahkan `min-h-11 min-w-11` (44px) + area padding klik yang luas, ikon tetap kecil secara visual.
+Rewrite schemas to spec:
+- `PresetSchema` — add `cost` (default 0), `unit` (default "")
+- `NoteItemSchema` — add `cost`, allow `qty` decimal (min 0.001)
+- `NoteSchema` — add `tags[]`, `note`, `createdAt`, `updatedAt`; collapse discount to single `discount` integer (remove percent/amount split); `customerName`/`customerPhone` default ""
+- `BusinessSchema` — add `receiptFooter`, `lastWaNumber`; rename existing `footer` → `receiptFooter` with migration
+- `PrefsSchema` — `{ hideAmounts: boolean }` (new key)
+- `BackupSchema` — wrap export in `{ app: "notaku", version, exportedAt, data }`
+- `SCHEMA_VERSION = 1` with migration hook in `importAll`
+- Derived helpers: `deriveCustomers(notes)`, `deriveTags(notes)`, `calcNoteTotals(note)` returning `{subtotal,total,modal,laba}`, `aggregatePeriod(notes, range)` for dashboard
 
-## 5. Haptic feedback ringan
-Helper `tapHaptic()` pakai `navigator.vibrate(10)` (no-op di iOS Safari, tetap aktif di Android Chrome):
-- Tap qty +/-, hapus item, simpan nota, salin teks, kirim WA.
-- Vibrate 20ms untuk konfirmasi simpan berhasil.
+Number format helpers: ensure `Rp50.000` (dot thousands, no space) — update `formatIDR`.
 
-## Detail teknis
+Date format: add `formatDateID` → `Sen, 27 Mei 2026`.
 
-**File yang berubah:**
-- `src/styles.css` — util `.pb-safe`, `.pt-safe`, `.h-tap` (44px min).
-- `src/components/AppShell.tsx` — safe-area pada bottom nav.
-- `src/routes/buat.tsx` — sticky save bar, inputMode, enterKeyHint, auto-select, haptic.
-- `src/routes/riwayat.$noteId.tsx` — haptic pada action tile, tap target breadcrumb.
-- `src/routes/riwayat.tsx` — tap target search clear.
-- `src/routes/pengaturan.tsx` — inputMode untuk field nomor.
-- Helper baru `src/lib/haptic.ts` (≤ 10 baris).
+## 2. Navigation (`src/components/AppShell.tsx`)
 
-**Tidak menyentuh:** `storage.ts`, `receipt.ts`, struktur data, routing.
+Replace 3-tab nav with: **Beranda · [FAB +] · Riwayat · Pelanggan**. Center FAB is a prominent circular button linking to `/buat`. Gear icon moves to Beranda header top-right (remove from bottom nav). Remove ThemeToggle (single light theme per spec §11).
 
-**Verifikasi:** cek visual di preview mobile 375×812, pastikan:
-- Sticky bar tidak menutupi item terakhir (tambah padding-bottom pada container).
-- Bottom nav tidak terpotong di iPhone (safe-area).
-- Tombol +/- qty masih nyaman ditekan dengan jempol.
+Routes to create/rename:
+- `/` → Beranda (replace current redirect)
+- `/buat` (keep, rebuild form)
+- `/riwayat` (keep, rebuild)
+- `/riwayat/$noteId` (keep)
+- `/pelanggan` (new) + `/pelanggan/$key` (new) — derived, read-only
+- `/pengaturan` (keep, rebuild) with sub-sections + `/tentang` (new)
+
+## 3. Screens
+
+**Beranda (`/`)** — new. Two hero cards (Omset, Laba) with `Hari Ini | Bulan Ini` segment toggle, eye-toggle for hide-amounts (persist via `prefs`), 7/30-day bar chart (recharts), 5 latest transactions, hint if any item has cost=0, empty state.
+
+**Buat Nota (`/buat`)** — rebuild:
+- Pelanggan: nama + HP, recent-customer chips + autocomplete from `deriveCustomers`
+- Tanggal: editable date chip (keep DateChip pattern)
+- Item: preset picker (search) + manual add; qty stepper supports decimals; collapsible cost field per line
+- Diskon: single nominal field
+- Tags: chip input with previously-used suggestions
+- Catatan
+- Sticky bottom bar: live Total + Simpan
+- Draft autosave to localStorage every ~3s, restore prompt on reopen
+- Success state with [Lihat Nota] [Kirim WA] [Buat Lagi]
+
+**Riwayat (`/riwayat`)** — search, period chips (Semua/Hari/Minggu/Bulan), tag filter, filtered-set summary (omset + laba), list grouped by date.
+
+**Detail Nota (`/riwayat/$noteId`)** — show laba, actions: Kirim WA, Bagikan Gambar (PNG), Cetak Struk (58/80mm toggle via print CSS), Duplikasi, Edit, Hapus (confirm).
+
+**Pelanggan (`/pelanggan`)** — derived list, search, sort by total/terakhir. Detail page: stats, transaksi list, tombol WA cepat. No CRUD.
+
+**Pengaturan (`/pengaturan`)** — sections: Profil Bisnis, Produk/Preset (CRUD with cost & unit), Tampilan (default hideAmounts), Cadangan Data (Export, Import with Gabung/Timpa choice, Hapus Semua double-confirm), link ke Tentang.
+
+**Tentang (`/tentang`)** — deskripsi + single ad block for Aksel Media Digital + versi app. This is the ONLY place with agency branding.
+
+## 4. Receipt output
+
+Update `Receipt.tsx`: strip all Notaku/agency branding (already clean — verify). Remove any "Powered by". Ensure no pajak/rekening fields exist.
+
+Add print mode component with `@media print` CSS + 58mm/80mm toggle (monospace, ~32/~48 char width).
+
+## 5. PWA
+
+Add `public/manifest.json` (name Notaku, icons 192/512, standalone, portrait, warm theme color), link in `__root.tsx` head. Add minimal service worker (app-shell cache, offline-first) registered only outside Lovable preview iframe per project PWA guidance. One-time "Pasang aplikasi" hint (dismissible, persisted).
+
+## 6. Removals (anti-patterns §14)
+
+- Delete ThemeToggle + dark mode
+- Remove existing discount type selector (collapse to single nominal)
+- Remove any "customer CRUD" affordance (derived only)
+- No onboarding wizard, no backup reminder, no invoice status
+
+## 7. Visual direction
+
+Single light theme, warm cream background, friendly tone. Update `src/styles.css` tokens: warm cream bg, navy ink, accent (e.g. terracotta) for primary. Large touch targets (≥48px), body ≥15px, money ≥18px.
+
+## Technical notes
+
+- Keep `idb-keyval` (already used). Draft autosave uses `localStorage` only.
+- Recharts: add `bun add recharts` if not present.
+- Number input: keep `parseIDRInput`/`formatIDRInput`, ensure `inputmode="numeric"`.
+- Migration: on `getNotes()`, map old shape (`discountType`/`discountValue`) → new `discount` integer; old items without `cost` → 0. Old `business.footer` → `receiptFooter`.
+- Customer key: phone if present else lowercased name.
+- Tag derivation: union across all notes' `tags[]`, sorted by frequency.
+
+## Out of scope
+
+- Backend, auth, multi-business, dark mode, tax/PPN, utang/piutang, custom domain setup (deploy step §16).
+
+## Open question
+
+The current app is live and has user data in IndexedDB under the old schema. The migration in `getNotes()` handles old→new shape silently, but **existing notes will have `cost=0` everywhere** (laba shows = omset until user backfills modal in Preset / edits items). Acceptable? Or should I show a one-time banner explaining "isi modal di Preset biar laba akurat"?
