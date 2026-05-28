@@ -145,7 +145,7 @@ function PresetSection() {
   function add() {
     const nm = name.trim();
     if (!nm) return;
-    save.mutate([...presets, { id: uid(), name: nm, price }]);
+    save.mutate([...presets, { id: uid(), name: nm, price, cost: 0, unit: "" }]);
     setName(""); setPrice(0);
   }
   function remove(id: string) { save.mutate(presets.filter((p) => p.id !== id)); }
