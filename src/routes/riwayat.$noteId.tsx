@@ -110,10 +110,10 @@ function NoteDetail() {
         </section>
       )}
 
-      {note.notes && (
+      {note.note && (
         <section className="rounded-2xl bg-card border border-border shadow-soft p-4">
           <h2 className="t-eyebrow">Catatan</h2>
-          <div className="text-sm mt-1 whitespace-pre-wrap">{note.notes}</div>
+          <div className="text-sm mt-1 whitespace-pre-wrap">{note.note}</div>
         </section>
       )}
 
@@ -134,22 +134,23 @@ function NoteDetail() {
         </ul>
       </section>
 
-      <section aria-labelledby="nota-ringkasan" className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
-        <h2 id="nota-ringkasan" className="sr-only">Ringkasan</h2>
-        <Row label="Subtotal" value={formatIDR(note.subtotal)} muted />
-        {note.subtotal !== note.total && (
-          <Row
-            label={note.discountType === "percent" ? `Diskon ${note.discountValue}%` : "Diskon"}
-            value={"− " + formatIDR(note.subtotal - note.total)}
-            muted
-          />
-        )}
-        <div className="h-px bg-border my-1" />
-        <div className="flex items-end justify-between">
-          <span className="text-muted-foreground">Total</span>
-          <span className="font-display font-semibold text-2xl tracking-tight">{formatIDR(note.total)}</span>
-        </div>
-      </section>
+      {(() => {
+        const totals = calcNoteTotals(note);
+        return (
+          <section aria-labelledby="nota-ringkasan" className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
+            <h2 id="nota-ringkasan" className="sr-only">Ringkasan</h2>
+            <Row label="Subtotal" value={formatIDR(totals.subtotal)} muted />
+            {note.discount > 0 && (
+              <Row label="Diskon" value={"− " + formatIDR(note.discount)} muted />
+            )}
+            <div className="h-px bg-border my-1" />
+            <div className="flex items-end justify-between">
+              <span className="text-muted-foreground">Total</span>
+              <span className="font-display font-semibold text-2xl tracking-tight">{formatIDR(totals.total)}</span>
+            </div>
+          </section>
+        );
+      })()}
 
       <div className="grid grid-cols-3 gap-2 pt-2">
         <ActionTile icon={<ImageIcon className="h-5 w-5" />} label="PNG" onClick={shareImage} loading={busy} />
