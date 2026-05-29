@@ -49,6 +49,7 @@ export function waLink(phone: string | undefined, text: string): string {
 }
 
 export async function downloadDataUrl(dataUrl: string, filename: string) {
+  if (typeof document === "undefined") return;
   const a = document.createElement("a");
   a.href = dataUrl;
   a.download = filename;
@@ -58,6 +59,7 @@ export async function downloadDataUrl(dataUrl: string, filename: string) {
 }
 
 export async function sharePNG(dataUrl: string, filename: string, text?: string): Promise<boolean> {
+  if (typeof navigator === "undefined") return false;
   try {
     const blob = await (await fetch(dataUrl)).blob();
     const file = new File([blob], filename, { type: "image/png" });
