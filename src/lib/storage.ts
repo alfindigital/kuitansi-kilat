@@ -1,7 +1,19 @@
 import { get, set, createStore } from "idb-keyval";
 import { z } from "zod";
 
-const store = typeof indexedDB !== "undefined" ? createStore("notaku-db", "kv") : undefined;
+let store: ReturnType<typeof createStore> | undefined;
+
+function getStore() {
+  if (typeof window === "undefined" || typeof indexedDB === "undefined") {
+    return undefined;
+  }
+
+  if (!store) {
+    store = createStore("notaku-db", "kv");
+  }
+
+  return store;
+}
 
 export const SCHEMA_VERSION = 1;
 
@@ -156,6 +168,7 @@ function migratePreset(raw: unknown): Preset | null {
 
 // ===== Generic kv =====
 async function kvGet<T>(k: string, fallback: T): Promise<T> {
+  const store = getStore();
   if (!store) return fallback;
   try {
     const v = await get<T>(k, store);
@@ -165,6 +178,7 @@ async function kvGet<T>(k: string, fallback: T): Promise<T> {
   }
 }
 async function kvSet<T>(k: string, v: T): Promise<void> {
+  const store = getStore();
   if (!store) return;
   await set(k, v, store);
 }
