@@ -103,15 +103,23 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  if (typeof window !== "undefined" && !(window as any).__notakuErrLog) {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if ((window as any).__notakuErrLog) return;
     (window as any).__notakuErrLog = true;
-    window.addEventListener("error", (e) => {
+    const onError = (e: ErrorEvent) => {
       console.error("[runtime-error]", `${e.filename}:${e.lineno}:${e.colno}`, e.error ?? e.message);
-    });
-    window.addEventListener("unhandledrejection", (e) => {
+    };
+    const onRejection = (e: PromiseRejectionEvent) => {
       console.error("[unhandled-rejection]", e.reason);
-    });
-  }
+    };
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onRejection);
+    return () => {
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onRejection);
+    };
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <AppShell />
