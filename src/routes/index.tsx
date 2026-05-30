@@ -40,7 +40,10 @@ function Beranda() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="t-h1">{business?.name?.trim() || "Notaku"}</h1>
+          <h1 className="t-h1">
+            {business?.name?.trim() || "Notaku"}
+            <span className="sr-only"> — Catat & Cetak Struk UMKM</span>
+          </h1>
           <p className="t-caption">{formatDateID(new Date().toISOString())}</p>
         </div>
         <div className="flex items-center gap-1">
