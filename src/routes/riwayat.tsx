@@ -91,6 +91,7 @@ function RiwayatList() {
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
+          aria-label="Cari nota"
           placeholder="Cari nama, nomor, item…" value={q} onChange={(e) => setQ(e.target.value)}
           className="w-full h-11 pl-11 pr-4 rounded-full bg-card border border-border shadow-soft text-[15px] placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-ring/20"
         />
