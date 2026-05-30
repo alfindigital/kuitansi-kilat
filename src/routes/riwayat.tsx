@@ -132,7 +132,7 @@ function RiwayatList() {
         <div className="space-y-4">
           {groups.map(([dateKey, items]) => (
             <div key={dateKey} className="space-y-2">
-              <h3 className="t-eyebrow px-1">{formatDate(dateKey + "T00:00:00")}</h3>
+              <h2 className="t-eyebrow px-1">{formatDate(dateKey + "T00:00:00")}</h2>
               <ul className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
                 {items.map((n) => {
                   const t = calcNoteTotals(n);
