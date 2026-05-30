@@ -35,6 +35,8 @@ export const Route = createFileRoute("/buat")({
     meta: [
       { title: "Buat Nota — Notaku" },
       { name: "description", content: "Catat transaksi dan bikin nota sat-set, langsung kirim ke pelanggan." },
+      { property: "og:title", content: "Buat Nota — Notaku" },
+      { property: "og:description", content: "Catat transaksi dan bikin nota sat-set untuk UMKM." },
     ],
   }),
   component: BuatPage,
