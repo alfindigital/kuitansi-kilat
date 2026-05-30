@@ -253,6 +253,7 @@ function BuatPage() {
 
   return (
     <div className="space-y-4">
+      <h1 className="sr-only">Buat Nota Baru</h1>
       {/* Top bar */}
       <div className="flex items-center justify-between">
         <Link to="/" className="tap inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground rounded-full px-1 py-1">
