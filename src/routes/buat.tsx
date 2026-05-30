@@ -567,6 +567,7 @@ function CustomerSuggestInput({ placeholder, value, onChange, suggestions, onPic
   return (
     <div className="relative">
       <input
+        aria-label={placeholder}
         placeholder={placeholder} value={value}
         onChange={(e) => { onChange(e.target.value); setOpen(true); }}
         onFocus={() => { setFocused(true); setOpen(true); }}
