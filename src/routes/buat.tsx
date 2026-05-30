@@ -414,6 +414,7 @@ function ItemRow({ item, onChange, onRemove }: { item: NoteItem; onChange: (p: P
   return (
     <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-2">
       <input
+        aria-label="Nama item"
         placeholder="Nama item" value={item.name} onChange={(e) => onChange({ name: e.target.value })} maxLength={60} enterKeyHint="next"
         className="w-full h-11 px-3 bg-surface rounded-full text-[15px] font-medium placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-ring/30"
       />
