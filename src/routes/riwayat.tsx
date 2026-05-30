@@ -12,7 +12,14 @@ const PERIODS: { id: Period; label: string }[] = [
 ];
 
 export const Route = createFileRoute("/riwayat")({
-  head: () => ({ meta: [{ title: "Riwayat — Notaku" }, { name: "description", content: "Riwayat nota, filter tanggal & tag, rekap omset & laba." }] }),
+  head: () => ({
+    meta: [
+      { title: "Riwayat — Notaku" },
+      { name: "description", content: "Riwayat nota, filter tanggal & tag, rekap omset & laba." },
+      { property: "og:title", content: "Riwayat — Notaku" },
+      { property: "og:description", content: "Lihat dan filter riwayat nota transaksi bisnis UMKM." },
+    ],
+  }),
   component: RiwayatPage,
 });
 
