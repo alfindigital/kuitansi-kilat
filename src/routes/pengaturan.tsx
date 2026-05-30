@@ -154,10 +154,11 @@ function PresetSection() {
     <Section title="Preset">
       <Card className="p-3 space-y-3">
         <div className="flex gap-2">
-          <Input placeholder="Nama" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} enterKeyHint="next" className="h-11 rounded-xl" />
+          <Input aria-label="Nama preset" placeholder="Nama" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} enterKeyHint="next" className="h-11 rounded-xl" />
           <div className="relative w-32">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Rp</span>
             <Input
+              aria-label="Harga preset"
               inputMode="decimal" enterKeyHint="done" placeholder="0"
               value={formatIDRInput(price)}
               onChange={(e) => setPrice(parseIDRInput(e.target.value))}

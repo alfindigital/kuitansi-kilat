@@ -16,6 +16,7 @@ export const Route = createFileRoute("/riwayat/$noteId")({
     meta: [
       { title: "Detail nota — Notaku" },
       { name: "description", content: "Lihat detail nota tersimpan: item, total, catatan, dan kirim ulang struk ke pelanggan via WhatsApp." },
+      { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "Detail nota — Notaku" },
       { property: "og:description", content: "Detail nota UMKM dengan opsi cetak struk, salin teks, dan kirim WhatsApp." },
     ],

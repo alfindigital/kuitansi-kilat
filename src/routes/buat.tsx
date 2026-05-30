@@ -35,6 +35,8 @@ export const Route = createFileRoute("/buat")({
     meta: [
       { title: "Buat Nota — Notaku" },
       { name: "description", content: "Catat transaksi dan bikin nota sat-set, langsung kirim ke pelanggan." },
+      { property: "og:title", content: "Buat Nota — Notaku" },
+      { property: "og:description", content: "Catat transaksi dan bikin nota sat-set untuk UMKM." },
     ],
   }),
   component: BuatPage,
@@ -251,6 +253,7 @@ function BuatPage() {
 
   return (
     <div className="space-y-4">
+      <h1 className="sr-only">Buat Nota Baru</h1>
       {/* Top bar */}
       <div className="flex items-center justify-between">
         <Link to="/" className="tap inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground rounded-full px-1 py-1">
@@ -411,6 +414,7 @@ function ItemRow({ item, onChange, onRemove }: { item: NoteItem; onChange: (p: P
   return (
     <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-2">
       <input
+        aria-label="Nama item"
         placeholder="Nama item" value={item.name} onChange={(e) => onChange({ name: e.target.value })} maxLength={60} enterKeyHint="next"
         className="w-full h-11 px-3 bg-surface rounded-full text-[15px] font-medium placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-ring/30"
       />
@@ -563,6 +567,7 @@ function CustomerSuggestInput({ placeholder, value, onChange, suggestions, onPic
   return (
     <div className="relative">
       <input
+        aria-label={placeholder}
         placeholder={placeholder} value={value}
         onChange={(e) => { onChange(e.target.value); setOpen(true); }}
         onFocus={() => { setFocused(true); setOpen(true); }}

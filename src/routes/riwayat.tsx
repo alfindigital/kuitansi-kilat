@@ -12,7 +12,14 @@ const PERIODS: { id: Period; label: string }[] = [
 ];
 
 export const Route = createFileRoute("/riwayat")({
-  head: () => ({ meta: [{ title: "Riwayat — Notaku" }, { name: "description", content: "Riwayat nota, filter tanggal & tag, rekap omset & laba." }] }),
+  head: () => ({
+    meta: [
+      { title: "Riwayat — Notaku" },
+      { name: "description", content: "Riwayat nota, filter tanggal & tag, rekap omset & laba." },
+      { property: "og:title", content: "Riwayat — Notaku" },
+      { property: "og:description", content: "Lihat dan filter riwayat nota transaksi bisnis UMKM." },
+    ],
+  }),
   component: RiwayatPage,
 });
 
@@ -84,6 +91,7 @@ function RiwayatList() {
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
+          aria-label="Cari nota"
           placeholder="Cari nama, nomor, item…" value={q} onChange={(e) => setQ(e.target.value)}
           className="w-full h-11 pl-11 pr-4 rounded-full bg-card border border-border shadow-soft text-[15px] placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-ring/20"
         />
@@ -124,7 +132,7 @@ function RiwayatList() {
         <div className="space-y-4">
           {groups.map(([dateKey, items]) => (
             <div key={dateKey} className="space-y-2">
-              <h3 className="t-eyebrow px-1">{formatDate(dateKey + "T00:00:00")}</h3>
+              <h2 className="t-eyebrow px-1">{formatDate(dateKey + "T00:00:00")}</h2>
               <ul className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
                 {items.map((n) => {
                   const t = calcNoteTotals(n);
