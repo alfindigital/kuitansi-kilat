@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Save, Plus, Trash2, Download, MessageCircle, RotateCcw } from "lucide-react";
+import { Upload, Save, Plus, Trash2, Download, MessageCircle, RotateCcw, Gauge, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { db, defaultBusiness, deriveCustomers, uid, type Business, type Preset } from "@/lib/storage";
@@ -32,7 +32,26 @@ function PengaturanPage() {
       <PresetSection />
       <CustomerSection />
       <BackupSection />
+      <SeoStatusLink />
     </div>
+  );
+}
+
+function SeoStatusLink() {
+  return (
+    <Section title="Diagnostik">
+      <Link
+        to="/seo"
+        className="tap flex items-center gap-3 rounded-2xl bg-card border border-border shadow-soft px-4 py-3"
+      >
+        <Gauge className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-medium">Status SEO</div>
+          <div className="text-xs text-muted-foreground">Lihat temuan yang lulus & yang masih gagal.</div>
+        </div>
+        <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      </Link>
+    </Section>
   );
 }
 
