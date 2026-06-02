@@ -18,8 +18,11 @@ export const Route = createFileRoute("/riwayat")({
       { name: "description", content: "Riwayat nota, filter tanggal & tag, rekap omset & laba." },
       { property: "og:title", content: "Riwayat — Notaku" },
       { property: "og:description", content: "Lihat dan filter riwayat nota transaksi bisnis UMKM." },
+      { property: "og:url", content: "https://notaq.lovable.app/riwayat" },
     ],
+    links: [{ rel: "canonical", href: "https://notaq.lovable.app/riwayat" }],
   }),
+
   component: RiwayatPage,
 });
 
