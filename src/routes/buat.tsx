@@ -41,10 +41,9 @@ export const Route = createFileRoute("/buat")({
     ],
     links: [{ rel: "canonical", href: "https://notaq.lovable.app/buat" }],
   }),
-
-  }),
   component: BuatPage,
 });
+
 
 const DRAFT_KEY = "notaku:buat-draft:v2";
 
