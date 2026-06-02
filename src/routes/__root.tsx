@@ -120,11 +120,14 @@ function RootComponent() {
     };
     window.addEventListener("error", onError);
     window.addEventListener("unhandledrejection", onRejection);
+    // Register PWA service worker (no-op inside Lovable preview / iframes)
+    import("@/lib/pwa").then((m) => m.registerServiceWorker()).catch(() => undefined);
     return () => {
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);
     };
   }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppShell />
