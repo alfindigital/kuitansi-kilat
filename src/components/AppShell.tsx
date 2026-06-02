@@ -1,13 +1,14 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { Home, History, Users, Plus, Receipt } from "lucide-react";
+import { Home, History, Plus, Receipt, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { to: "/", label: "Beranda", icon: Home, exact: true },
   { to: "/buat", label: "Buat", icon: Plus },
   { to: "/riwayat", label: "Riwayat", icon: History },
-  { to: "/pelanggan", label: "Pelanggan", icon: Users },
+  { to: "/pengaturan", label: "Pengaturan", icon: Settings },
 ] as const;
+
 
 export function AppShell() {
   const { pathname } = useLocation();

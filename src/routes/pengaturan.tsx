@@ -19,8 +19,11 @@ export const Route = createFileRoute("/pengaturan")({
       { name: "description", content: "Atur identitas bisnis, logo, preset item, daftar pelanggan, dan cadangan data Notaku." },
       { property: "og:title", content: "Pengaturan — Notaku" },
       { property: "og:description", content: "Kelola profil bisnis, preset item, pelanggan, dan backup data lokal Notaku." },
+      { property: "og:url", content: "https://notaq.lovable.app/pengaturan" },
     ],
+    links: [{ rel: "canonical", href: "https://notaq.lovable.app/pengaturan" }],
   }),
+
   component: PengaturanPage,
 });
 

@@ -86,8 +86,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" },
     ],
-
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "Notaku",
+          description: "Aplikasi sat-set untuk UMKM: bikin nota, cetak struk, simpan riwayat dan pelanggan. Tanpa login, semua data di HP.",
+          url: "https://notaq.lovable.app",
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Web, Android, iOS",
+          inLanguage: "id-ID",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "IDR" },
+        }),
+      },
+    ],
   }),
+
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

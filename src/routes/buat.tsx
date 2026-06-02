@@ -37,10 +37,13 @@ export const Route = createFileRoute("/buat")({
       { name: "description", content: "Catat transaksi dan bikin nota sat-set, langsung kirim ke pelanggan." },
       { property: "og:title", content: "Buat Nota — Notaku" },
       { property: "og:description", content: "Catat transaksi dan bikin nota sat-set untuk UMKM." },
+      { property: "og:url", content: "https://notaq.lovable.app/buat" },
     ],
+    links: [{ rel: "canonical", href: "https://notaq.lovable.app/buat" }],
   }),
   component: BuatPage,
 });
+
 
 const DRAFT_KEY = "notaku:buat-draft:v2";
 

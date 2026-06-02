@@ -14,8 +14,11 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Lihat omset, laba, dan transaksi terakhir usaha kamu — gratis, tanpa login." },
       { property: "og:title", content: "Notaku — Catat omset & laba UMKM" },
       { property: "og:description", content: "Dashboard omset & laba untuk warung dan toko kecil." },
+      { property: "og:url", content: "https://notaq.lovable.app/" },
     ],
+    links: [{ rel: "canonical", href: "https://notaq.lovable.app/" }],
   }),
+
   component: Beranda,
 });
 

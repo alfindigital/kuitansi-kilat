@@ -27,11 +27,14 @@ export const Route = createFileRoute("/seo")({
     meta: [
       { title: "Status SEO — Notaku" },
       { name: "description", content: "Ringkasan status SEO Notaku: temuan yang lulus dan yang masih perlu diperbaiki." },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "Status SEO — Notaku" },
+      { property: "og:description", content: "Ringkasan temuan SEO terakhir untuk Notaku." },
     ],
   }),
   component: SeoStatusPage,
 });
+
 
 function SeoStatusPage() {
   const failing = FINDINGS.filter((f) => f.status === "failing");
