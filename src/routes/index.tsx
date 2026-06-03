@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, EyeOff, Settings as SettingsIcon, ChevronRight, FilePlus2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronRight, FilePlus2 } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts";
 
 import { db, aggregate, dailyBuckets, calcNoteTotals, hasMissingCost } from "@/lib/storage";
