@@ -392,14 +392,24 @@ function BuatPage() {
         <TagInput value={tags} onChange={setTags} suggestions={allTags.map((t) => t.tag)} />
       </section>
 
-      {/* Catatan */}
-      <section className="space-y-1.5">
-        <SectionLabel>Catatan</SectionLabel>
-        <div className="relative">
-          <Textarea rows={2} value={noteText} onChange={(e) => setNoteText(e.target.value.slice(0, 200))} enterKeyHint="done" maxLength={200} placeholder="" className="rounded-2xl border-border bg-card shadow-soft pr-14" />
-          <span className="absolute bottom-2 right-3 text-[10px] text-muted-foreground tabular-nums">{noteText.length}/200</span>
-        </div>
-      </section>
+      {/* Catatan accordion */}
+      <Collapsible defaultOpen={false}>
+        <CollapsibleTrigger asChild>
+          <button type="button" className="tap w-full flex items-center justify-between rounded-2xl bg-card border border-border shadow-soft px-4 py-3 text-sm text-muted-foreground hover:text-foreground">
+            <span className="inline-flex items-center gap-2">
+              <StickyNote className="h-4 w-4" />
+              {noteText.trim() ? "Catatan" : "Tambah catatan"}
+            </span>
+            <ChevronRight className="h-4 w-4 transition-transform data-[state=open]:rotate-90" />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-2">
+          <div className="relative">
+            <Textarea rows={2} value={noteText} onChange={(e) => setNoteText(e.target.value.slice(0, 200))} enterKeyHint="done" maxLength={200} placeholder="" className="rounded-2xl border-border bg-card shadow-soft pr-14" />
+            <span className="absolute bottom-2 right-3 text-[10px] text-muted-foreground tabular-nums">{noteText.length}/200</span>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Summary */}
       <div className="rounded-2xl bg-card border border-border shadow-soft p-3 space-y-1.5 text-sm">
