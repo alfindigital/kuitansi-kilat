@@ -1,6 +1,8 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { Home, History, Plus, Receipt, Settings } from "lucide-react";
+import { Home, History, Plus, Receipt, Settings, Eye, EyeOff } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { db } from "@/lib/storage";
 
 const tabs = [
   { to: "/", label: "Beranda", icon: Home, exact: true },
@@ -12,6 +14,14 @@ const tabs = [
 
 export function AppShell() {
   const { pathname } = useLocation();
+  const qc = useQueryClient();
+  const { data: prefs } = useQuery({ queryKey: ["prefs"], queryFn: () => db.getPrefs() });
+  const hide = !!prefs?.hideAmounts;
+  const toggleHide = useMutation({
+    mutationFn: async () => { await db.setPrefs({ hideAmounts: !hide }); },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["prefs"] }),
+  });
+
   return (
     <div className="min-h-dvh flex flex-col bg-background text-foreground">
       <header className="sticky top-0 z-30 backdrop-blur-md bg-background/80 border-b border-border/60">
@@ -22,6 +32,22 @@ export function AppShell() {
             </div>
             <span className="font-display font-semibold tracking-tight text-[15px]">Notaku</span>
           </Link>
+          <div className="ml-auto flex items-center gap-1">
+            <button
+              onClick={() => toggleHide.mutate()}
+              aria-label={hide ? "Tampilkan nominal" : "Sembunyikan nominal"}
+              className="tap tap-target inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+            >
+              {hide ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+            <Link
+              to="/pengaturan"
+              aria-label="Pengaturan"
+              className="tap tap-target inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+            >
+              <Settings className="h-5 w-5" />
+            </Link>
+          </div>
         </div>
       </header>
 

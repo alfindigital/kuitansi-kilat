@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, EyeOff, Settings as SettingsIcon, ChevronRight, FilePlus2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronRight, FilePlus2 } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts";
 
 import { db, aggregate, dailyBuckets, calcNoteTotals, hasMissingCost } from "@/lib/storage";
@@ -23,7 +23,6 @@ export const Route = createFileRoute("/")({
 });
 
 function Beranda() {
-  const qc = useQueryClient();
   const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
   const { data: business } = useQuery({ queryKey: ["business"], queryFn: () => db.getBusiness() });
   const { data: prefs } = useQuery({ queryKey: ["prefs"], queryFn: () => db.getPrefs() });
@@ -34,38 +33,10 @@ function Beranda() {
   const missingCost = useMemo(() => hasMissingCost(notes), [notes]);
   const hide = !!prefs?.hideAmounts;
 
-  const toggleHide = useMutation({
-    mutationFn: async () => { await db.setPrefs({ hideAmounts: !hide }); },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["prefs"] }),
-  });
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="t-h1">
-            {business?.name?.trim() || "Notaku"}
-            <span className="sr-only"> — Catat & Cetak Struk UMKM</span>
-          </h1>
-          <p className="t-caption">{formatDateID(new Date().toISOString())}</p>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => toggleHide.mutate()}
-            aria-label={hide ? "Tampilkan nominal" : "Sembunyikan nominal"}
-            className="tap tap-target inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
-          >
-            {hide ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-          </button>
-          <Link
-            to="/pengaturan"
-            aria-label="Pengaturan"
-            className="tap tap-target inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
-          >
-            <SettingsIcon className="h-5 w-5" />
-          </Link>
-        </div>
-      </div>
+      <h1 className="sr-only">{business?.name?.trim() || "Notaku"} — Catat & Cetak Struk UMKM</h1>
 
       <div className="relative grid grid-cols-2 rounded-full bg-surface p-1 text-sm">
         {(["today", "month"] as const).map((r) => (
