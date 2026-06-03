@@ -81,7 +81,7 @@ function TabButton({ tab, pathname }: { tab: typeof tabs[number]; pathname: stri
       to={tab.to}
       className={cn(
         "tap flex flex-col items-center justify-center gap-0.5 py-2.5 rounded-2xl text-[11px] font-medium",
-        active ? "text-primary" : "text-muted-foreground",
+        active ? "text-primary-foreground" : "text-primary-foreground/60",
       )}
     >
       <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
