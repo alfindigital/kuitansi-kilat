@@ -3,8 +3,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plus, Trash2, X, Check, MessageCircle, ArrowLeft,
-  Image as ImageIcon, Copy, ChevronDown, Calendar, BookmarkPlus, Tag,
+  Image as ImageIcon, Copy, ChevronDown, ChevronRight, Calendar, BookmarkPlus, Tag, StickyNote,
 } from "lucide-react";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { toast } from "sonner";
 
 import {
@@ -354,20 +355,36 @@ function BuatPage() {
         </button>
       </section>
 
-      {/* Discount */}
-      <section className="space-y-1.5">
-        <SectionLabel>Diskon</SectionLabel>
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
-          <Input
-            inputMode="decimal" enterKeyHint="done" placeholder="0"
-            value={discount || ""}
-            onChange={(e) => setDiscount(parseIDRInput(e.target.value))}
-            onFocus={(e) => e.target.select()}
-            className="h-11 rounded-xl border-border bg-card shadow-soft pl-9"
-          />
+      {/* Discount tag */}
+      {discount > 0 ? (
+        <div className="flex items-center gap-2 -mt-2">
+          <span className="inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs">
+            Diskon {formatIDR(discount)}
+            <button type="button" onClick={() => setDiscount(0)} aria-label="Hapus diskon" className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
+          </span>
         </div>
-      </section>
+      ) : (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-card border border-border border-dashed px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground shadow-soft -mt-2">
+              <Plus className="h-3 w-3" /> Diskon
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-60 p-2" align="start">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
+              <Input
+                inputMode="decimal" enterKeyHint="done" placeholder="0"
+                value={discount || ""}
+                onChange={(e) => setDiscount(parseIDRInput(e.target.value))}
+                onFocus={(e) => e.target.select()}
+                className="h-10 rounded-xl border-border bg-card pl-8"
+                autoFocus
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
 
       {/* Tags */}
       <section className="space-y-1.5">
@@ -375,14 +392,24 @@ function BuatPage() {
         <TagInput value={tags} onChange={setTags} suggestions={allTags.map((t) => t.tag)} />
       </section>
 
-      {/* Catatan */}
-      <section className="space-y-1.5">
-        <SectionLabel>Catatan</SectionLabel>
-        <div className="relative">
-          <Textarea rows={2} value={noteText} onChange={(e) => setNoteText(e.target.value.slice(0, 200))} enterKeyHint="done" maxLength={200} placeholder="" className="rounded-2xl border-border bg-card shadow-soft pr-14" />
-          <span className="absolute bottom-2 right-3 text-[10px] text-muted-foreground tabular-nums">{noteText.length}/200</span>
-        </div>
-      </section>
+      {/* Catatan accordion */}
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <button type="button" className="tap w-full flex items-center justify-between rounded-2xl bg-card border border-border shadow-soft px-4 py-3 text-sm text-muted-foreground hover:text-foreground [&[data-state=open]>svg]:rotate-90">
+            <span className="inline-flex items-center gap-2">
+              <StickyNote className="h-4 w-4" />
+              {noteText.trim() ? "Catatan" : "Tambah catatan"}
+            </span>
+            <ChevronRight className="h-4 w-4 transition-transform" />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-2">
+          <div className="relative">
+            <Textarea rows={2} value={noteText} onChange={(e) => setNoteText(e.target.value.slice(0, 200))} enterKeyHint="done" maxLength={200} placeholder="" className="rounded-2xl border-border bg-card shadow-soft pr-14" />
+            <span className="absolute bottom-2 right-3 text-[10px] text-muted-foreground tabular-nums">{noteText.length}/200</span>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Summary */}
       <div className="rounded-2xl bg-card border border-border shadow-soft p-3 space-y-1.5 text-sm">
