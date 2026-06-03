@@ -60,7 +60,7 @@ export function AppShell() {
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}
       >
         <div className="mx-auto w-full max-w-md px-3 pointer-events-auto">
-          <div className="grid grid-cols-4 gap-1 rounded-full bg-card/95 backdrop-blur-md border border-border shadow-nav p-2">
+          <div className="grid grid-cols-4 gap-1 rounded-full bg-primary text-primary-foreground backdrop-blur-md border border-primary/40 shadow-nav p-2">
             {tabs.map((tab) => (
               <TabButton key={tab.to} tab={tab} pathname={pathname} />
             ))}
