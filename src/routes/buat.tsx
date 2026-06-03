@@ -393,14 +393,14 @@ function BuatPage() {
       </section>
 
       {/* Catatan accordion */}
-      <Collapsible defaultOpen={false}>
+      <Collapsible>
         <CollapsibleTrigger asChild>
-          <button type="button" className="tap w-full flex items-center justify-between rounded-2xl bg-card border border-border shadow-soft px-4 py-3 text-sm text-muted-foreground hover:text-foreground">
+          <button type="button" className="tap w-full flex items-center justify-between rounded-2xl bg-card border border-border shadow-soft px-4 py-3 text-sm text-muted-foreground hover:text-foreground [&[data-state=open]>svg]:rotate-90">
             <span className="inline-flex items-center gap-2">
               <StickyNote className="h-4 w-4" />
               {noteText.trim() ? "Catatan" : "Tambah catatan"}
             </span>
-            <ChevronRight className="h-4 w-4 transition-transform data-[state=open]:rotate-90" />
+            <ChevronRight className="h-4 w-4 transition-transform" />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-2">
