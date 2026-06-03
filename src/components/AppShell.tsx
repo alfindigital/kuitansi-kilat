@@ -60,7 +60,7 @@ export function AppShell() {
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 8px)" }}
       >
         <div className="mx-auto w-full max-w-md px-3 pointer-events-auto">
-          <div className="grid grid-cols-4 gap-1 rounded-full bg-card/95 backdrop-blur-md border border-border shadow-nav p-2">
+          <div className="grid grid-cols-4 gap-1 rounded-full bg-primary text-primary-foreground backdrop-blur-md border border-primary/40 shadow-nav p-2">
             {tabs.map((tab) => (
               <TabButton key={tab.to} tab={tab} pathname={pathname} />
             ))}
@@ -81,7 +81,7 @@ function TabButton({ tab, pathname }: { tab: typeof tabs[number]; pathname: stri
       to={tab.to}
       className={cn(
         "tap flex flex-col items-center justify-center gap-0.5 py-2.5 rounded-2xl text-[11px] font-medium",
-        active ? "text-primary" : "text-muted-foreground",
+        active ? "text-primary-foreground" : "text-primary-foreground/60",
       )}
     >
       <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
