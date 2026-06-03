@@ -23,7 +23,6 @@ export const Route = createFileRoute("/")({
 });
 
 function Beranda() {
-  const qc = useQueryClient();
   const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
   const { data: business } = useQuery({ queryKey: ["business"], queryFn: () => db.getBusiness() });
   const { data: prefs } = useQuery({ queryKey: ["prefs"], queryFn: () => db.getPrefs() });
@@ -34,10 +33,6 @@ function Beranda() {
   const missingCost = useMemo(() => hasMissingCost(notes), [notes]);
   const hide = !!prefs?.hideAmounts;
 
-  const toggleHide = useMutation({
-    mutationFn: async () => { await db.setPrefs({ hideAmounts: !hide }); },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["prefs"] }),
-  });
 
   return (
     <div className="space-y-5">
