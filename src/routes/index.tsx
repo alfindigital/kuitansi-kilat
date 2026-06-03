@@ -41,31 +41,7 @@ function Beranda() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="t-h1">
-            {business?.name?.trim() || "Notaku"}
-            <span className="sr-only"> — Catat & Cetak Struk UMKM</span>
-          </h1>
-          <p className="t-caption">{formatDateID(new Date().toISOString())}</p>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => toggleHide.mutate()}
-            aria-label={hide ? "Tampilkan nominal" : "Sembunyikan nominal"}
-            className="tap tap-target inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
-          >
-            {hide ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-          </button>
-          <Link
-            to="/pengaturan"
-            aria-label="Pengaturan"
-            className="tap tap-target inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
-          >
-            <SettingsIcon className="h-5 w-5" />
-          </Link>
-        </div>
-      </div>
+      <h1 className="sr-only">{business?.name?.trim() || "Notaku"} — Catat & Cetak Struk UMKM</h1>
 
       <div className="relative grid grid-cols-2 rounded-full bg-surface p-1 text-sm">
         {(["today", "month"] as const).map((r) => (
