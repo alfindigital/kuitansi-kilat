@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 
 type SearchParams = { edit?: string; from?: string };
@@ -81,19 +82,26 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 function DateChip({ date, onChange }: { date: string; onChange: (v: string) => void }) {
-  const ref = useRef<HTMLInputElement>(null);
-  const text = new Date(date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short" });
-  function open() {
-    const el = ref.current; if (!el) return;
-    type WithPicker = HTMLInputElement & { showPicker?: () => void };
-    const p = (el as WithPicker).showPicker;
-    if (typeof p === "function") p.call(el); else el.click();
-  }
+  const [open, setOpen] = useState(false);
+  const d = new Date(date + "T00:00:00");
+  const text = d.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
   return (
-    <button type="button" onClick={open} className="tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-[12px] text-foreground shadow-soft hover:bg-accent">
-      <Calendar className="h-3.5 w-3.5" /><span>{text}</span>
-      <input ref={ref} type="date" value={date} onChange={(e) => onChange(e.target.value)} className="sr-only" tabIndex={-1} aria-hidden />
-    </button>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button type="button" className="tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-[12px] text-foreground shadow-soft hover:bg-accent">
+          <Calendar className="h-3.5 w-3.5" /><span>{text}</span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="end">
+        <CalendarPicker
+          mode="single"
+          selected={d}
+          onSelect={(picked) => { if (picked) { onChange(toDateInput(picked.toISOString())); setOpen(false); } }}
+          initialFocus
+          className="p-3 pointer-events-auto"
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -346,70 +354,37 @@ function BuatPage() {
         </div>
 
         <div className="space-y-2">
-          {items.map((it, i) => (
-            <ItemRow key={i} item={it} onChange={(p) => updateItem(i, p)} onRemove={items.length > 1 ? () => removeItem(i) : undefined} />
-          ))}
+          {items.map((it, i) => {
+            const isPreset = presets.some((p) => p.name.trim().toLowerCase() === it.name.trim().toLowerCase() && p.price === it.price);
+            const canSave = !!it.name.trim() && it.price > 0 && !isPreset;
+            return (
+              <ItemRow
+                key={i}
+                item={it}
+                onChange={(p) => updateItem(i, p)}
+                onRemove={items.length > 1 ? () => removeItem(i) : undefined}
+                onSavePreset={canSave ? () => savePresetMutation.mutate(it) : undefined}
+                isPreset={isPreset}
+              />
+            );
+          })}
         </div>
         <button type="button" onClick={addRow} className="tap w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm text-muted-foreground hover:text-foreground rounded-2xl border border-dashed border-border">
           <Plus className="h-4 w-4" /> Tambah
         </button>
       </section>
 
-      {/* Discount tag */}
-      {discount > 0 ? (
-        <div className="flex items-center gap-2 -mt-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs">
-            Diskon {formatIDR(discount)}
-            <button type="button" onClick={() => setDiscount(0)} aria-label="Hapus diskon" className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
-          </span>
-        </div>
-      ) : (
-        <Popover>
-          <PopoverTrigger asChild>
-            <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-card border border-border border-dashed px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground shadow-soft -mt-2">
-              <Plus className="h-3 w-3" /> Diskon
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-60 p-2" align="start">
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
-              <Input
-                inputMode="decimal" enterKeyHint="done" placeholder="0"
-                value={discount || ""}
-                onChange={(e) => setDiscount(parseIDRInput(e.target.value))}
-                onFocus={(e) => e.target.select()}
-                className="h-10 rounded-xl border-border bg-card pl-8"
-                autoFocus
-              />
-            </div>
-          </PopoverContent>
-        </Popover>
-      )}
+      {/* Inline chips: Diskon, Tag, Catatan */}
+      <ExtrasRow
+        discount={discount}
+        setDiscount={setDiscount}
+        tags={tags}
+        setTags={setTags}
+        tagSuggestions={allTags.map((t) => t.tag)}
+        noteText={noteText}
+        setNoteText={setNoteText}
+      />
 
-      {/* Tags */}
-      <section className="space-y-1.5">
-        <SectionLabel>Tag</SectionLabel>
-        <TagInput value={tags} onChange={setTags} suggestions={allTags.map((t) => t.tag)} />
-      </section>
-
-      {/* Catatan accordion */}
-      <Collapsible>
-        <CollapsibleTrigger asChild>
-          <button type="button" className="tap w-full flex items-center justify-between rounded-2xl bg-card border border-border shadow-soft px-4 py-3 text-sm text-muted-foreground hover:text-foreground [&[data-state=open]>svg]:rotate-90">
-            <span className="inline-flex items-center gap-2">
-              <StickyNote className="h-4 w-4" />
-              {noteText.trim() ? "Catatan" : "Tambah catatan"}
-            </span>
-            <ChevronRight className="h-4 w-4 transition-transform" />
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-2">
-          <div className="relative">
-            <Textarea rows={2} value={noteText} onChange={(e) => setNoteText(e.target.value.slice(0, 200))} enterKeyHint="done" maxLength={200} placeholder="" className="rounded-2xl border-border bg-card shadow-soft pr-14" />
-            <span className="absolute bottom-2 right-3 text-[10px] text-muted-foreground tabular-nums">{noteText.length}/200</span>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
 
       {/* Summary */}
       <div className="rounded-2xl bg-card border border-border shadow-soft p-3 space-y-1.5 text-sm">
@@ -439,7 +414,7 @@ function Row({ label, value, muted }: { label: React.ReactNode; value: React.Rea
   return <div className={cn("flex justify-between", muted && "text-muted-foreground")}><span>{label}</span><span className="tabular-nums">{value}</span></div>;
 }
 
-function ItemRow({ item, onChange, onRemove }: { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void }) {
+function ItemRow({ item, onChange, onRemove, onSavePreset, isPreset }: { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void; onSavePreset?: () => void; isPreset?: boolean }) {
   const [showCost, setShowCost] = useState(item.cost > 0);
   return (
     <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-2">
@@ -486,10 +461,151 @@ function ItemRow({ item, onChange, onRemove }: { item: NoteItem; onChange: (p: P
       ) : (
         <button type="button" onClick={() => setShowCost(true)} className="text-[11px] text-muted-foreground hover:text-foreground pl-1">+ modal (opsional)</button>
       )}
-      {onRemove && (
-        <button type="button" onClick={() => { tapHaptic(); onRemove(); }} className="tap tap-target absolute top-1 right-1 inline-flex items-center justify-center text-muted-foreground hover:text-destructive rounded-full" aria-label="Hapus baris">
-          <Trash2 className="h-4 w-4" />
-        </button>
+      <div className="absolute top-1 right-1 flex items-center">
+        {onSavePreset && (
+          <button type="button" onClick={() => { tapHaptic(); onSavePreset(); }} className="tap inline-flex items-center justify-center w-9 h-9 text-muted-foreground hover:text-foreground rounded-full" aria-label="Simpan ke preset" title="Simpan ke preset">
+            <BookmarkPlus className="h-4 w-4" />
+          </button>
+        )}
+        {isPreset && !onSavePreset && (
+          <span className="inline-flex items-center justify-center w-9 h-9 text-primary/70" title="Sudah ada di preset" aria-label="Sudah ada di preset">
+            <BookmarkPlus className="h-4 w-4" />
+          </span>
+        )}
+        {onRemove && (
+          <button type="button" onClick={() => { tapHaptic(); onRemove(); }} className="tap inline-flex items-center justify-center w-9 h-9 text-muted-foreground hover:text-destructive rounded-full" aria-label="Hapus baris">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ExtrasRow({
+  discount, setDiscount, tags, setTags, tagSuggestions, noteText, setNoteText,
+}: {
+  discount: number; setDiscount: (n: number) => void;
+  tags: string[]; setTags: (v: string[]) => void; tagSuggestions: string[];
+  noteText: string; setNoteText: (v: string) => void;
+}) {
+  const [tagText, setTagText] = useState("");
+  function addTag(t: string) {
+    const k = t.trim(); if (!k) return;
+    if (tags.includes(k)) return;
+    setTags([...tags, k.slice(0, 20)]); setTagText("");
+  }
+  const sugs = tagSuggestions.filter((s) => !tags.includes(s) && (!tagText || s.toLowerCase().includes(tagText.toLowerCase()))).slice(0, 8);
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {/* Diskon */}
+      {discount > 0 ? (
+        <span className="inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs">
+          Diskon {formatIDR(discount)}
+          <button type="button" onClick={() => setDiscount(0)} aria-label="Hapus diskon" className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
+        </span>
+      ) : (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-card border border-border border-dashed px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground shadow-soft">
+              <Plus className="h-3 w-3" /> Diskon
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-60 p-2" align="start">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
+              <Input
+                inputMode="decimal" enterKeyHint="done" placeholder="0"
+                value={discount || ""}
+                onChange={(e) => setDiscount(parseIDRInput(e.target.value))}
+                onFocus={(e) => e.target.select()}
+                className="h-10 rounded-xl border-border bg-card pl-8"
+                autoFocus
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
+
+      {/* Tags */}
+      {tags.map((t) => (
+        <span key={t} className="inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs">
+          <Tag className="h-3 w-3" /> {t}
+          <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={`Hapus tag ${t}`} className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
+        </span>
+      ))}
+      <Popover>
+        <PopoverTrigger asChild>
+          <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-card border border-border border-dashed px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground shadow-soft">
+            <Plus className="h-3 w-3" /> Tag
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-64 p-2 space-y-2" align="start">
+          <Input
+            value={tagText}
+            onChange={(e) => setTagText(e.target.value.slice(0, 20))}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(tagText); } }}
+            placeholder="Tambah tag…"
+            className="h-9 rounded-xl border-border bg-card"
+            autoFocus
+            maxLength={20}
+          />
+          {sugs.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {sugs.map((s) => (
+                <button key={s} type="button" onClick={() => addTag(s)} className="tap rounded-full bg-surface px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground">+ {s}</button>
+              ))}
+            </div>
+          )}
+        </PopoverContent>
+      </Popover>
+
+      {/* Catatan */}
+      {noteText.trim() ? (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs max-w-[60%]">
+              <StickyNote className="h-3 w-3 shrink-0" />
+              <span className="truncate">{noteText}</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-2 space-y-2" align="start">
+            <Textarea
+              rows={3}
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value.slice(0, 200))}
+              maxLength={200}
+              placeholder="Catatan…"
+              className="rounded-xl border-border bg-card"
+              autoFocus
+            />
+            <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+              <button type="button" onClick={() => setNoteText("")} className="hover:text-destructive">Hapus</button>
+              <span className="tabular-nums">{noteText.length}/200</span>
+            </div>
+          </PopoverContent>
+        </Popover>
+      ) : (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-card border border-border border-dashed px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground shadow-soft">
+              <Plus className="h-3 w-3" /> Catatan
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-2 space-y-2" align="start">
+            <Textarea
+              rows={3}
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value.slice(0, 200))}
+              maxLength={200}
+              placeholder="Catatan…"
+              className="rounded-xl border-border bg-card"
+              autoFocus
+            />
+            <div className="text-right text-[10px] text-muted-foreground tabular-nums">{noteText.length}/200</div>
+          </PopoverContent>
+        </Popover>
       )}
     </div>
   );
