@@ -612,43 +612,7 @@ function ExtrasRow({
   );
 }
 
-function TagInput({ value, onChange, suggestions }: { value: string[]; onChange: (v: string[]) => void; suggestions: string[] }) {
-  const [text, setText] = useState("");
-  function add(t: string) {
-    const k = t.trim(); if (!k) return;
-    if (value.includes(k)) return;
-    onChange([...value, k.slice(0, 20)]); setText("");
-  }
-  function remove(t: string) { onChange(value.filter((x) => x !== t)); }
-  const sugs = suggestions.filter((s) => !value.includes(s) && (!text || s.toLowerCase().includes(text.toLowerCase()))).slice(0, 6);
-  return (
-    <div className="rounded-2xl bg-card border border-border shadow-soft p-2 space-y-2">
-      <div className="flex flex-wrap items-center gap-1.5">
-        {value.map((t) => (
-          <span key={t} className="inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs">
-            <Tag className="h-3 w-3" /> {t}
-            <button onClick={() => remove(t)} aria-label={`Hapus tag ${t}`} className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
-          </span>
-        ))}
-        <input
-          value={text} onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(text); } }}
-          onBlur={() => text.trim() && add(text)}
-          placeholder={value.length ? "" : "mis. catering, jasa, dagangan"}
-          maxLength={20}
-          className="flex-1 min-w-[120px] bg-transparent text-sm h-8 px-2 focus:outline-none"
-        />
-      </div>
-      {sugs.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 px-1 pb-1">
-          {sugs.map((s) => (
-            <button key={s} onClick={() => add(s)} className="tap rounded-full bg-surface px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground">+ {s}</button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+
 
 function ShareSheet({ note, business, onClose, onOpenDetail }: { note: Note; business: import("@/lib/storage").Business; onClose: () => void; onOpenDetail: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
