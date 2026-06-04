@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, FilePlus2 } from "lucide-react";
-import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts";
+
+const OmsetChart = lazy(() => import("@/components/OmsetChart"));
 
 import { db, aggregate, dailyBuckets, calcNoteTotals, hasMissingCost } from "@/lib/storage";
 import { formatIDR, formatDateID } from "@/lib/format";
