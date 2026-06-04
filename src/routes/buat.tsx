@@ -1,11 +1,10 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback, memo, lazy, Suspense } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plus, Trash2, X, Check, MessageCircle, ArrowLeft,
-  Image as ImageIcon, Copy, ChevronDown, ChevronRight, Calendar, BookmarkPlus, Tag, StickyNote,
+  Image as ImageIcon, Copy, ChevronDown, Calendar, BookmarkPlus, Tag, StickyNote,
 } from "lucide-react";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { toast } from "sonner";
 
 import {
@@ -23,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarPicker } from "@/components/ui/calendar";
+const CalendarPicker = lazy(() => import("@/components/ui/calendar").then((m) => ({ default: m.Calendar })));
 import { cn } from "@/lib/utils";
 
 type SearchParams = { edit?: string; from?: string };
@@ -93,13 +92,15 @@ function DateChip({ date, onChange }: { date: string; onChange: (v: string) => v
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="end">
-        <CalendarPicker
-          mode="single"
-          selected={d}
-          onSelect={(picked) => { if (picked) { onChange(toDateInput(picked.toISOString())); setOpen(false); } }}
-          initialFocus
-          className="p-3 pointer-events-auto"
-        />
+        <Suspense fallback={<div className="p-6 text-xs text-muted-foreground">Memuat…</div>}>
+          <CalendarPicker
+            mode="single"
+            selected={d}
+            onSelect={(picked) => { if (picked) { onChange(toDateInput(picked.toISOString())); setOpen(false); } }}
+            initialFocus
+            className="p-3 pointer-events-auto"
+          />
+        </Suspense>
       </PopoverContent>
     </Popover>
   );
@@ -414,7 +415,7 @@ function Row({ label, value, muted }: { label: React.ReactNode; value: React.Rea
   return <div className={cn("flex justify-between", muted && "text-muted-foreground")}><span>{label}</span><span className="tabular-nums">{value}</span></div>;
 }
 
-function ItemRow({ item, onChange, onRemove, onSavePreset, isPreset }: { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void; onSavePreset?: () => void; isPreset?: boolean }) {
+const ItemRow = memo(function ItemRow({ item, onChange, onRemove, onSavePreset, isPreset }: { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void; onSavePreset?: () => void; isPreset?: boolean }) {
   const [showCost, setShowCost] = useState(item.cost > 0);
   return (
     <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-2">
@@ -480,7 +481,7 @@ function ItemRow({ item, onChange, onRemove, onSavePreset, isPreset }: { item: N
       </div>
     </div>
   );
-}
+});
 
 function ExtrasRow({
   discount, setDiscount, tags, setTags, tagSuggestions, noteText, setNoteText,
@@ -611,43 +612,7 @@ function ExtrasRow({
   );
 }
 
-function TagInput({ value, onChange, suggestions }: { value: string[]; onChange: (v: string[]) => void; suggestions: string[] }) {
-  const [text, setText] = useState("");
-  function add(t: string) {
-    const k = t.trim(); if (!k) return;
-    if (value.includes(k)) return;
-    onChange([...value, k.slice(0, 20)]); setText("");
-  }
-  function remove(t: string) { onChange(value.filter((x) => x !== t)); }
-  const sugs = suggestions.filter((s) => !value.includes(s) && (!text || s.toLowerCase().includes(text.toLowerCase()))).slice(0, 6);
-  return (
-    <div className="rounded-2xl bg-card border border-border shadow-soft p-2 space-y-2">
-      <div className="flex flex-wrap items-center gap-1.5">
-        {value.map((t) => (
-          <span key={t} className="inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs">
-            <Tag className="h-3 w-3" /> {t}
-            <button onClick={() => remove(t)} aria-label={`Hapus tag ${t}`} className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
-          </span>
-        ))}
-        <input
-          value={text} onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(text); } }}
-          onBlur={() => text.trim() && add(text)}
-          placeholder={value.length ? "" : "mis. catering, jasa, dagangan"}
-          maxLength={20}
-          className="flex-1 min-w-[120px] bg-transparent text-sm h-8 px-2 focus:outline-none"
-        />
-      </div>
-      {sugs.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 px-1 pb-1">
-          {sugs.map((s) => (
-            <button key={s} onClick={() => add(s)} className="tap rounded-full bg-surface px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground">+ {s}</button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+
 
 function ShareSheet({ note, business, onClose, onOpenDetail }: { note: Note; business: import("@/lib/storage").Business; onClose: () => void; onOpenDetail: () => void }) {
   const ref = useRef<HTMLDivElement>(null);

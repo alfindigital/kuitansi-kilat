@@ -1,19 +1,56 @@
-import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts";
+import { memo, useState } from "react";
 import { formatIDR, formatDateID } from "@/lib/format";
 
-export default function OmsetChart({ buckets }: { buckets: { date: string; omset: number }[] }) {
+type Bucket = { date: string; omset: number };
+
+function OmsetChart({ buckets }: { buckets: Bucket[] }) {
+  const [hover, setHover] = useState<number | null>(null);
+  const max = Math.max(1, ...buckets.map((b) => b.omset));
+  const n = buckets.length || 1;
+  const W = 100;
+  const H = 100;
+  const gap = 2;
+  const bw = (W - gap * (n - 1)) / n;
+
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={buckets}>
-        <XAxis dataKey="date" hide />
-        <Tooltip
-          cursor={{ fill: "rgba(0,0,0,0.04)" }}
-          contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", background: "var(--popover)", fontSize: 12 }}
-          formatter={(v: number) => [formatIDR(v), "Omset"]}
-          labelFormatter={(l: string) => formatDateID(l + "T00:00:00")}
-        />
-        <Bar dataKey="omset" radius={[6, 6, 0, 0]} fill="var(--primary)" />
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="relative h-full w-full">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        preserveAspectRatio="none"
+        className="h-full w-full"
+        onMouseLeave={() => setHover(null)}
+      >
+        {buckets.map((b, i) => {
+          const h = (b.omset / max) * (H - 4);
+          const x = i * (bw + gap);
+          const y = H - h;
+          return (
+            <rect
+              key={b.date}
+              x={x}
+              y={y}
+              width={bw}
+              height={Math.max(h, b.omset > 0 ? 1 : 0)}
+              rx={1.2}
+              fill="var(--primary)"
+              opacity={hover === null || hover === i ? 1 : 0.5}
+              onMouseEnter={() => setHover(i)}
+              onTouchStart={() => setHover(i)}
+            />
+          );
+        })}
+      </svg>
+      {hover !== null && buckets[hover] && (
+        <div
+          className="pointer-events-none absolute top-0 -translate-x-1/2 rounded-lg border border-border bg-popover px-2 py-1 text-[11px] shadow-soft"
+          style={{ left: `${((hover + 0.5) / n) * 100}%` }}
+        >
+          <div className="text-muted-foreground">{formatDateID(buckets[hover].date + "T00:00:00")}</div>
+          <div className="font-medium">{formatIDR(buckets[hover].omset)}</div>
+        </div>
+      )}
+    </div>
   );
 }
+
+export default memo(OmsetChart);
