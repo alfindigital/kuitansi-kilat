@@ -481,7 +481,7 @@ const ItemRow = memo(function ItemRow({ item, onChange, onRemove, onSavePreset, 
       </div>
     </div>
   );
-}
+});
 
 function ExtrasRow({
   discount, setDiscount, tags, setTags, tagSuggestions, noteText, setNoteText,
