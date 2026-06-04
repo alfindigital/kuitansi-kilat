@@ -415,7 +415,7 @@ function Row({ label, value, muted }: { label: React.ReactNode; value: React.Rea
   return <div className={cn("flex justify-between", muted && "text-muted-foreground")}><span>{label}</span><span className="tabular-nums">{value}</span></div>;
 }
 
-function ItemRow({ item, onChange, onRemove, onSavePreset, isPreset }: { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void; onSavePreset?: () => void; isPreset?: boolean }) {
+const ItemRow = memo(function ItemRow({ item, onChange, onRemove, onSavePreset, isPreset }: { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void; onSavePreset?: () => void; isPreset?: boolean }) {
   const [showCost, setShowCost] = useState(item.cost > 0);
   return (
     <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-2">
