@@ -81,19 +81,26 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 function DateChip({ date, onChange }: { date: string; onChange: (v: string) => void }) {
-  const ref = useRef<HTMLInputElement>(null);
-  const text = new Date(date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short" });
-  function open() {
-    const el = ref.current; if (!el) return;
-    type WithPicker = HTMLInputElement & { showPicker?: () => void };
-    const p = (el as WithPicker).showPicker;
-    if (typeof p === "function") p.call(el); else el.click();
-  }
+  const [open, setOpen] = useState(false);
+  const d = new Date(date + "T00:00:00");
+  const text = d.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
   return (
-    <button type="button" onClick={open} className="tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-[12px] text-foreground shadow-soft hover:bg-accent">
-      <Calendar className="h-3.5 w-3.5" /><span>{text}</span>
-      <input ref={ref} type="date" value={date} onChange={(e) => onChange(e.target.value)} className="sr-only" tabIndex={-1} aria-hidden />
-    </button>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button type="button" className="tap inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-[12px] text-foreground shadow-soft hover:bg-accent">
+          <Calendar className="h-3.5 w-3.5" /><span>{text}</span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="end">
+        <CalendarPicker
+          mode="single"
+          selected={d}
+          onSelect={(picked) => { if (picked) { onChange(toDateInput(picked.toISOString())); setOpen(false); } }}
+          initialFocus
+          className="p-3 pointer-events-auto"
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
 
