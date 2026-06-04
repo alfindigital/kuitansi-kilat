@@ -79,6 +79,7 @@ function TabButton({ tab, pathname }: { tab: typeof tabs[number]; pathname: stri
   return (
     <Link
       to={tab.to}
+      preload="render"
       className={cn(
         "tap relative flex flex-col items-center justify-center gap-0.5 py-2 rounded-full text-[11px] font-medium transition-colors",
         active
