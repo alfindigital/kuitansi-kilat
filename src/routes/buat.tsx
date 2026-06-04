@@ -92,13 +92,15 @@ function DateChip({ date, onChange }: { date: string; onChange: (v: string) => v
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="end">
-        <CalendarPicker
-          mode="single"
-          selected={d}
-          onSelect={(picked) => { if (picked) { onChange(toDateInput(picked.toISOString())); setOpen(false); } }}
-          initialFocus
-          className="p-3 pointer-events-auto"
-        />
+        <Suspense fallback={<div className="p-6 text-xs text-muted-foreground">Memuat…</div>}>
+          <CalendarPicker
+            mode="single"
+            selected={d}
+            onSelect={(picked) => { if (picked) { onChange(toDateInput(picked.toISOString())); setOpen(false); } }}
+            initialFocus
+            className="p-3 pointer-events-auto"
+          />
+        </Suspense>
       </PopoverContent>
     </Popover>
   );
