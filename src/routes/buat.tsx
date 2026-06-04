@@ -461,10 +461,151 @@ function ItemRow({ item, onChange, onRemove, onSavePreset, isPreset }: { item: N
       ) : (
         <button type="button" onClick={() => setShowCost(true)} className="text-[11px] text-muted-foreground hover:text-foreground pl-1">+ modal (opsional)</button>
       )}
-      {onRemove && (
-        <button type="button" onClick={() => { tapHaptic(); onRemove(); }} className="tap tap-target absolute top-1 right-1 inline-flex items-center justify-center text-muted-foreground hover:text-destructive rounded-full" aria-label="Hapus baris">
-          <Trash2 className="h-4 w-4" />
-        </button>
+      <div className="absolute top-1 right-1 flex items-center">
+        {onSavePreset && (
+          <button type="button" onClick={() => { tapHaptic(); onSavePreset(); }} className="tap inline-flex items-center justify-center w-9 h-9 text-muted-foreground hover:text-foreground rounded-full" aria-label="Simpan ke preset" title="Simpan ke preset">
+            <BookmarkPlus className="h-4 w-4" />
+          </button>
+        )}
+        {isPreset && !onSavePreset && (
+          <span className="inline-flex items-center justify-center w-9 h-9 text-primary/70" title="Sudah ada di preset" aria-label="Sudah ada di preset">
+            <BookmarkPlus className="h-4 w-4" />
+          </span>
+        )}
+        {onRemove && (
+          <button type="button" onClick={() => { tapHaptic(); onRemove(); }} className="tap inline-flex items-center justify-center w-9 h-9 text-muted-foreground hover:text-destructive rounded-full" aria-label="Hapus baris">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ExtrasRow({
+  discount, setDiscount, tags, setTags, tagSuggestions, noteText, setNoteText,
+}: {
+  discount: number; setDiscount: (n: number) => void;
+  tags: string[]; setTags: (v: string[]) => void; tagSuggestions: string[];
+  noteText: string; setNoteText: (v: string) => void;
+}) {
+  const [tagText, setTagText] = useState("");
+  function addTag(t: string) {
+    const k = t.trim(); if (!k) return;
+    if (tags.includes(k)) return;
+    setTags([...tags, k.slice(0, 20)]); setTagText("");
+  }
+  const sugs = tagSuggestions.filter((s) => !tags.includes(s) && (!tagText || s.toLowerCase().includes(tagText.toLowerCase()))).slice(0, 8);
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {/* Diskon */}
+      {discount > 0 ? (
+        <span className="inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs">
+          Diskon {formatIDR(discount)}
+          <button type="button" onClick={() => setDiscount(0)} aria-label="Hapus diskon" className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
+        </span>
+      ) : (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-card border border-border border-dashed px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground shadow-soft">
+              <Plus className="h-3 w-3" /> Diskon
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-60 p-2" align="start">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
+              <Input
+                inputMode="decimal" enterKeyHint="done" placeholder="0"
+                value={discount || ""}
+                onChange={(e) => setDiscount(parseIDRInput(e.target.value))}
+                onFocus={(e) => e.target.select()}
+                className="h-10 rounded-xl border-border bg-card pl-8"
+                autoFocus
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
+
+      {/* Tags */}
+      {tags.map((t) => (
+        <span key={t} className="inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs">
+          <Tag className="h-3 w-3" /> {t}
+          <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={`Hapus tag ${t}`} className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
+        </span>
+      ))}
+      <Popover>
+        <PopoverTrigger asChild>
+          <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-card border border-border border-dashed px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground shadow-soft">
+            <Plus className="h-3 w-3" /> Tag
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-64 p-2 space-y-2" align="start">
+          <Input
+            value={tagText}
+            onChange={(e) => setTagText(e.target.value.slice(0, 20))}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(tagText); } }}
+            placeholder="Tambah tag…"
+            className="h-9 rounded-xl border-border bg-card"
+            autoFocus
+            maxLength={20}
+          />
+          {sugs.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {sugs.map((s) => (
+                <button key={s} type="button" onClick={() => addTag(s)} className="tap rounded-full bg-surface px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground">+ {s}</button>
+              ))}
+            </div>
+          )}
+        </PopoverContent>
+      </Popover>
+
+      {/* Catatan */}
+      {noteText.trim() ? (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs max-w-[60%]">
+              <StickyNote className="h-3 w-3 shrink-0" />
+              <span className="truncate">{noteText}</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-2 space-y-2" align="start">
+            <Textarea
+              rows={3}
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value.slice(0, 200))}
+              maxLength={200}
+              placeholder="Catatan…"
+              className="rounded-xl border-border bg-card"
+              autoFocus
+            />
+            <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+              <button type="button" onClick={() => setNoteText("")} className="hover:text-destructive">Hapus</button>
+              <span className="tabular-nums">{noteText.length}/200</span>
+            </div>
+          </PopoverContent>
+        </Popover>
+      ) : (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-card border border-border border-dashed px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground shadow-soft">
+              <Plus className="h-3 w-3" /> Catatan
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-2 space-y-2" align="start">
+            <Textarea
+              rows={3}
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value.slice(0, 200))}
+              maxLength={200}
+              placeholder="Catatan…"
+              className="rounded-xl border-border bg-card"
+              autoFocus
+            />
+            <div className="text-right text-[10px] text-muted-foreground tabular-nums">{noteText.length}/200</div>
+          </PopoverContent>
+        </Popover>
       )}
     </div>
   );
