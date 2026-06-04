@@ -354,70 +354,37 @@ function BuatPage() {
         </div>
 
         <div className="space-y-2">
-          {items.map((it, i) => (
-            <ItemRow key={i} item={it} onChange={(p) => updateItem(i, p)} onRemove={items.length > 1 ? () => removeItem(i) : undefined} />
-          ))}
+          {items.map((it, i) => {
+            const isPreset = presets.some((p) => p.name.trim().toLowerCase() === it.name.trim().toLowerCase() && p.price === it.price);
+            const canSave = !!it.name.trim() && it.price > 0 && !isPreset;
+            return (
+              <ItemRow
+                key={i}
+                item={it}
+                onChange={(p) => updateItem(i, p)}
+                onRemove={items.length > 1 ? () => removeItem(i) : undefined}
+                onSavePreset={canSave ? () => savePresetMutation.mutate(it) : undefined}
+                isPreset={isPreset}
+              />
+            );
+          })}
         </div>
         <button type="button" onClick={addRow} className="tap w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm text-muted-foreground hover:text-foreground rounded-2xl border border-dashed border-border">
           <Plus className="h-4 w-4" /> Tambah
         </button>
       </section>
 
-      {/* Discount tag */}
-      {discount > 0 ? (
-        <div className="flex items-center gap-2 -mt-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs">
-            Diskon {formatIDR(discount)}
-            <button type="button" onClick={() => setDiscount(0)} aria-label="Hapus diskon" className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
-          </span>
-        </div>
-      ) : (
-        <Popover>
-          <PopoverTrigger asChild>
-            <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-card border border-border border-dashed px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground shadow-soft -mt-2">
-              <Plus className="h-3 w-3" /> Diskon
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-60 p-2" align="start">
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
-              <Input
-                inputMode="decimal" enterKeyHint="done" placeholder="0"
-                value={discount || ""}
-                onChange={(e) => setDiscount(parseIDRInput(e.target.value))}
-                onFocus={(e) => e.target.select()}
-                className="h-10 rounded-xl border-border bg-card pl-8"
-                autoFocus
-              />
-            </div>
-          </PopoverContent>
-        </Popover>
-      )}
+      {/* Inline chips: Diskon, Tag, Catatan */}
+      <ExtrasRow
+        discount={discount}
+        setDiscount={setDiscount}
+        tags={tags}
+        setTags={setTags}
+        tagSuggestions={allTags.map((t) => t.tag)}
+        noteText={noteText}
+        setNoteText={setNoteText}
+      />
 
-      {/* Tags */}
-      <section className="space-y-1.5">
-        <SectionLabel>Tag</SectionLabel>
-        <TagInput value={tags} onChange={setTags} suggestions={allTags.map((t) => t.tag)} />
-      </section>
-
-      {/* Catatan accordion */}
-      <Collapsible>
-        <CollapsibleTrigger asChild>
-          <button type="button" className="tap w-full flex items-center justify-between rounded-2xl bg-card border border-border shadow-soft px-4 py-3 text-sm text-muted-foreground hover:text-foreground [&[data-state=open]>svg]:rotate-90">
-            <span className="inline-flex items-center gap-2">
-              <StickyNote className="h-4 w-4" />
-              {noteText.trim() ? "Catatan" : "Tambah catatan"}
-            </span>
-            <ChevronRight className="h-4 w-4 transition-transform" />
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-2">
-          <div className="relative">
-            <Textarea rows={2} value={noteText} onChange={(e) => setNoteText(e.target.value.slice(0, 200))} enterKeyHint="done" maxLength={200} placeholder="" className="rounded-2xl border-border bg-card shadow-soft pr-14" />
-            <span className="absolute bottom-2 right-3 text-[10px] text-muted-foreground tabular-nums">{noteText.length}/200</span>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
 
       {/* Summary */}
       <div className="rounded-2xl bg-card border border-border shadow-soft p-3 space-y-1.5 text-sm">
