@@ -1,11 +1,17 @@
-// Notaku service worker — simple offline-first shell + NetworkFirst for HTML.
-// Bump CACHE_VERSION to invalidate caches on deploys.
-const CACHE_VERSION = "notaku-v1";
+// Notaku service worker — stale-while-revalidate untuk app shell.
+// Strategi: cache instant utk first paint, fetch di background utk update.
+// Bump CACHE_VERSION untuk invalidate cache saat deploy.
+const CACHE_VERSION = "notaku-v2";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
+const PAGE_CACHE = `${CACHE_VERSION}-pages`;
 
+// Precache route HTML utama biar /, /buat, dll instan saat offline / koneksi jelek.
 const PRECACHE_URLS = [
   "/",
+  "/buat",
+  "/riwayat",
+  "/pengaturan",
   "/manifest.json",
   "/icon-192.png",
   "/icon-512.png",
@@ -14,10 +20,18 @@ const PRECACHE_URLS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(STATIC_CACHE)
-      .then((cache) => cache.addAll(PRECACHE_URLS).catch(() => undefined))
-      .then(() => self.skipWaiting()),
+    (async () => {
+      const cache = await caches.open(STATIC_CACHE);
+      // addAll gagal kalau salah satu 404; jalankan satu-satu biar resilient.
+      await Promise.all(
+        PRECACHE_URLS.map((u) =>
+          fetch(u, { cache: "reload" })
+            .then((res) => (res.ok ? cache.put(u, res) : undefined))
+            .catch(() => undefined),
+        ),
+      );
+      await self.skipWaiting();
+    })(),
   );
 });
 
@@ -26,9 +40,7 @@ self.addEventListener("activate", (event) => {
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
-        keys
-          .filter((k) => !k.startsWith(CACHE_VERSION))
-          .map((k) => caches.delete(k)),
+        keys.filter((k) => !k.startsWith(CACHE_VERSION)).map((k) => caches.delete(k)),
       );
       await self.clients.claim();
     })(),
@@ -46,30 +58,38 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  // Never cache API/server-fn endpoints
+  // Jangan pernah cache API / server-fn endpoints
   if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/_server")) return;
 
-  // NetworkFirst for HTML navigations (always serve fresh app shell when online)
+  // Stale-While-Revalidate untuk HTML navigations.
+  // Serve cache instan (≤ 1 round-trip), update di background biar deploy berikut fresh.
   if (req.mode === "navigate") {
     event.respondWith(
       (async () => {
-        try {
-          const fresh = await fetch(req);
-          const cache = await caches.open(RUNTIME_CACHE);
-          cache.put(req, fresh.clone()).catch(() => undefined);
-          return fresh;
-        } catch {
-          const cached = await caches.match(req);
-          if (cached) return cached;
-          const fallback = await caches.match("/");
-          return fallback || Response.error();
+        const cache = await caches.open(PAGE_CACHE);
+        const cached = await cache.match(req) || await caches.match(req) || await caches.match("/");
+
+        const networkPromise = fetch(req)
+          .then((fresh) => {
+            if (fresh && fresh.ok) cache.put(req, fresh.clone()).catch(() => undefined);
+            return fresh;
+          })
+          .catch(() => null);
+
+        // Kalau ada cache → return langsung (instan). Update di background.
+        if (cached) {
+          event.waitUntil(networkPromise);
+          return cached;
         }
+        // Belum ada cache → tunggu network; fallback ke "/" kalau gagal total.
+        const fresh = await networkPromise;
+        return fresh || (await caches.match("/")) || Response.error();
       })(),
     );
     return;
   }
 
-  // CacheFirst for static assets (immutable hashed files, images, fonts)
+  // CacheFirst untuk static assets (hashed JS/CSS, images, fonts) — immutable.
   const dest = req.destination;
   if (["style", "script", "image", "font"].includes(dest)) {
     event.respondWith(
