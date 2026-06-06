@@ -234,12 +234,17 @@ export const db = {
     };
   },
   async importAll(data: unknown, mode: "merge" | "replace" = "replace") {
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      throw new Error("Format tidak valid.");
+    }
     // Be lenient: also accept legacy flat exports.
     let parsed: Backup["data"];
-    if (data && typeof data === "object" && (data as Loose).app === "notaku" && (data as Loose).data) {
+    if ((data as Loose).app === "notaku" && (data as Loose).data) {
       parsed = BackupSchema.parse(data).data;
     } else {
-      const r = (data ?? {}) as Loose;
+      const r = data as Loose;
+      const hasAnyKey = ["business", "presets", "notes", "seq", "prefs"].some((k) => k in r);
+      if (!hasAnyKey) throw new Error("Format tidak valid.");
       parsed = {
         business: migrateBusiness(r.business),
         presets: Array.isArray(r.presets) ? (r.presets as unknown[]).map(migratePreset).filter((x): x is Preset => !!x) : [],
