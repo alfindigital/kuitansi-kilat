@@ -22,7 +22,7 @@ export const Receipt = forwardRef<HTMLDivElement, Props>(function Receipt({ note
     >
       <div style={{ textAlign: "center", marginBottom: 10 }}>
         {business.logo ? (
-          <img src={business.logo} alt="" style={{ height: 40, margin: "0 auto 6px", display: "block" }} />
+          <img src={business.logo} alt="" role="presentation" style={{ height: 40, margin: "0 auto 6px", display: "block" }} />
         ) : null}
         {business.name ? (
           <div style={{ fontWeight: 700, fontSize: 14, letterSpacing: "-0.01em" }}>{business.name}</div>

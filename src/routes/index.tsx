@@ -39,11 +39,13 @@ function Beranda() {
     <div className="space-y-5">
       <h1 className="sr-only">{business?.name?.trim() || "Notaku"} — Catat & Cetak Struk UMKM</h1>
 
-      <div className="relative grid grid-cols-2 rounded-full bg-surface p-1 text-sm">
+      <div className="relative grid grid-cols-2 rounded-full bg-surface p-1 text-sm" role="tablist">
         {(["today", "month"] as const).map((r) => (
           <button
             key={r}
             type="button"
+            role="tab"
+            aria-selected={range === r}
             onClick={() => setRange(r)}
             className={
               "tap min-h-9 rounded-full font-medium " +
