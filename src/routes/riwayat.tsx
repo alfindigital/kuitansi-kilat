@@ -14,13 +14,30 @@ const PERIODS: { id: Period; label: string }[] = [
 export const Route = createFileRoute("/riwayat")({
   head: () => ({
     meta: [
-      { title: "Riwayat — Notaku" },
-      { name: "description", content: "Riwayat nota, filter tanggal & tag, rekap omset & laba." },
-      { property: "og:title", content: "Riwayat — Notaku" },
-      { property: "og:description", content: "Lihat dan filter riwayat nota transaksi bisnis UMKM." },
+      { title: "Riwayat Nota & Rekap Omset Harian UMKM · Notaku" },
+      { name: "description", content: "Lihat semua nota tersimpan, rekap omset harian dan bulanan, plus laba kotor usaha kamu. Filter cepat per tanggal dan tag — semua di HP." },
+      { property: "og:title", content: "Riwayat Nota & Rekap Omset Harian UMKM · Notaku" },
+      { property: "og:description", content: "Lihat semua nota tersimpan, rekap omset harian dan bulanan, plus laba kotor usaha kamu. Filter cepat per tanggal dan tag." },
       { property: "og:url", content: "https://notaq.lovable.app/riwayat" },
+      { property: "og:image", content: "https://notaq.lovable.app/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { name: "twitter:image", content: "https://notaq.lovable.app/og-image.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://notaq.lovable.app/riwayat" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Beranda", item: "https://notaq.lovable.app/" },
+            { "@type": "ListItem", position: 2, name: "Riwayat", item: "https://notaq.lovable.app/riwayat" },
+          ],
+        }),
+      },
+    ],
   }),
 
   component: RiwayatPage,
@@ -83,7 +100,7 @@ function RiwayatList() {
 
   return (
     <div className="space-y-4">
-      <h1 className="sr-only">Riwayat</h1>
+      <h1 className="sr-only">Riwayat Nota & Rekap Omset Harian</h1>
 
       <div className="rounded-2xl bg-card border border-border shadow-soft p-4 grid grid-cols-3 gap-2">
         <Stat label="Nota" value={String(summary.count)} />
