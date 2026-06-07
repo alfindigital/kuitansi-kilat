@@ -15,13 +15,30 @@ import { Label } from "@/components/ui/label";
 export const Route = createFileRoute("/pengaturan")({
   head: () => ({
     meta: [
-      { title: "Pengaturan — Notaku" },
-      { name: "description", content: "Atur identitas bisnis, logo, preset item, daftar pelanggan, dan cadangan data Notaku." },
-      { property: "og:title", content: "Pengaturan — Notaku" },
+      { title: "Pengaturan Bisnis & Backup Data Nota · Notaku" },
+      { name: "description", content: "Atur identitas usaha, logo, preset item, dan pelanggan. Backup & restore data nota Notaku — semua tersimpan lokal di perangkat kamu." },
+      { property: "og:title", content: "Pengaturan Bisnis & Backup Data Nota · Notaku" },
       { property: "og:description", content: "Kelola profil bisnis, preset item, pelanggan, dan backup data lokal Notaku." },
       { property: "og:url", content: "https://notaq.lovable.app/pengaturan" },
+      { property: "og:image", content: "https://notaq.lovable.app/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { name: "twitter:image", content: "https://notaq.lovable.app/og-image.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://notaq.lovable.app/pengaturan" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Beranda", item: "https://notaq.lovable.app/" },
+            { "@type": "ListItem", position: 2, name: "Pengaturan", item: "https://notaq.lovable.app/pengaturan" },
+          ],
+        }),
+      },
+    ],
   }),
 
   component: PengaturanPage,
@@ -30,7 +47,7 @@ export const Route = createFileRoute("/pengaturan")({
 function PengaturanPage() {
   return (
     <div className="space-y-8">
-      <h1 className="sr-only">Pengaturan</h1>
+      <h1 className="sr-only">Pengaturan Bisnis & Backup Data Nota</h1>
       <BusinessSection />
       <PresetSection />
       <CustomerSection />

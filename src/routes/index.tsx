@@ -11,13 +11,48 @@ import { formatIDR, formatDateID } from "@/lib/format";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Notaku — Catat omset & laba UMKM" },
-      { name: "description", content: "Lihat omset, laba, dan transaksi terakhir usaha kamu — gratis, tanpa login." },
-      { property: "og:title", content: "Notaku — Catat omset & laba UMKM" },
-      { property: "og:description", content: "Dashboard omset & laba untuk warung dan toko kecil." },
+      { title: "Notaku — Aplikasi Nota & Struk UMKM Gratis Tanpa Login" },
+      { name: "description", content: "Aplikasi nota dan struk gratis untuk UMKM Indonesia. Catat omset, cetak struk, kirim ke pelanggan via WhatsApp — tanpa login, data aman di HP." },
+      { property: "og:title", content: "Notaku — Aplikasi Nota & Struk UMKM Gratis Tanpa Login" },
+      { property: "og:description", content: "Aplikasi nota dan struk gratis untuk UMKM. Catat omset, cetak struk, kirim ke pelanggan via WhatsApp — tanpa login, data aman di HP." },
       { property: "og:url", content: "https://notaq.lovable.app/" },
+      { property: "og:image", content: "https://notaq.lovable.app/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { name: "twitter:image", content: "https://notaq.lovable.app/og-image.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://notaq.lovable.app/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "Apakah Notaku gratis?",
+              acceptedAnswer: { "@type": "Answer", text: "Ya. Notaku 100% gratis tanpa biaya bulanan, tanpa iklan, dan tanpa login akun." },
+            },
+            {
+              "@type": "Question",
+              name: "Apakah data nota saya aman?",
+              acceptedAnswer: { "@type": "Answer", text: "Semua data tersimpan lokal di HP kamu (IndexedDB). Notaku tidak mengirim data ke server mana pun." },
+            },
+            {
+              "@type": "Question",
+              name: "Bisa kirim nota ke pelanggan lewat WhatsApp?",
+              acceptedAnswer: { "@type": "Answer", text: "Bisa. Nota bisa dibagikan sebagai gambar atau teks langsung ke WhatsApp pelanggan dalam sekali tap." },
+            },
+            {
+              "@type": "Question",
+              name: "Apakah Notaku bisa dipakai offline?",
+              acceptedAnswer: { "@type": "Answer", text: "Bisa. Notaku adalah PWA yang bisa diinstal di HP dan tetap berfungsi tanpa koneksi internet." },
+            },
+          ],
+        }),
+      },
+    ],
   }),
 
   component: Beranda,
@@ -37,7 +72,12 @@ function Beranda() {
 
   return (
     <div className="space-y-5">
-      <h1 className="sr-only">{business?.name?.trim() || "Notaku"} — Catat & Cetak Struk UMKM</h1>
+      <header className="px-1">
+        <h1 className="font-display text-xl font-semibold tracking-tight text-foreground">
+          {business?.name?.trim() || "Aplikasi Nota & Struk UMKM"}
+        </h1>
+        <p className="t-caption mt-0.5">Catat omset, cetak struk, kirim via WhatsApp — gratis.</p>
+      </header>
 
       <div className="relative grid grid-cols-2 rounded-full bg-surface p-1 text-sm" role="tablist">
         {(["today", "month"] as const).map((r) => (

@@ -34,13 +34,45 @@ export const Route = createFileRoute("/buat")({
   }),
   head: () => ({
     meta: [
-      { title: "Buat Nota — Notaku" },
-      { name: "description", content: "Catat transaksi dan bikin nota sat-set, langsung kirim ke pelanggan." },
-      { property: "og:title", content: "Buat Nota — Notaku" },
-      { property: "og:description", content: "Catat transaksi dan bikin nota sat-set untuk UMKM." },
+      { title: "Bikin Nota Online Gratis — Cetak & Kirim WA · Notaku" },
+      { name: "description", content: "Buat nota & invoice online dalam hitungan detik. Tambah item, diskon, lalu kirim struk langsung ke pelanggan via WhatsApp. Gratis, tanpa registrasi." },
+      { property: "og:title", content: "Bikin Nota Online Gratis — Cetak & Kirim WA · Notaku" },
+      { property: "og:description", content: "Buat nota & invoice online dalam hitungan detik. Tambah item, diskon, kirim struk langsung ke pelanggan via WhatsApp. Gratis, tanpa registrasi." },
       { property: "og:url", content: "https://notaq.lovable.app/buat" },
+      { property: "og:image", content: "https://notaq.lovable.app/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { name: "twitter:image", content: "https://notaq.lovable.app/og-image.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://notaq.lovable.app/buat" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Beranda", item: "https://notaq.lovable.app/" },
+            { "@type": "ListItem", position: 2, name: "Buat Nota", item: "https://notaq.lovable.app/buat" },
+          ],
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "HowTo",
+          name: "Cara bikin nota online dan kirim ke WhatsApp",
+          inLanguage: "id-ID",
+          step: [
+            { "@type": "HowToStep", position: 1, name: "Isi nama & kontak pelanggan", text: "Masukkan nama dan nomor HP pelanggan (opsional)." },
+            { "@type": "HowToStep", position: 2, name: "Tambah item belanja", text: "Tambah item beserta jumlah dan harga. Bisa dari preset agar lebih cepat." },
+            { "@type": "HowToStep", position: 3, name: "Set diskon & catatan", text: "Beri diskon jika perlu, lalu tulis catatan tambahan." },
+            { "@type": "HowToStep", position: 4, name: "Cetak atau kirim via WhatsApp", text: "Simpan nota lalu bagikan ke pelanggan via WhatsApp sebagai teks atau gambar." },
+          ],
+        }),
+      },
+    ],
   }),
   component: BuatPage,
 });
@@ -266,7 +298,7 @@ function BuatPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="sr-only">Buat Nota Baru</h1>
+      <h1 className="sr-only">Bikin Nota Online & Cetak Struk Gratis</h1>
       {/* Top bar */}
       <div className="flex items-center justify-between">
         <Link to="/" className="tap inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground rounded-full px-1 py-1">
