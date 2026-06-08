@@ -8,11 +8,28 @@
   "orientation": "portrait",
   "background_color": "#fbf6ec",
   "theme_color": "#fbf6ec",
-  "lang": "id",
+  "lang": "id-ID",
+  "dir": "ltr",
   "categories": ["business", "finance", "productivity"],
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Buat Nota Baru",
+      "short_name": "Buat Nota",
+      "description": "Bikin nota baru dan kirim ke pelanggan",
+      "url": "/buat",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Riwayat Nota",
+      "short_name": "Riwayat",
+      "description": "Lihat semua nota dan rekap omset",
+      "url": "/riwayat",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
   ]
 }
