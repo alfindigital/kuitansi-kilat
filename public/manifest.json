@@ -31,5 +31,21 @@
       "url": "/riwayat",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile-1.jpg",
+      "sizes": "390x844",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Beranda — rekap omset & laba UMKM"
+    },
+    {
+      "src": "/screenshot-mobile-2.jpg",
+      "sizes": "390x844",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Buat nota & kirim ke pelanggan"
+    }
   ]
 }
