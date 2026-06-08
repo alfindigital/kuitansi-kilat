@@ -1,11 +1,40 @@
 # Notaku
 
-> Aplikasi sat-set untuk UMKM Indonesia: bikin nota, cetak struk, dan simpan riwayat pelanggan langsung dari HP — tanpa login, semua data tersimpan di perangkat.
+> Aplikasi web (PWA) gratis untuk UMKM Indonesia: bikin nota, cetak struk, dan kirim ke pelanggan via WhatsApp langsung dari HP. Tanpa login, tanpa biaya, semua data tersimpan lokal di perangkat (IndexedDB).
 
-Notaku membantu pelaku usaha kecil mencatat transaksi, membuat struk siap kirim via WhatsApp, dan merekap omset harian/bulanan dengan antarmuka mobile-first yang offline-friendly.
+Notaku dirancang untuk pelaku usaha kecil (warung, toko, jasa, freelancer) yang butuh cara cepat mencatat transaksi, membuat struk siap kirim, dan merekap omset harian/bulanan. Antarmuka mobile-first, offline-friendly, dan bisa diinstal sebagai aplikasi di HP (Android & iOS).
+
+## About
+
+- **Nama:** Notaku
+- **Kategori:** Business / Finance / Productivity (PWA)
+- **Bahasa:** Bahasa Indonesia (id-ID)
+- **Harga:** Gratis 100%, tanpa iklan, tanpa langganan
+- **Akun:** Tidak perlu daftar / login
+- **Privasi:** Data hanya disimpan di perangkat pengguna (IndexedDB). Tidak ada server backend yang menyimpan data nota.
+- **Offline:** Berfungsi penuh tanpa internet setelah dibuka pertama kali.
+
+## Features
+
+- Buat nota & struk dengan diskon dan catatan pelanggan
+- Cetak struk dalam format gambar atau teks
+- Kirim nota langsung ke WhatsApp pelanggan dalam sekali tap
+- Riwayat semua transaksi dengan filter tanggal
+- Rekap omset hari ini, bulan ini, dan grafik 7 hari terakhir
+- Hitung laba kotor otomatis (jika harga modal diisi)
+- Daftar pelanggan dan preset item untuk input lebih cepat
+- Backup & restore data dalam format JSON
+- Bisa diinstal sebagai aplikasi di HP (PWA)
 
 ## Pages
 
-- [Buat Nota](/buat): Form cepat untuk membuat nota baru, menambah item, diskon, dan catatan pelanggan.
-- [Riwayat](/riwayat): Daftar semua nota tersimpan beserta rekap omset hari ini dan bulan ini.
-- [Pengaturan](/pengaturan): Atur identitas bisnis, logo, preset item, daftar pelanggan, dan cadangan data.
+- [Beranda](https://notaq.lovable.app/): Ringkasan omset, laba, grafik 7 hari, dan transaksi terbaru.
+- [Buat Nota](https://notaq.lovable.app/buat): Form cepat untuk membuat nota baru, menambah item, diskon, dan catatan pelanggan.
+- [Riwayat](https://notaq.lovable.app/riwayat): Daftar semua nota tersimpan beserta rekap omset hari ini dan bulan ini.
+- [Pengaturan](https://notaq.lovable.app/pengaturan): Atur identitas bisnis, logo, preset item, daftar pelanggan, dan cadangan data.
+
+## Optional
+
+- [Sitemap](https://notaq.lovable.app/sitemap.xml)
+- [Robots](https://notaq.lovable.app/robots.txt)
+- [Manifest PWA](https://notaq.lovable.app/manifest.json)
