@@ -553,6 +553,7 @@ function ExtrasRow({
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
               <Input
+                aria-label="Nominal diskon"
                 inputMode="decimal" enterKeyHint="done" placeholder="0"
                 value={discount || ""}
                 onChange={(e) => setDiscount(parseIDRInput(e.target.value))}
