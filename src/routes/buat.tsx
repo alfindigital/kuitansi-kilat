@@ -581,6 +581,7 @@ function ExtrasRow({
         </PopoverTrigger>
         <PopoverContent className="w-64 p-2 space-y-2" align="start">
           <Input
+            aria-label="Tambah tag baru"
             value={tagText}
             onChange={(e) => setTagText(e.target.value.slice(0, 20))}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(tagText); } }}
