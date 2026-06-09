@@ -461,6 +461,7 @@ const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: Item
         <div className="inline-flex items-center rounded-full bg-surface">
           <button type="button" onClick={() => { tapHaptic(); onChange({ qty: Math.max(1, item.qty - 1) }); }} className="tap w-11 h-11 grid place-items-center text-muted-foreground text-lg active:scale-95 select-none" aria-label="Kurangi">−</button>
           <input
+            aria-label="Jumlah item"
             inputMode="decimal" enterKeyHint="next" value={item.qty}
             onChange={(e) => { const v = parseFloat(e.target.value.replace(",", ".")); onChange({ qty: Number.isFinite(v) && v > 0 ? v : 1 }); }}
             onFocus={(e) => e.target.select()}
