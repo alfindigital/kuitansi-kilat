@@ -461,6 +461,7 @@ const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: Item
         <div className="inline-flex items-center rounded-full bg-surface">
           <button type="button" onClick={() => { tapHaptic(); onChange({ qty: Math.max(1, item.qty - 1) }); }} className="tap w-11 h-11 grid place-items-center text-muted-foreground text-lg active:scale-95 select-none" aria-label="Kurangi">−</button>
           <input
+            aria-label="Jumlah item"
             inputMode="decimal" enterKeyHint="next" value={item.qty}
             onChange={(e) => { const v = parseFloat(e.target.value.replace(",", ".")); onChange({ qty: Number.isFinite(v) && v > 0 ? v : 1 }); }}
             onFocus={(e) => e.target.select()}
@@ -472,6 +473,7 @@ const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: Item
         <div className="relative flex-1">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
           <input
+            aria-label="Harga satuan"
             inputMode="decimal" enterKeyHint="next" placeholder="0"
             value={formatIDRInput(item.price)} onChange={(e) => onChange({ price: parseIDRInput(e.target.value) })}
             onFocus={(e) => e.target.select()}
@@ -485,6 +487,7 @@ const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: Item
           <div className="relative flex-1">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[10px]">Rp</span>
             <input
+              aria-label="Harga modal per item"
               inputMode="decimal" placeholder="0"
               value={formatIDRInput(item.cost)} onChange={(e) => onChange({ cost: parseIDRInput(e.target.value) })}
               onFocus={(e) => e.target.select()}
@@ -550,6 +553,7 @@ function ExtrasRow({
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
               <Input
+                aria-label="Nominal diskon"
                 inputMode="decimal" enterKeyHint="done" placeholder="0"
                 value={discount || ""}
                 onChange={(e) => setDiscount(parseIDRInput(e.target.value))}
@@ -577,6 +581,7 @@ function ExtrasRow({
         </PopoverTrigger>
         <PopoverContent className="w-64 p-2 space-y-2" align="start">
           <Input
+            aria-label="Tambah tag baru"
             value={tagText}
             onChange={(e) => setTagText(e.target.value.slice(0, 20))}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(tagText); } }}
