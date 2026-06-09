@@ -473,6 +473,7 @@ const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: Item
         <div className="relative flex-1">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">Rp</span>
           <input
+            aria-label="Harga satuan"
             inputMode="decimal" enterKeyHint="next" placeholder="0"
             value={formatIDRInput(item.price)} onChange={(e) => onChange({ price: parseIDRInput(e.target.value) })}
             onFocus={(e) => e.target.select()}
