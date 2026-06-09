@@ -81,19 +81,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "preload",
-        as: "style",
-        href: "https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap",
-      },
+      // Async, non-blocking Google Fonts: load as media="print" so the browser
+      // doesn't block render on it, then promote to all media via inline script
+      // below once the stylesheet is parsed. (`onLoad` as a string attribute
+      // is stripped by React, so we can't rely on the classic onLoad trick.)
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap",
         media: "print",
-        onLoad: "this.media='all'",
+        "data-font": "google",
       } as any,
     ],
     scripts: [
+      {
+        children:
+          "(function(){var l=document.querySelector('link[data-font=\"google\"]');if(l){if(l.sheet)l.media='all';else l.addEventListener('load',function(){l.media='all'});}})();",
+      },
       {
         type: "application/ld+json",
         children: JSON.stringify({
