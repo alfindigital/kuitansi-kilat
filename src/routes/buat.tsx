@@ -487,6 +487,7 @@ const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: Item
           <div className="relative flex-1">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[10px]">Rp</span>
             <input
+              aria-label="Harga modal per item"
               inputMode="decimal" placeholder="0"
               value={formatIDRInput(item.cost)} onChange={(e) => onChange({ cost: parseIDRInput(e.target.value) })}
               onFocus={(e) => e.target.select()}
