@@ -144,6 +144,31 @@ button:disabled,
   cursor: not-allowed;
 }
 
+/* ---- Global keyboard focus ring (WCAG 2.4.7) ----
+   Uses :focus-visible so the ring shows for keyboard users
+   (Tab / Shift+Tab / arrows) but not for mouse clicks. */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+/* Match pill/full-rounded controls (tabs, nav, chips) */
+.rounded-full:focus-visible,
+[class*="rounded-full"]:focus-visible {
+  outline-offset: 3px;
+  border-radius: 9999px;
+}
+/* Inputs / textarea / select: ring inside the field for clarity */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
+}
+
+
+
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
