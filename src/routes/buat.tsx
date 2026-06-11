@@ -687,7 +687,7 @@ function ShareSheet({ note, business, onClose, onOpenDetail }: { note: Note; bus
           </div>
           <div className="flex justify-between pt-1">
             <button onClick={onOpenDetail} className="tap text-sm text-muted-foreground hover:text-foreground">Lihat detail</button>
-            <button onClick={onClose} className="tap text-sm inline-flex items-center gap-1 font-medium"><X className="h-4 w-4" /> Buat lagi</button>
+            <button onClick={onClose} className="tap text-sm inline-flex items-center gap-1 font-medium"><Plus className="h-4 w-4" /> Buat lagi</button>
           </div>
         </div>
         <div style={{ position: "fixed", left: -10000, top: 0 }}>
