@@ -449,7 +449,7 @@ function Row({ label, value, muted }: { label: React.ReactNode; value: React.Rea
 
 type ItemRowProps = { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void; onSavePreset?: () => void; isPreset?: boolean };
 const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: ItemRowProps) => {
-  const [showCost, setShowCost] = useState(item.cost > 0);
+  const [showCost] = useState(item.cost > 0);
   return (
     <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-2">
       <input
@@ -481,7 +481,7 @@ const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: Item
           />
         </div>
       </div>
-      {showCost ? (
+      {showCost && (
         <div className="flex items-center gap-2 text-xs">
           <span className="text-muted-foreground shrink-0 pl-1">Modal</span>
           <div className="relative flex-1">
@@ -495,8 +495,6 @@ const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: Item
             />
           </div>
         </div>
-      ) : (
-        <button type="button" onClick={() => setShowCost(true)} className="text-[11px] text-muted-foreground hover:text-foreground pl-1">+ modal (opsional)</button>
       )}
       <div className="absolute top-1 right-1 flex items-center">
         {onSavePreset && (
