@@ -44,6 +44,8 @@ export const Route = createFileRoute("/pengaturan")({
   component: PengaturanPage,
 });
 
+export const APP_VERSION = "1.0.0";
+
 function PengaturanPage() {
   return (
     <div className="space-y-8">
@@ -53,6 +55,15 @@ function PengaturanPage() {
       <CustomerSection />
       <BackupSection />
       <SeoStatusLink />
+      <VersionFooter />
+    </div>
+  );
+}
+
+function VersionFooter() {
+  return (
+    <div className="text-center">
+      <p className="text-[10px] text-muted-foreground">Notaku v{APP_VERSION}</p>
     </div>
   );
 }
