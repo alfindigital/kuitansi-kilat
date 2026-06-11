@@ -3,8 +3,6 @@ import { Home, History, Plus, Receipt, Settings, Eye, EyeOff } from "lucide-reac
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { db } from "@/lib/storage";
-import { useTheme } from "@/lib/theme";
-
 const tabs = [
   { to: "/", label: "Beranda", icon: Home, exact: true },
   { to: "/buat", label: "Buat", icon: Plus },
@@ -12,17 +10,8 @@ const tabs = [
   { to: "/pengaturan", label: "Pengaturan", icon: Settings },
 ] as const;
 
-
 export function AppShell() {
   const { pathname } = useLocation();
-  const qc = useQueryClient();
-  const { data: prefs } = useQuery({ queryKey: ["prefs"], queryFn: () => db.getPrefs() });
-  const hide = !!prefs?.hideAmounts;
-  const { theme, toggle: toggleTheme } = useTheme();
-  const toggleHide = useMutation({
-    mutationFn: async () => { await db.setPrefs({ hideAmounts: !hide }); },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["prefs"] }),
-  });
 
   return (
     <div className="min-h-dvh flex flex-col bg-background text-foreground">
