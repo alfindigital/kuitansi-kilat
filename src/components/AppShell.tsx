@@ -38,6 +38,7 @@ export function AppShell() {
   const qc = useQueryClient();
   const { data: prefs } = useQuery({ queryKey: ["prefs"], queryFn: () => db.getPrefs() });
   const hide = !!prefs?.hideAmounts;
+  const { theme, toggle: toggleTheme } = useTheme();
   const toggleHide = useMutation({
     mutationFn: async () => { await db.setPrefs({ hideAmounts: !hide }); },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["prefs"] }),
@@ -61,13 +62,15 @@ export function AppShell() {
             >
               {hide ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
-            <Link
-              to="/pengaturan"
-              aria-label="Pengaturan"
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={theme === "dark" ? "Ganti ke mode terang" : "Ganti ke mode gelap"}
+              aria-pressed={theme === "dark"}
               className="tap tap-target inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
             >
-              <Settings className="h-5 w-5" />
-            </Link>
+              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
           </div>
         </div>
       </header>
