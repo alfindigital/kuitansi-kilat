@@ -1,8 +1,6 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { Home, History, Plus, Receipt, Settings, Eye, EyeOff } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Home, History, Plus, Receipt, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { db } from "@/lib/storage";
 const tabs = [
   { to: "/", label: "Beranda", icon: Home, exact: true },
   { to: "/buat", label: "Buat", icon: Plus },
