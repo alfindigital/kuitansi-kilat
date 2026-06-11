@@ -10,6 +10,7 @@ import { formatIDR, formatDateTime } from "@/lib/format";
 import { buildReceiptText, renderReceiptPNG, sharePNG, waLink } from "@/lib/receipt";
 import { tapHaptic } from "@/lib/haptic";
 import { Receipt as ReceiptCard } from "@/components/Receipt";
+import { RollingIDR } from "@/components/RollingIDR";
 
 export const Route = createFileRoute("/riwayat/$noteId")({
   head: () => ({
@@ -140,14 +141,14 @@ function NoteDetail() {
         return (
           <section aria-labelledby="nota-ringkasan" className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
             <h2 id="nota-ringkasan" className="sr-only">Ringkasan</h2>
-            <Row label="Subtotal" value={formatIDR(totals.subtotal)} muted />
+            <Row label="Subtotal" value={<RollingIDR value={totals.subtotal} />} muted />
             {note.discount > 0 && (
               <Row label="Diskon" value={"− " + formatIDR(note.discount)} muted />
             )}
             <div className="h-px bg-border my-1" />
             <div className="flex items-end justify-between">
               <span className="text-muted-foreground">Total</span>
-              <span className="font-display font-semibold text-2xl tracking-tight">{formatIDR(totals.total)}</span>
+              <RollingIDR value={totals.total} className="font-display font-semibold text-2xl tracking-tight" />
             </div>
           </section>
         );
