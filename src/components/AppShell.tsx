@@ -21,24 +21,6 @@ export function AppShell() {
             </div>
             <span className="font-display font-semibold tracking-tight text-[15px]">Notaku</span>
           </Link>
-          <div className="ml-auto flex items-center gap-1">
-            <button
-              onClick={() => toggleHide.mutate()}
-              aria-label={hide ? "Tampilkan nominal" : "Sembunyikan nominal"}
-              className="tap tap-target inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
-            >
-              {hide ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-            </button>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              aria-label={theme === "dark" ? "Ganti ke mode terang" : "Ganti ke mode gelap"}
-              aria-pressed={theme === "dark"}
-              className="tap tap-target inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
-            >
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
-          </div>
         </div>
       </header>
 
