@@ -481,7 +481,7 @@ const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: Item
           />
         </div>
       </div>
-      {showCost ? (
+      {showCost && (
         <div className="flex items-center gap-2 text-xs">
           <span className="text-muted-foreground shrink-0 pl-1">Modal</span>
           <div className="relative flex-1">
