@@ -52,6 +52,7 @@ function PengaturanPage() {
     <div className="space-y-8">
       <h1 className="sr-only">Pengaturan Bisnis & Backup Data Nota</h1>
       <BusinessSection />
+      <DisplaySection />
       <PresetSection />
       <CustomerSection />
       <BackupSection />
