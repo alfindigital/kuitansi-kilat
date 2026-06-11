@@ -141,7 +141,7 @@ function NoteDetail() {
         return (
           <section aria-labelledby="nota-ringkasan" className="rounded-2xl bg-card border border-border shadow-soft p-4 space-y-2 text-sm">
             <h2 id="nota-ringkasan" className="sr-only">Ringkasan</h2>
-            <Row label="Subtotal" value={formatIDR(totals.subtotal)} muted />
+            <Row label="Subtotal" value={<RollingIDR value={totals.subtotal} />} muted />
             {note.discount > 0 && (
               <Row label="Diskon" value={"− " + formatIDR(note.discount)} muted />
             )}
