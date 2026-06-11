@@ -1,9 +1,9 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { Home, History, Plus, Receipt, Settings, Eye, EyeOff, Sun, Moon } from "lucide-react";
+import { Home, History, Plus, Receipt, Settings, Eye, EyeOff } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { db } from "@/lib/storage";
+import { useTheme } from "@/lib/theme";
 
 const tabs = [
   { to: "/", label: "Beranda", icon: Home, exact: true },
@@ -11,26 +11,6 @@ const tabs = [
   { to: "/riwayat", label: "Riwayat", icon: History },
   { to: "/pengaturan", label: "Pengaturan", icon: Settings },
 ] as const;
-
-const THEME_KEY = "notaku-theme";
-type Theme = "light" | "dark";
-
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "light";
-  const stored = window.localStorage.getItem(THEME_KEY) as Theme | null;
-  if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
-function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => getInitialTheme());
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("dark", theme === "dark");
-    window.localStorage.setItem(THEME_KEY, theme);
-  }, [theme]);
-  return { theme, toggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")) };
-}
 
 
 export function AppShell() {
