@@ -495,8 +495,6 @@ const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: Item
             />
           </div>
         </div>
-      ) : (
-        <button type="button" onClick={() => setShowCost(true)} className="text-[11px] text-muted-foreground hover:text-foreground pl-1">+ modal (opsional)</button>
       )}
       <div className="absolute top-1 right-1 flex items-center">
         {onSavePreset && (
