@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Save, Plus, Trash2, Download, MessageCircle, RotateCcw, Gauge, ChevronRight } from "lucide-react";
+import { Upload, Save, Plus, Trash2, Download, MessageCircle, RotateCcw, Gauge, ChevronRight, Sun, Moon, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 import { db, defaultBusiness, deriveCustomers, uid, type Business, type Preset } from "@/lib/storage";
+import { useTheme } from "@/lib/theme";
 import { formatIDR, formatIDRInput, parseIDRInput } from "@/lib/format";
 import { waLink } from "@/lib/receipt";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ function PengaturanPage() {
     <div className="space-y-8">
       <h1 className="sr-only">Pengaturan Bisnis & Backup Data Nota</h1>
       <BusinessSection />
+      <DisplaySection />
       <PresetSection />
       <CustomerSection />
       <BackupSection />
@@ -82,6 +84,47 @@ function SeoStatusLink() {
         </div>
         <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
       </Link>
+    </Section>
+  );
+}
+
+function DisplaySection() {
+  const qc = useQueryClient();
+  const { data: prefs } = useQuery({ queryKey: ["prefs"], queryFn: () => db.getPrefs() });
+  const hide = !!prefs?.hideAmounts;
+  const { theme, toggle: toggleTheme } = useTheme();
+
+  const toggleHide = useMutation({
+    mutationFn: async () => { await db.setPrefs({ hideAmounts: !hide }); },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["prefs"] }),
+  });
+
+  return (
+    <Section title="Tampilan">
+      <Card className="p-3 space-y-1">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="tap flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-muted transition-colors"
+        >
+          {theme === "dark" ? <Sun className="h-5 w-5 text-muted-foreground" /> : <Moon className="h-5 w-5 text-muted-foreground" />}
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium">{theme === "dark" ? "Mode Gelap" : "Mode Terang"}</div>
+            <div className="text-xs text-muted-foreground">Ketuk untuk mengganti tema.</div>
+          </div>
+        </button>
+        <button
+          type="button"
+          onClick={() => toggleHide.mutate()}
+          className="tap flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-muted transition-colors"
+        >
+          {hide ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium">{hide ? "Nominal disembunyikan" : "Nominal ditampilkan"}</div>
+            <div className="text-xs text-muted-foreground">{hide ? "Ketuk untuk menampilkan." : "Ketuk untuk menyembunyikan."}</div>
+          </div>
+        </button>
+      </Card>
     </Section>
   );
 }
