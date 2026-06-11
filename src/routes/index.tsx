@@ -72,12 +72,6 @@ function Beranda() {
 
   return (
     <div className="space-y-5">
-      <header className="px-1">
-        <h1 className="font-display text-xl font-semibold tracking-tight text-foreground">
-          {business?.name?.trim() || "Aplikasi Nota & Struk UMKM"}
-        </h1>
-        <p className="t-caption mt-0.5">Catat omset, cetak struk, kirim via WhatsApp — gratis.</p>
-      </header>
 
       <div className="relative grid grid-cols-2 rounded-full bg-surface p-1 text-sm" role="tablist">
         {(["today", "month"] as const).map((r) => (
