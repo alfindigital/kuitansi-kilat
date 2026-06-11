@@ -148,7 +148,7 @@ function NoteDetail() {
             <div className="h-px bg-border my-1" />
             <div className="flex items-end justify-between">
               <span className="text-muted-foreground">Total</span>
-              <span className="font-display font-semibold text-2xl tracking-tight">{formatIDR(totals.total)}</span>
+              <RollingIDR value={totals.total} className="font-display font-semibold text-2xl tracking-tight" />
             </div>
           </section>
         );
