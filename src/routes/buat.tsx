@@ -449,7 +449,7 @@ function Row({ label, value, muted }: { label: React.ReactNode; value: React.Rea
 
 type ItemRowProps = { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void; onSavePreset?: () => void; isPreset?: boolean };
 const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: ItemRowProps) => {
-  const [showCost, setShowCost] = useState(item.cost > 0);
+  const [showCost] = useState(item.cost > 0);
   return (
     <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-2">
       <input
