@@ -1,6 +1,7 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { Home, History, Plus, Receipt, Settings, Eye, EyeOff } from "lucide-react";
+import { Home, History, Plus, Receipt, Settings, Eye, EyeOff, Sun, Moon } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { db } from "@/lib/storage";
 
@@ -11,12 +12,33 @@ const tabs = [
   { to: "/pengaturan", label: "Pengaturan", icon: Settings },
 ] as const;
 
+const THEME_KEY = "notaku-theme";
+type Theme = "light" | "dark";
+
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "light";
+  const stored = window.localStorage.getItem(THEME_KEY) as Theme | null;
+  if (stored === "light" || stored === "dark") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function useTheme() {
+  const [theme, setTheme] = useState<Theme>(() => getInitialTheme());
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("dark", theme === "dark");
+    window.localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
+  return { theme, toggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")) };
+}
+
 
 export function AppShell() {
   const { pathname } = useLocation();
   const qc = useQueryClient();
   const { data: prefs } = useQuery({ queryKey: ["prefs"], queryFn: () => db.getPrefs() });
   const hide = !!prefs?.hideAmounts;
+  const { theme, toggle: toggleTheme } = useTheme();
   const toggleHide = useMutation({
     mutationFn: async () => { await db.setPrefs({ hideAmounts: !hide }); },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["prefs"] }),
@@ -40,13 +62,15 @@ export function AppShell() {
             >
               {hide ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
-            <Link
-              to="/pengaturan"
-              aria-label="Pengaturan"
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={theme === "dark" ? "Ganti ke mode terang" : "Ganti ke mode gelap"}
+              aria-pressed={theme === "dark"}
               className="tap tap-target inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
             >
-              <Settings className="h-5 w-5" />
-            </Link>
+              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
           </div>
         </div>
       </header>
