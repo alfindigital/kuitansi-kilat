@@ -10,6 +10,7 @@ import { formatIDR, formatDateTime } from "@/lib/format";
 import { buildReceiptText, renderReceiptPNG, sharePNG, waLink } from "@/lib/receipt";
 import { tapHaptic } from "@/lib/haptic";
 import { Receipt as ReceiptCard } from "@/components/Receipt";
+import { RollingIDR } from "@/components/RollingIDR";
 
 export const Route = createFileRoute("/riwayat/$noteId")({
   head: () => ({
