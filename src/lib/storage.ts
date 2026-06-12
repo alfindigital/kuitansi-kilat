@@ -177,10 +177,38 @@ async function kvGet<T>(k: string, fallback: T): Promise<T> {
     return fallback;
   }
 }
+export class StorageWriteError extends Error {
+  readonly quota: boolean;
+  constructor(message: string, options: { quota: boolean; cause?: unknown }) {
+    super(message);
+    this.name = "StorageWriteError";
+    this.quota = options.quota;
+    if (options.cause !== undefined) (this as { cause?: unknown }).cause = options.cause;
+  }
+}
+
+function isQuotaError(e: unknown): boolean {
+  if (!e || typeof e !== "object") return false;
+  const err = e as { name?: string; code?: number; message?: string };
+  if (err.name === "QuotaExceededError" || err.name === "NS_ERROR_DOM_QUOTA_REACHED") return true;
+  if (err.code === 22 || err.code === 1014) return true;
+  return typeof err.message === "string" && /quota/i.test(err.message);
+}
+
 async function kvSet<T>(k: string, v: T): Promise<void> {
   const store = getStore();
-  if (!store) return;
-  await set(k, v, store);
+  if (!store) {
+    throw new StorageWriteError("Penyimpanan tidak tersedia di peramban ini.", { quota: false });
+  }
+  try {
+    await set(k, v, store);
+  } catch (e) {
+    const quota = isQuotaError(e);
+    throw new StorageWriteError(
+      quota ? "Penyimpanan penuh. Hapus data lama atau export dulu." : "Gagal menyimpan ke penyimpanan lokal.",
+      { quota, cause: e },
+    );
+  }
 }
 
 // ===== API =====
