@@ -67,6 +67,7 @@ function DisplaySection() {
   const toggleHide = useMutation({
     mutationFn: async () => { await db.setPrefs({ hideAmounts: !hide }); },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["prefs"] }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   return (
