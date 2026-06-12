@@ -43,6 +43,7 @@ function NoteDetail() {
       qc.invalidateQueries({ queryKey: ["notes"] });
       navigate({ to: "/riwayat" });
     },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   if (!note || !business) {

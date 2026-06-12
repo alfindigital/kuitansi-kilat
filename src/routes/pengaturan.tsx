@@ -67,6 +67,7 @@ function DisplaySection() {
   const toggleHide = useMutation({
     mutationFn: async () => { await db.setPrefs({ hideAmounts: !hide }); },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["prefs"] }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   return (
@@ -292,14 +293,21 @@ function BackupSection() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function doExport() {
-    const data = await db.exportAll();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `notaku-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const data = await db.exportAll();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `notaku-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      // Defer revoke so Safari/iOS finishes the download.
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Gagal export.");
+    }
   }
   async function doImport(file: File, mode: "merge" | "replace") {
     try {
@@ -308,9 +316,28 @@ function BackupSection() {
       qc.invalidateQueries();
       toast.success("Berhasil import.");
     } catch (e) {
-      toast.error("Gagal import: format tidak valid.");
+      toast.error(e instanceof Error ? e.message : "Gagal import: format tidak valid.");
       console.error(e);
     }
+  }
+
+  function confirmReplace(): boolean {
+    if (!confirm("Mode REPLACE akan MENIMPA semua data saat ini.\n\nLanjutkan?")) return false;
+    const typed = prompt('Ketik "REPLACE" untuk konfirmasi:');
+    if (typed?.trim().toUpperCase() !== "REPLACE") {
+      toast.info("Dibatalkan.");
+      return false;
+    }
+    return true;
+  }
+  function confirmWipe(): boolean {
+    if (!confirm("Hapus SEMUA data Notaku? Tidak bisa dibatalkan.")) return false;
+    const typed = prompt('Ketik "HAPUS" untuk konfirmasi reset total:');
+    if (typed?.trim().toUpperCase() !== "HAPUS") {
+      toast.info("Dibatalkan.");
+      return false;
+    }
+    return true;
   }
 
   return (
@@ -322,7 +349,9 @@ function BackupSection() {
             variant="outline"
             className="tap rounded-xl"
             onClick={() => {
-              const mode = confirm("OK = Replace semua data. Cancel = Merge (tambah, tidak menimpa).") ? "replace" : "merge";
+              const useReplace = confirm("OK = Replace semua data. Cancel = Merge (tambah, tidak menimpa).");
+              if (useReplace && !confirmReplace()) return;
+              const mode: "merge" | "replace" = useReplace ? "replace" : "merge";
               fileRef.current?.setAttribute("data-mode", mode);
               fileRef.current?.click();
             }}
@@ -333,8 +362,14 @@ function BackupSection() {
             variant="outline"
             className="tap rounded-xl text-destructive hover:text-destructive"
             onClick={async () => {
-              if (!confirm("Hapus SEMUA data Notaku? Tidak bisa dibatalkan.")) return;
-              await db.wipe(); qc.invalidateQueries(); toast.success("Data direset.");
+              if (!confirmWipe()) return;
+              try {
+                await db.wipe();
+                qc.invalidateQueries();
+                toast.success("Data direset.");
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "Gagal reset.");
+              }
             }}
           >
             <RotateCcw className="h-4 w-4" /> Reset

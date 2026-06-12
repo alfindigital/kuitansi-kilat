@@ -185,8 +185,12 @@ function BuatPage() {
     if (savedNote || editingId || fromId) return;
     const draft = { date, customerName, customerPhone, items, discount, tags, noteText };
     const t = setTimeout(() => {
-      if (isDraftEmpty(draft)) localStorage.removeItem(DRAFT_KEY);
-      else localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...draft, updatedAt: Date.now() }));
+      try {
+        if (isDraftEmpty(draft)) localStorage.removeItem(DRAFT_KEY);
+        else localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...draft, updatedAt: Date.now() }));
+      } catch {
+        // Storage penuh atau Safari private mode: lewati simpan draf diam-diam.
+      }
     }, 400);
     return () => clearTimeout(t);
   }, [date, customerName, customerPhone, items, discount, tags, noteText, savedNote, editingId, fromId]);
@@ -281,7 +285,7 @@ function BuatPage() {
     },
     onSuccess: (note) => {
       qc.invalidateQueries({ queryKey: ["notes"] });
-      if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
+      if (typeof window !== "undefined") { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } }
       tapHaptic(20);
       if (editingId) { toast.success("Perubahan disimpan"); navigate({ to: "/riwayat/$noteId", params: { noteId: note.id } }); }
       else setSavedNote(note);
@@ -293,7 +297,7 @@ function BuatPage() {
     setSavedNote(null); setCustomerName(""); setCustomerPhone("");
     setItems([emptyItem()]); setDiscount(0); setTags([]); setNoteText("");
     setDate(toDateInput(new Date().toISOString()));
-    if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
+    if (typeof window !== "undefined") { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } }
   }
 
   return (
