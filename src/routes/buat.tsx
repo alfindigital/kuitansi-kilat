@@ -297,7 +297,7 @@ function BuatPage() {
     setSavedNote(null); setCustomerName(""); setCustomerPhone("");
     setItems([emptyItem()]); setDiscount(0); setTags([]); setNoteText("");
     setDate(toDateInput(new Date().toISOString()));
-    if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
+    if (typeof window !== "undefined") { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } }
   }
 
   return (
