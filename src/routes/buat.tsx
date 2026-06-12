@@ -185,8 +185,12 @@ function BuatPage() {
     if (savedNote || editingId || fromId) return;
     const draft = { date, customerName, customerPhone, items, discount, tags, noteText };
     const t = setTimeout(() => {
-      if (isDraftEmpty(draft)) localStorage.removeItem(DRAFT_KEY);
-      else localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...draft, updatedAt: Date.now() }));
+      try {
+        if (isDraftEmpty(draft)) localStorage.removeItem(DRAFT_KEY);
+        else localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...draft, updatedAt: Date.now() }));
+      } catch {
+        // Storage penuh atau Safari private mode: lewati simpan draf diam-diam.
+      }
     }, 400);
     return () => clearTimeout(t);
   }, [date, customerName, customerPhone, items, discount, tags, noteText, savedNote, editingId, fromId]);
