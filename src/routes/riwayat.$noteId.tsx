@@ -92,7 +92,13 @@ function NoteDetail() {
             <Pencil className="h-4 w-4" /> Edit
           </Link>
           <button
-            onClick={() => { if (confirm("Hapus nota ini?")) del.mutate(); }}
+            onClick={() => {
+              toast("Hapus nota ini?", {
+                action: { label: "Hapus", onClick: () => del.mutate() },
+                cancel: { label: "Batal", onClick: () => undefined },
+                duration: 8000,
+              });
+            }}
             className="tap text-muted-foreground hover:text-destructive inline-flex items-center gap-1 text-sm rounded-full px-3 py-1.5"
           >
             <Trash2 className="h-4 w-4" /> Hapus
