@@ -226,6 +226,7 @@ async function kvSet<T>(k: string, v: T): Promise<void> {
   }
   try {
     await set(k, v, store);
+    broadcastChange(k);
   } catch (e) {
     const quota = isQuotaError(e);
     throw new StorageWriteError(
@@ -233,6 +234,17 @@ async function kvSet<T>(k: string, v: T): Promise<void> {
       { quota, cause: e },
     );
   }
+}
+
+// Schema-version gate. Detect data written by a newer build than this one.
+export type SchemaCheck = { ok: true } | { ok: false; reason: "newer"; stored: number };
+export async function checkSchemaVersion(): Promise<SchemaCheck> {
+  const stored = await kvGet<number>(KEYS.schemaVersion, 0);
+  if (stored > SCHEMA_VERSION) return { ok: false, reason: "newer", stored };
+  if (stored !== SCHEMA_VERSION) {
+    try { await kvSet(KEYS.schemaVersion, SCHEMA_VERSION); } catch { /* ignore */ }
+  }
+  return { ok: true };
 }
 
 // ===== API =====
