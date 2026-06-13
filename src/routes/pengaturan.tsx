@@ -140,8 +140,8 @@ function BusinessSection() {
   return (
     <Section title="Bisnis">
       <Card className="p-4 space-y-4">
-        <div className="flex gap-4">
-          <label className="w-20 h-20 rounded-2xl border border-dashed border-border flex items-center justify-center overflow-hidden cursor-pointer bg-surface tap" aria-label="Unggah logo bisnis">
+        <div className="flex gap-3 items-center">
+          <label className="w-16 h-16 shrink-0 rounded-2xl border border-dashed border-border flex items-center justify-center overflow-hidden cursor-pointer bg-surface tap" aria-label="Unggah logo bisnis">
             {form.logo ? (
               <img src={form.logo} alt={form.name ? `Logo ${form.name}` : "Logo bisnis"} className="w-full h-full object-contain" />
             ) : (
@@ -152,16 +152,14 @@ function BusinessSection() {
               onChange={(e) => { const f = e.target.files?.[0]; if (f) onLogo(f); }}
             />
           </label>
-          <div className="flex-1 space-y-2">
-            <div>
-              <Label className="text-xs text-muted-foreground">Nama bisnis</Label>
-              <Input value={form.name} maxLength={80} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Warung Sate Pak Ali" className="h-10 rounded-xl mt-1" />
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">Telepon</Label>
-              <Input value={form.phone} maxLength={20} inputMode="tel" enterKeyHint="done" onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="08xx" className="h-10 rounded-xl mt-1" />
-            </div>
+          <div className="flex-1 min-w-0">
+            <Label className="text-xs text-muted-foreground">Nama bisnis</Label>
+            <Input value={form.name} maxLength={80} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Warung Sate Pak Ali" className="h-10 rounded-xl mt-1" />
           </div>
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Telepon</Label>
+          <Input value={form.phone} maxLength={20} inputMode="tel" enterKeyHint="done" onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="08xx" className="h-10 rounded-xl mt-1" />
         </div>
         <div>
           <Label className="text-xs text-muted-foreground">Alamat</Label>
