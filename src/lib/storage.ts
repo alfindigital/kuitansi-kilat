@@ -23,7 +23,31 @@ const KEYS = {
   notes: "notes",
   seq: "seq",
   prefs: "prefs",
+  schemaVersion: "schemaVersion",
 } as const;
+
+// ===== Multi-tab sync =====
+const CHANNEL_NAME = "notaku-db";
+let channel: BroadcastChannel | undefined;
+function getChannel(): BroadcastChannel | undefined {
+  if (typeof window === "undefined" || typeof BroadcastChannel === "undefined") return undefined;
+  if (!channel) {
+    try { channel = new BroadcastChannel(CHANNEL_NAME); } catch { return undefined; }
+  }
+  return channel;
+}
+function broadcastChange(key: string) {
+  try { getChannel()?.postMessage({ type: "kv", key, ts: Date.now() }); } catch { /* ignore */ }
+}
+export function subscribeDbChanges(handler: (key: string) => void): () => void {
+  const ch = getChannel();
+  if (!ch) return () => {};
+  const listener = (e: MessageEvent) => {
+    if (e?.data?.type === "kv" && typeof e.data.key === "string") handler(e.data.key);
+  };
+  ch.addEventListener("message", listener);
+  return () => ch.removeEventListener("message", listener);
+}
 
 // ===== Schemas =====
 export const BusinessSchema = z.object({
@@ -202,6 +226,7 @@ async function kvSet<T>(k: string, v: T): Promise<void> {
   }
   try {
     await set(k, v, store);
+    broadcastChange(k);
   } catch (e) {
     const quota = isQuotaError(e);
     throw new StorageWriteError(
@@ -209,6 +234,17 @@ async function kvSet<T>(k: string, v: T): Promise<void> {
       { quota, cause: e },
     );
   }
+}
+
+// Schema-version gate. Detect data written by a newer build than this one.
+export type SchemaCheck = { ok: true } | { ok: false; reason: "newer"; stored: number };
+export async function checkSchemaVersion(): Promise<SchemaCheck> {
+  const stored = await kvGet<number>(KEYS.schemaVersion, 0);
+  if (stored > SCHEMA_VERSION) return { ok: false, reason: "newer", stored };
+  if (stored !== SCHEMA_VERSION) {
+    try { await kvSet(KEYS.schemaVersion, SCHEMA_VERSION); } catch { /* ignore */ }
+  }
+  return { ok: true };
 }
 
 // ===== API =====
