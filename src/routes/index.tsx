@@ -109,9 +109,6 @@ function Beranda() {
         </section>
       )}
 
-      <div className="text-center text-sm text-muted-foreground py-2">
-        {range === "today" ? "Hari Ini" : "Bulan Ini"} — {stats.count} nota
-      </div>
 
       <section className="space-y-2">
         <h2 className="t-eyebrow px-1">Transaksi terbaru</h2>
