@@ -109,12 +109,9 @@ function Beranda() {
         </section>
       )}
 
-      {missingCost && (
-        <Link to="/pengaturan" className="block rounded-2xl bg-accent/40 border border-border px-4 py-3 text-sm">
-          <div className="font-medium">Isi modal produk biar laba lebih akurat</div>
-          <div className="t-caption mt-0.5">Tambahkan harga modal di Preset → laba langsung kehitung.</div>
-        </Link>
-      )}
+      <div className="text-center text-sm text-muted-foreground py-2">
+        {range === "today" ? "Hari Ini" : "Bulan Ini"} — {stats.count} nota
+      </div>
 
       <section className="space-y-2">
         <h2 className="t-eyebrow px-1">Transaksi terbaru</h2>
