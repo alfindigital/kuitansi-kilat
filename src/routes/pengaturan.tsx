@@ -1,13 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Save, Plus, Trash2, Download, MessageCircle, RotateCcw, Sun, Moon, Eye, EyeOff } from "lucide-react";
+import { Upload, Save, Plus, Trash2, Download, RotateCcw, Sun, Moon, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
-import { db, defaultBusiness, deriveCustomers, uid, type Business, type Preset } from "@/lib/storage";
+import { db, defaultBusiness, uid, type Business, type Preset } from "@/lib/storage";
 import { useTheme } from "@/lib/theme";
 import { formatIDR, formatIDRInput, parseIDRInput } from "@/lib/format";
-import { waLink } from "@/lib/receipt";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
