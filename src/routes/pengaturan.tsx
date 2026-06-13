@@ -322,8 +322,7 @@ function BackupSection() {
   }
 
   function confirmReplace(): boolean {
-    if (!confirm("Mode REPLACE akan MENIMPA semua data saat ini.\n\nLanjutkan?")) return false;
-    const typed = prompt('Ketik "REPLACE" untuk konfirmasi:');
+    const typed = prompt('Mode REPLACE akan MENIMPA semua data.\n\nKetik "REPLACE" untuk lanjut:');
     if (typed?.trim().toUpperCase() !== "REPLACE") {
       toast.info("Dibatalkan.");
       return false;
@@ -331,14 +330,14 @@ function BackupSection() {
     return true;
   }
   function confirmWipe(): boolean {
-    if (!confirm("Hapus SEMUA data Notaku? Tidak bisa dibatalkan.")) return false;
-    const typed = prompt('Ketik "HAPUS" untuk konfirmasi reset total:');
+    const typed = prompt('Hapus SEMUA data Notaku? Tidak bisa dibatalkan.\n\nKetik "HAPUS" untuk lanjut:');
     if (typed?.trim().toUpperCase() !== "HAPUS") {
       toast.info("Dibatalkan.");
       return false;
     }
     return true;
   }
+
 
   return (
     <Section title="Cadangan">
