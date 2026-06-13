@@ -52,7 +52,7 @@ function PengaturanPage() {
       <BusinessSection />
       <DisplaySection />
       <PresetSection />
-      <CustomerSection />
+      
       <BackupSection />
     </div>
   );
