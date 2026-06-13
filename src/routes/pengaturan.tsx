@@ -170,13 +170,12 @@ function BusinessSection() {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label className="text-xs text-muted-foreground">Prefix nota</Label>
+            <Label className="text-xs text-muted-foreground">Kode awal nota</Label>
             <Input value={form.prefix} maxLength={10} onChange={(e) => setForm({ ...form, prefix: e.target.value })} className="h-10 rounded-xl mt-1" />
-            <p className="text-[10px] text-muted-foreground mt-1">Mis. {form.prefix || "NT"}-{new Date().getFullYear()}-0001</p>
           </div>
           <div>
-            <Label className="text-xs text-muted-foreground">Footer struk</Label>
-            <Input value={form.receiptFooter} maxLength={120} onChange={(e) => setForm({ ...form, receiptFooter: e.target.value })} className="h-10 rounded-xl mt-1" />
+            <Label className="text-xs text-muted-foreground">Pesan bawah struk</Label>
+            <Input value={form.receiptFooter} maxLength={120} onChange={(e) => setForm({ ...form, receiptFooter: e.target.value })} placeholder="Terima kasih" className="h-10 rounded-xl mt-1" />
           </div>
         </div>
         <div className="flex items-center justify-between pt-1">
