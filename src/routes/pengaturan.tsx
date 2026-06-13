@@ -168,7 +168,7 @@ function BusinessSection() {
           <Label className="text-xs text-muted-foreground">Alamat</Label>
           <Textarea rows={2} value={form.address} maxLength={200} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Alamat singkat" className="rounded-xl mt-1" />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-3">
           <div>
             <Label className="text-xs text-muted-foreground">Kode awal nota</Label>
             <Input value={form.prefix} maxLength={10} onChange={(e) => setForm({ ...form, prefix: e.target.value })} className="h-10 rounded-xl mt-1" />
