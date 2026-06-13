@@ -1,13 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Save, Plus, Trash2, Download, MessageCircle, RotateCcw, Sun, Moon, Eye, EyeOff } from "lucide-react";
+import { Upload, Save, Plus, Trash2, Download, RotateCcw, Sun, Moon, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
-import { db, defaultBusiness, deriveCustomers, uid, type Business, type Preset } from "@/lib/storage";
+import { db, defaultBusiness, uid, type Business, type Preset } from "@/lib/storage";
 import { useTheme } from "@/lib/theme";
 import { formatIDR, formatIDRInput, parseIDRInput } from "@/lib/format";
-import { waLink } from "@/lib/receipt";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -52,7 +51,7 @@ function PengaturanPage() {
       <BusinessSection />
       <DisplaySection />
       <PresetSection />
-      <CustomerSection />
+      
       <BackupSection />
     </div>
   );
@@ -255,37 +254,6 @@ function PresetSection() {
   );
 }
 
-function CustomerSection() {
-  const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
-  const customers = deriveCustomers(notes);
-  if (customers.length === 0) return null;
-
-  return (
-    <Section title="Pelanggan">
-      <Card>
-        <ul className="divide-y divide-border">
-          {customers.map((c, i) => (
-            <li key={i} className="flex items-center justify-between px-4 py-3">
-              <div className="min-w-0">
-                <div className="text-sm font-medium truncate">{c.name}</div>
-                <div className="text-xs text-muted-foreground">{c.phone || "—"} · {c.count} nota</div>
-              </div>
-              {c.phone && (
-                <a
-                  href={waLink(c.phone, `Halo ${c.name}, terima kasih sudah berbelanja.`)}
-                  target="_blank" rel="noopener"
-                  className="tap text-sm inline-flex items-center gap-1 text-muted-foreground hover:text-foreground rounded-full px-3 py-1.5"
-                >
-                  <MessageCircle className="h-4 w-4" /> WA
-                </a>
-              )}
-            </li>
-          ))}
-        </ul>
-      </Card>
-    </Section>
-  );
-}
 
 function BackupSection() {
   const qc = useQueryClient();
