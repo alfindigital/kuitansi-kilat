@@ -105,11 +105,25 @@ function Beranda() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <HeroCard label="Omset" amount={stats.omset} sub={`${stats.count} nota`} hide={hide} />
-        <HeroCard label="Laba" amount={stats.laba} sub={missingCost ? "Sebagian item belum bermodal" : "Laba kotor"} hide={hide} tone="accent" />
+        {loading ? (
+          <>
+            <SkelHero />
+            <SkelHero />
+          </>
+        ) : (
+          <>
+            <HeroCard label="Omset" amount={stats.omset} sub={`${stats.count} nota`} hide={hide} />
+            <HeroCard label="Laba" amount={stats.laba} sub={missingCost ? "Sebagian item belum bermodal" : "Laba kotor"} hide={hide} tone="accent" />
+          </>
+        )}
       </div>
 
-      {notes.length > 0 && (
+      {loading ? (
+        <section className="rounded-2xl bg-card border border-border shadow-soft p-3 space-y-2">
+          <Skel className="h-3 w-20" />
+          <Skel className="h-32 w-full" />
+        </section>
+      ) : notes.length > 0 && (
         <section className="rounded-2xl bg-card border border-border shadow-soft p-3">
           <div className="flex items-center justify-between px-1 pb-2">
             <h2 className="t-eyebrow">Omset 7 hari</h2>
@@ -125,7 +139,11 @@ function Beranda() {
 
       <section className="space-y-2">
         <h2 className="t-eyebrow px-1">Transaksi terbaru</h2>
-        {recent.length === 0 ? (
+        {loading ? (
+          <ul className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
+            {[0,1,2].map((i) => <li key={i}><SkelListItem /></li>)}
+          </ul>
+        ) : recent.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border p-8 text-center">
             <p className="font-medium">Belum ada transaksi</p>
             <p className="t-caption mt-1">Yuk buat nota pertama!</p>
