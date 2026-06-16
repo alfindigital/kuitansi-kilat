@@ -1,12 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, lazy, Suspense } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, FilePlus2 } from "lucide-react";
+import { toast } from "sonner";
 
 const OmsetChart = lazy(() => import("@/components/OmsetChart"));
 
 import { db, aggregate, dailyBuckets, calcNoteTotals, hasMissingCost } from "@/lib/storage";
 import { formatIDR, formatDateID } from "@/lib/format";
+import { SkelHero, SkelListItem, Skel } from "@/components/Skeleton";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -59,8 +63,10 @@ export const Route = createFileRoute("/")({
 });
 
 function Beranda() {
-  const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
-  const { data: business } = useQuery({ queryKey: ["business"], queryFn: () => db.getBusiness() });
+  const qc = useQueryClient();
+  const notesQ = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
+  const notes = notesQ.data ?? [];
+  useQuery({ queryKey: ["business"], queryFn: () => db.getBusiness() });
   const { data: prefs } = useQuery({ queryKey: ["prefs"], queryFn: () => db.getPrefs() });
   const [range, setRange] = useState<"today" | "month">("today");
   const stats = useMemo(() => aggregate(notes, range), [notes, range]);
@@ -68,10 +74,17 @@ function Beranda() {
   const recent = useMemo(() => [...notes].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 5), [notes]);
   const missingCost = useMemo(() => hasMissingCost(notes), [notes]);
   const hide = !!prefs?.hideAmounts;
+  const loading = notesQ.isPending;
 
+  const ptr = usePullToRefresh(async () => {
+    await qc.invalidateQueries();
+    toast.success("Diperbarui", { duration: 1500 });
+  });
 
   return (
     <div className="space-y-5">
+      <PullToRefreshIndicator {...ptr} />
+
 
       <div className="relative grid grid-cols-2 rounded-full bg-surface p-1 text-sm" role="tablist">
         {(["today", "month"] as const).map((r) => (
