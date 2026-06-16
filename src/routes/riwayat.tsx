@@ -402,48 +402,40 @@ function RiwayatList() {
         </div>
       )}
 
-      <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Hapus {selected.size} nota?</AlertDialogTitle>
-            <AlertDialogDescription>Aksi ini tidak bisa dibatalkan.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={bulkDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Hapus</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={tagSheetOpen} onOpenChange={setTagSheetOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Tambah tag ke {selected.size} nota</AlertDialogTitle>
-          </AlertDialogHeader>
-          <div className="space-y-3">
-            <Input
-              value={newTagText}
-              onChange={(e) => setNewTagText(e.target.value.slice(0, 20))}
-              onKeyDown={(e) => { if (e.key === "Enter") bulkAddTag(newTagText); }}
-              placeholder="Nama tag…"
-              autoFocus
-            />
-            {allTags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {allTags.map((t) => (
-                  <button key={t.tag} onClick={() => bulkAddTag(t.tag)} className="tap rounded-full bg-surface px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground border border-border">
-                    + {t.tag}
-                  </button>
-                ))}
-              </div>
-            )}
+      {confirmDeleteOpen && (
+        <Modal onClose={() => setConfirmDeleteOpen(false)} title={`Hapus ${selected.size} nota?`}>
+          <p className="text-sm text-muted-foreground">Aksi ini tidak bisa dibatalkan.</p>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setConfirmDeleteOpen(false)} className="rounded-full">Batal</Button>
+            <Button variant="destructive" onClick={bulkDelete} className="rounded-full">Hapus</Button>
           </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={() => bulkAddTag(newTagText)} disabled={!newTagText.trim()}>Tambah</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        </Modal>
+      )}
+
+      {tagSheetOpen && (
+        <Modal onClose={() => setTagSheetOpen(false)} title={`Tambah tag ke ${selected.size} nota`}>
+          <Input
+            value={newTagText}
+            onChange={(e) => setNewTagText(e.target.value.slice(0, 20))}
+            onKeyDown={(e) => { if (e.key === "Enter") bulkAddTag(newTagText); }}
+            placeholder="Nama tag…"
+            autoFocus
+          />
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 pt-2">
+              {allTags.map((t) => (
+                <button key={t.tag} onClick={() => bulkAddTag(t.tag)} className="tap rounded-full bg-surface px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground border border-border">
+                  + {t.tag}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-3">
+            <Button variant="outline" onClick={() => setTagSheetOpen(false)} className="rounded-full">Batal</Button>
+            <Button onClick={() => bulkAddTag(newTagText)} disabled={!newTagText.trim()} className="rounded-full">Tambah</Button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
