@@ -124,11 +124,42 @@ function RiwayatList() {
 
       <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
         {PERIODS.map((p) => (
-          <button key={p.id} type="button" onClick={() => setPeriod(p.id)}
+          <button key={p.id} type="button" onClick={() => { setPeriod(p.id); setCustomDate(null); }}
             className={"tap shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium border " + (period === p.id ? "bg-primary text-primary-foreground border-primary shadow-soft" : "bg-card text-muted-foreground border-border")}>
             {p.label}
           </button>
         ))}
+        <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+          <PopoverTrigger asChild>
+            <button type="button"
+              className={"tap shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium border " + (period === "custom" ? "bg-primary text-primary-foreground border-primary shadow-soft" : "bg-card text-muted-foreground border-border")}>
+              <Calendar className="h-3.5 w-3.5" />
+              <span>{period === "custom" && customDate ? new Date(customDate + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short" }) : "Tanggal"}</span>
+              {period === "custom" && (
+                <X className="h-3 w-3" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPeriod("all"); setCustomDate(null); }} />
+              )}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0 pointer-events-auto z-50" align="start">
+            <Suspense fallback={<div className="p-6 text-xs text-muted-foreground">Memuat…</div>}>
+              <CalendarPicker
+                mode="single"
+                selected={customDate ? new Date(customDate + "T00:00:00") : undefined}
+                defaultMonth={customDate ? new Date(customDate + "T00:00:00") : new Date()}
+                onSelect={(picked) => {
+                  if (!picked) return;
+                  const y = picked.getFullYear();
+                  const m = String(picked.getMonth() + 1).padStart(2, "0");
+                  const day = String(picked.getDate()).padStart(2, "0");
+                  setCustomDate(`${y}-${m}-${day}`);
+                  setPeriod("custom");
+                  setDatePickerOpen(false);
+                }}
+                className="p-3 pointer-events-auto"
+              />
+            </Suspense>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {allTags.length > 0 && (
