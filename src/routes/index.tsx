@@ -1,12 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, lazy, Suspense } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, FilePlus2 } from "lucide-react";
+import { toast } from "sonner";
 
 const OmsetChart = lazy(() => import("@/components/OmsetChart"));
 
 import { db, aggregate, dailyBuckets, calcNoteTotals, hasMissingCost } from "@/lib/storage";
 import { formatIDR, formatDateID } from "@/lib/format";
+import { SkelHero, SkelListItem, Skel } from "@/components/Skeleton";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -59,8 +63,10 @@ export const Route = createFileRoute("/")({
 });
 
 function Beranda() {
-  const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
-  const { data: business } = useQuery({ queryKey: ["business"], queryFn: () => db.getBusiness() });
+  const qc = useQueryClient();
+  const notesQ = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
+  const notes = notesQ.data ?? [];
+  useQuery({ queryKey: ["business"], queryFn: () => db.getBusiness() });
   const { data: prefs } = useQuery({ queryKey: ["prefs"], queryFn: () => db.getPrefs() });
   const [range, setRange] = useState<"today" | "month">("today");
   const stats = useMemo(() => aggregate(notes, range), [notes, range]);
@@ -68,10 +74,17 @@ function Beranda() {
   const recent = useMemo(() => [...notes].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 5), [notes]);
   const missingCost = useMemo(() => hasMissingCost(notes), [notes]);
   const hide = !!prefs?.hideAmounts;
+  const loading = notesQ.isPending;
 
+  const ptr = usePullToRefresh(async () => {
+    await qc.invalidateQueries();
+    toast.success("Diperbarui", { duration: 1500 });
+  });
 
   return (
     <div className="space-y-5">
+      <PullToRefreshIndicator {...ptr} />
+
 
       <div className="relative grid grid-cols-2 rounded-full bg-surface p-1 text-sm" role="tablist">
         {(["today", "month"] as const).map((r) => (
@@ -92,11 +105,25 @@ function Beranda() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <HeroCard label="Omset" amount={stats.omset} sub={`${stats.count} nota`} hide={hide} />
-        <HeroCard label="Laba" amount={stats.laba} sub={missingCost ? "Sebagian item belum bermodal" : "Laba kotor"} hide={hide} tone="accent" />
+        {loading ? (
+          <>
+            <SkelHero />
+            <SkelHero />
+          </>
+        ) : (
+          <>
+            <HeroCard label="Omset" amount={stats.omset} sub={`${stats.count} nota`} hide={hide} />
+            <HeroCard label="Laba" amount={stats.laba} sub={missingCost ? "Sebagian item belum bermodal" : "Laba kotor"} hide={hide} tone="accent" />
+          </>
+        )}
       </div>
 
-      {notes.length > 0 && (
+      {loading ? (
+        <section className="rounded-2xl bg-card border border-border shadow-soft p-3 space-y-2">
+          <Skel className="h-3 w-20" />
+          <Skel className="h-32 w-full" />
+        </section>
+      ) : notes.length > 0 && (
         <section className="rounded-2xl bg-card border border-border shadow-soft p-3">
           <div className="flex items-center justify-between px-1 pb-2">
             <h2 className="t-eyebrow">Omset 7 hari</h2>
@@ -112,7 +139,11 @@ function Beranda() {
 
       <section className="space-y-2">
         <h2 className="t-eyebrow px-1">Transaksi terbaru</h2>
-        {recent.length === 0 ? (
+        {loading ? (
+          <ul className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
+            {[0,1,2].map((i) => <li key={i}><SkelListItem /></li>)}
+          </ul>
+        ) : recent.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border p-8 text-center">
             <p className="font-medium">Belum ada transaksi</p>
             <p className="t-caption mt-1">Yuk buat nota pertama!</p>

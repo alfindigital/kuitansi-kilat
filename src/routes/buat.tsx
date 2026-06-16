@@ -344,45 +344,26 @@ function BuatPage() {
           <SectionLabel>Item</SectionLabel>
           {(() => {
             const savable = items.filter((it) => it.name.trim() && it.price > 0 && !presets.some((p) => p.name.trim().toLowerCase() === it.name.trim().toLowerCase() && p.price === it.price));
-            if (presets.length === 0 && savable.length === 0) return null;
+            if (savable.length === 0) return null;
             return (
               <Popover>
                 <PopoverTrigger asChild>
                   <button className="tap inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-[11px] font-medium text-foreground shadow-soft hover:bg-accent">
-                    <BookmarkPlus className="h-3 w-3" /> Preset <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                    <BookmarkPlus className="h-3 w-3" /> Simpan preset <ChevronDown className="h-3 w-3 text-muted-foreground" />
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-72 p-1.5" align="end">
-                  <div className="max-h-80 overflow-auto space-y-2">
-                    {presets.length > 0 && (
-                      <div>
-                        <div className="px-2 pt-1 pb-1 t-eyebrow">Pilih preset</div>
-                        <div className="space-y-0.5">
-                          {presets.map((p) => (
-                            <button key={p.id} onClick={() => addPreset(p)} className="tap w-full text-left px-2 py-2 text-sm rounded-lg hover:bg-accent flex justify-between gap-2">
-                              <span className="truncate">{p.name}</span>
-                              <span className="text-muted-foreground shrink-0">{formatIDR(p.price)}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {savable.length > 0 && (
-                      <div>
-                        <div className="px-2 pt-1 pb-1 t-eyebrow">Simpan ke preset</div>
-                        <div className="space-y-0.5">
-                          {savable.map((it, idx) => (
-                            <button key={`${it.name}-${idx}`} onClick={() => savePresetMutation.mutate(it)} className="tap w-full text-left px-2 py-2 text-sm rounded-lg hover:bg-accent flex items-center justify-between gap-2">
-                              <span className="inline-flex items-center gap-1.5 min-w-0">
-                                <BookmarkPlus className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                                <span className="truncate">{it.name}</span>
-                              </span>
-                              <span className="text-muted-foreground shrink-0">{formatIDR(it.price)}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                  <div className="max-h-80 overflow-auto space-y-0.5">
+                    <div className="px-2 pt-1 pb-1 t-eyebrow">Simpan ke preset</div>
+                    {savable.map((it, idx) => (
+                      <button key={`${it.name}-${idx}`} onClick={() => savePresetMutation.mutate(it)} className="tap w-full text-left px-2 py-2 text-sm rounded-lg hover:bg-accent flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center gap-1.5 min-w-0">
+                          <BookmarkPlus className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <span className="truncate">{it.name}</span>
+                        </span>
+                        <span className="text-muted-foreground shrink-0">{formatIDR(it.price)}</span>
+                      </button>
+                    ))}
                   </div>
                 </PopoverContent>
               </Popover>
@@ -390,17 +371,36 @@ function BuatPage() {
           })()}
         </div>
 
+        {presets.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1 pb-0.5">
+            {presets.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => { tapHaptic(); addPreset(p); }}
+                className="tap shrink-0 inline-flex items-center gap-1.5 rounded-full bg-card border border-border px-3 py-1.5 text-xs shadow-soft hover:bg-accent active:scale-95"
+              >
+                <Plus className="h-3 w-3 text-muted-foreground" />
+                <span className="font-medium truncate max-w-[120px]">{p.name}</span>
+                <span className="text-muted-foreground tabular-nums">{formatIDR(p.price)}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="space-y-2">
           {items.map((it, i) => (
             <ItemRow
               key={i}
               item={it}
+              presets={presets}
               onChange={(p) => updateItem(i, p)}
               onRemove={items.length > 1 ? () => removeItem(i) : undefined}
             />
           ))}
         </div>
       </section>
+
 
       {/* Inline chips: Tambah item, Diskon, Tag, Catatan */}
       <ExtrasRow
@@ -440,16 +440,44 @@ function Row({ label, value, muted }: { label: React.ReactNode; value: React.Rea
   return <div className={cn("flex justify-between", muted && "text-muted-foreground")}><span>{label}</span><span className="tabular-nums">{value}</span></div>;
 }
 
-type ItemRowProps = { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void };
-const ItemRow = memo(({ item, onChange, onRemove }: ItemRowProps) => {
+type ItemRowProps = { item: NoteItem; presets?: Preset[]; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void };
+const ItemRow = memo(({ item, presets = [], onChange, onRemove }: ItemRowProps) => {
   const [showCost] = useState(item.cost > 0);
+  const [focused, setFocused] = useState(false);
+  const sugs = useMemo(() => {
+    const q = item.name.trim().toLowerCase();
+    if (!q) return [];
+    return presets.filter((p) => p.name.toLowerCase().includes(q) && p.name.toLowerCase() !== q).slice(0, 5);
+  }, [item.name, presets]);
+  const showSugs = focused && sugs.length > 0;
   return (
     <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-2">
-      <input
-        aria-label="Nama item"
-        placeholder="Nama item" value={item.name} onChange={(e) => onChange({ name: e.target.value })} maxLength={60} enterKeyHint="next"
-        className="w-full h-11 px-3 bg-surface rounded-full text-[15px] font-medium placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-ring/30"
-      />
+      <div className="relative">
+        <input
+          aria-label="Nama item"
+          placeholder="Nama item" value={item.name}
+          onChange={(e) => onChange({ name: e.target.value })}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setTimeout(() => setFocused(false), 120)}
+          maxLength={60} enterKeyHint="next"
+          className="w-full h-11 px-3 bg-surface rounded-full text-[15px] font-medium placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-ring/30"
+        />
+        {showSugs && (
+          <div className="absolute z-20 left-1 right-1 mt-1 rounded-xl border border-border bg-popover shadow-pop overflow-hidden">
+            {sugs.map((p) => (
+              <button
+                key={p.id} type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => { tapHaptic(); onChange({ name: p.name, price: p.price, cost: p.cost || 0 }); setFocused(false); }}
+                className="tap w-full text-left px-3 py-2 text-sm hover:bg-accent flex items-center justify-between gap-2"
+              >
+                <span className="truncate font-medium">{p.name}</span>
+                <span className="text-muted-foreground text-xs tabular-nums shrink-0">{formatIDR(p.price)}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="flex items-center gap-2 text-sm">
         <div className="inline-flex items-center rounded-full bg-surface">
           <button type="button" onClick={() => { tapHaptic(); onChange({ qty: Math.max(1, item.qty - 1) }); }} className="tap w-9 h-11 grid place-items-center text-muted-foreground text-lg active:scale-95 select-none" aria-label="Kurangi">−</button>
