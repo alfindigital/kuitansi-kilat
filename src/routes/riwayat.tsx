@@ -52,11 +52,18 @@ function RiwayatPage() {
   return <RiwayatList />;
 }
 
+function fmtYMD(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 function RiwayatList() {
   const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
   const [q, setQ] = useState("");
   const [period, setPeriod] = useState<Period>("all");
-  const [customDate, setCustomDate] = useState<string | null>(null);
+  const [range, setRange] = useState<{ from?: Date; to?: Date } | undefined>();
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [tag, setTag] = useState<string | null>(null);
   const allTags = useMemo(() => deriveTags(notes), [notes]);
@@ -66,6 +73,8 @@ function RiwayatList() {
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    const fromYMD = range?.from ? fmtYMD(range.from) : null;
+    const toYMD = range?.to ? fmtYMD(range.to) : fromYMD;
     return notes.filter((n) => {
       if (ql) {
         const inItems = n.items.some((it) => it.name.toLowerCase().includes(ql));
@@ -76,8 +85,9 @@ function RiwayatList() {
         if (!hit) return false;
       }
       if (tag && !n.tags.includes(tag)) return false;
-      if (period === "custom" && customDate) {
-        if (n.date.slice(0, 10) !== customDate) return false;
+      if (period === "custom" && fromYMD && toYMD) {
+        const ymd = n.date.slice(0, 10);
+        if (ymd < fromYMD || ymd > toYMD) return false;
       } else if (period !== "all") {
         const t = new Date(n.date).getTime();
         if (period === "day" && t < startOfDay) return false;
@@ -85,7 +95,7 @@ function RiwayatList() {
       }
       return true;
     });
-  }, [notes, q, period, customDate, tag]);
+  }, [notes, q, period, range, tag]);
 
   const summary = useMemo(() => {
     let om = 0, lb = 0;
@@ -102,6 +112,14 @@ function RiwayatList() {
     }
     return [...map.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
   }, [filtered]);
+
+  const rangeLabel = (() => {
+    if (period !== "custom" || !range?.from) return "Tanggal";
+    const f = range.from.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+    if (!range.to || fmtYMD(range.to) === fmtYMD(range.from)) return f;
+    const t = range.to.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+    return `${f} – ${t}`;
+  })();
 
   return (
     <div className="space-y-4">
@@ -124,7 +142,7 @@ function RiwayatList() {
 
       <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
         {PERIODS.map((p) => (
-          <button key={p.id} type="button" onClick={() => { setPeriod(p.id); setCustomDate(null); }}
+          <button key={p.id} type="button" onClick={() => { setPeriod(p.id); setRange(undefined); }}
             className={"tap shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium border " + (period === p.id ? "bg-primary text-primary-foreground border-primary shadow-soft" : "bg-card text-muted-foreground border-border")}>
             {p.label}
           </button>
@@ -134,33 +152,31 @@ function RiwayatList() {
             <button type="button"
               className={"tap shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium border " + (period === "custom" ? "bg-primary text-primary-foreground border-primary shadow-soft" : "bg-card text-muted-foreground border-border")}>
               <Calendar className="h-3.5 w-3.5" />
-              <span>{period === "custom" && customDate ? new Date(customDate + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short" }) : "Tanggal"}</span>
+              <span>{rangeLabel}</span>
               {period === "custom" && (
-                <X className="h-3 w-3" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPeriod("all"); setCustomDate(null); }} />
+                <X className="h-3 w-3" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPeriod("all"); setRange(undefined); }} />
               )}
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 pointer-events-auto z-50" align="start">
             <Suspense fallback={<div className="p-6 text-xs text-muted-foreground">Memuat…</div>}>
               <CalendarPicker
-                mode="single"
-                selected={customDate ? new Date(customDate + "T00:00:00") : undefined}
-                defaultMonth={customDate ? new Date(customDate + "T00:00:00") : new Date()}
-                onSelect={(picked) => {
-                  if (!picked) return;
-                  const y = picked.getFullYear();
-                  const m = String(picked.getMonth() + 1).padStart(2, "0");
-                  const day = String(picked.getDate()).padStart(2, "0");
-                  setCustomDate(`${y}-${m}-${day}`);
+                mode="range"
+                selected={range as any}
+                defaultMonth={range?.from ?? new Date()}
+                onSelect={(picked: any) => {
+                  setRange(picked);
                   setPeriod("custom");
-                  setDatePickerOpen(false);
+                  if (picked?.from && picked?.to) setDatePickerOpen(false);
                 }}
+                numberOfMonths={1}
                 className="p-3 pointer-events-auto"
               />
             </Suspense>
           </PopoverContent>
         </Popover>
       </div>
+
 
       {allTags.length > 0 && (
         <div className="flex gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1">
