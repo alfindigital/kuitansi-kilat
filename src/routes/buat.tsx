@@ -440,16 +440,44 @@ function Row({ label, value, muted }: { label: React.ReactNode; value: React.Rea
   return <div className={cn("flex justify-between", muted && "text-muted-foreground")}><span>{label}</span><span className="tabular-nums">{value}</span></div>;
 }
 
-type ItemRowProps = { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void };
-const ItemRow = memo(({ item, onChange, onRemove }: ItemRowProps) => {
+type ItemRowProps = { item: NoteItem; presets?: Preset[]; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void };
+const ItemRow = memo(({ item, presets = [], onChange, onRemove }: ItemRowProps) => {
   const [showCost] = useState(item.cost > 0);
+  const [focused, setFocused] = useState(false);
+  const sugs = useMemo(() => {
+    const q = item.name.trim().toLowerCase();
+    if (!q) return [];
+    return presets.filter((p) => p.name.toLowerCase().includes(q) && p.name.toLowerCase() !== q).slice(0, 5);
+  }, [item.name, presets]);
+  const showSugs = focused && sugs.length > 0;
   return (
     <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-2">
-      <input
-        aria-label="Nama item"
-        placeholder="Nama item" value={item.name} onChange={(e) => onChange({ name: e.target.value })} maxLength={60} enterKeyHint="next"
-        className="w-full h-11 px-3 bg-surface rounded-full text-[15px] font-medium placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-ring/30"
-      />
+      <div className="relative">
+        <input
+          aria-label="Nama item"
+          placeholder="Nama item" value={item.name}
+          onChange={(e) => onChange({ name: e.target.value })}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setTimeout(() => setFocused(false), 120)}
+          maxLength={60} enterKeyHint="next"
+          className="w-full h-11 px-3 bg-surface rounded-full text-[15px] font-medium placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-ring/30"
+        />
+        {showSugs && (
+          <div className="absolute z-20 left-1 right-1 mt-1 rounded-xl border border-border bg-popover shadow-pop overflow-hidden">
+            {sugs.map((p) => (
+              <button
+                key={p.id} type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => { tapHaptic(); onChange({ name: p.name, price: p.price, cost: p.cost || 0 }); setFocused(false); }}
+                className="tap w-full text-left px-3 py-2 text-sm hover:bg-accent flex items-center justify-between gap-2"
+              >
+                <span className="truncate font-medium">{p.name}</span>
+                <span className="text-muted-foreground text-xs tabular-nums shrink-0">{formatIDR(p.price)}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="flex items-center gap-2 text-sm">
         <div className="inline-flex items-center rounded-full bg-surface">
           <button type="button" onClick={() => { tapHaptic(); onChange({ qty: Math.max(1, item.qty - 1) }); }} className="tap w-9 h-11 grid place-items-center text-muted-foreground text-lg active:scale-95 select-none" aria-label="Kurangi">−</button>
