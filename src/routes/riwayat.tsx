@@ -521,5 +521,21 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-// Re-export Skel to avoid unused warning if needed
-export { Skel as _Skel };
+function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40" onClick={onClose}>
+      <div className="w-full max-w-sm rounded-2xl bg-card border border-border shadow-pop p-4 space-y-3" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-base">{title}</h3>
+          <button onClick={onClose} aria-label="Tutup" className="tap p-1 rounded-full hover:bg-accent"><X className="h-4 w-4" /></button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
