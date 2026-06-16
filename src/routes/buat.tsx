@@ -185,7 +185,7 @@ function BuatPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (savedNote || editingId || fromId) return;
+    if (editingId || fromId) return;
     const draft = { date, customerName, customerPhone, items, discount, tags, noteText };
     const t = setTimeout(() => {
       try {
@@ -196,7 +196,7 @@ function BuatPage() {
       }
     }, 400);
     return () => clearTimeout(t);
-  }, [date, customerName, customerPhone, items, discount, tags, noteText, savedNote, editingId, fromId]);
+  }, [date, customerName, customerPhone, items, discount, tags, noteText, editingId, fromId]);
 
   useEffect(() => {
     if (hadInitialDraft.current) { toast.success("Draf dipulihkan"); hadInitialDraft.current = false; }
