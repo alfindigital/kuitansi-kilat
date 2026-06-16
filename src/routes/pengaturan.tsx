@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Save, Plus, Trash2, Download, RotateCcw, Sun, Moon, Eye, EyeOff } from "lucide-react";
+import { Upload, Save, Plus, Trash2, Download, RotateCcw, Sun, Moon, Eye, EyeOff, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 import { db, defaultBusiness, uid, type Business, type Preset } from "@/lib/storage";
@@ -201,6 +201,7 @@ function PresetSection() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0);
   const [cost, setCost] = useState(0);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const save = useMutation({
     mutationFn: async (items: Preset[]) => { await db.setPresets(items); },
@@ -215,8 +216,8 @@ function PresetSection() {
     setName(""); setPrice(0); setCost(0);
   }
   function remove(id: string) { save.mutate(presets.filter((p) => p.id !== id)); }
-  function updateCost(id: string, newCost: number) {
-    save.mutate(presets.map((p) => (p.id === id ? { ...p, cost: newCost } : p)));
+  function updatePreset(id: string, updates: Partial<Omit<Preset, "id">>) {
+    save.mutate(presets.map((p) => (p.id === id ? { ...p, ...updates } : p)));
   }
 
   return (
@@ -224,59 +225,91 @@ function PresetSection() {
       <Card className="p-3 space-y-3">
         <div className="space-y-2">
           <Input aria-label="Nama preset" placeholder="Nama item" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} enterKeyHint="next" className="h-11 rounded-xl" />
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-[10px] font-medium">Harga</span>
+          <div className="flex gap-2 items-end">
+            <div className="flex-1 space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Harga</Label>
               <Input
                 aria-label="Harga jual preset"
                 inputMode="decimal" enterKeyHint="next" placeholder="0"
                 value={formatIDRInput(price)}
                 onChange={(e) => setPrice(parseIDRInput(e.target.value))}
                 onFocus={(e) => e.target.select()}
-                className="h-11 rounded-xl pl-12 text-right"
+                className="h-11 rounded-xl text-right"
               />
             </div>
-            <div className="relative flex-1">
-              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-[10px] font-medium">Modal</span>
+            <div className="flex-1 space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Modal</Label>
               <Input
                 aria-label="Modal preset"
                 inputMode="decimal" enterKeyHint="done" placeholder="0"
                 value={formatIDRInput(cost)}
                 onChange={(e) => setCost(parseIDRInput(e.target.value))}
                 onFocus={(e) => e.target.select()}
-                className="h-11 rounded-xl pl-12 text-right"
+                className="h-11 rounded-xl text-right"
               />
             </div>
             <Button variant="outline" onClick={add} aria-label="Tambah preset item" className="tap rounded-xl h-11 w-11 p-0 shrink-0">
               <Plus className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
-          <p className="t-caption px-1">Modal dipakai untuk hitung laba otomatis.</p>
         </div>
         {presets.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-3">Belum ada preset.</p>
         ) : (
           <ul className="divide-y divide-border">
             {presets.map((p) => (
-              <li key={p.id} className="flex items-center justify-between gap-2 py-2.5">
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium truncate">{p.name}</div>
-                  <div className="text-xs text-muted-foreground">Harga {formatIDR(p.price)}</div>
-                </div>
-                <div className="relative w-28 shrink-0">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-[10px]">Modal</span>
-                  <Input
-                    aria-label={`Modal ${p.name}`}
-                    inputMode="decimal" placeholder="0"
-                    value={formatIDRInput(p.cost || 0)}
-                    onChange={(e) => updateCost(p.id, parseIDRInput(e.target.value))}
-                    onFocus={(e) => e.target.select()}
-                    className="h-9 rounded-lg pl-11 text-right text-xs"
-                  />
-                </div>
-                <button onClick={() => remove(p.id)} aria-label={`Hapus preset ${p.name}`} className="tap tap-target inline-flex items-center justify-center text-muted-foreground hover:text-destructive rounded-full">
-                  <Trash2 className="h-4 w-4" aria-hidden="true" />
-                </button>
+              <li key={p.id} className="py-2.5">
+                {editingId === p.id ? (
+                  <div className="space-y-2">
+                    <Input
+                      value={p.name}
+                      onChange={(e) => updatePreset(p.id, { name: e.target.value })}
+                      className="h-9 rounded-lg text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <Input
+                        inputMode="decimal"
+                        value={formatIDRInput(p.price)}
+                        onChange={(e) => updatePreset(p.id, { price: parseIDRInput(e.target.value) })}
+                        onFocus={(e) => e.target.select()}
+                        className="h-9 rounded-lg text-right text-xs"
+                      />
+                      <Input
+                        inputMode="decimal"
+                        value={formatIDRInput(p.cost || 0)}
+                        onChange={(e) => updatePreset(p.id, { cost: parseIDRInput(e.target.value) })}
+                        onFocus={(e) => e.target.select()}
+                        className="h-9 rounded-lg text-right text-xs"
+                      />
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Selesai
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="text-sm font-medium truncate">{p.name}</div>
+                      <div className="flex gap-3 text-xs text-muted-foreground">
+                        <span>Harga {formatIDR(p.price)}</span>
+                        <span>Modal {formatIDR(p.cost || 0)}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => setEditingId(p.id)} aria-label={`Edit preset ${p.name}`} className="tap tap-target inline-flex items-center justify-center text-muted-foreground hover:text-foreground rounded-full">
+                        <Pencil className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                      <button onClick={() => remove(p.id)} aria-label={`Hapus preset ${p.name}`} className="tap tap-target inline-flex items-center justify-center text-muted-foreground hover:text-destructive rounded-full">
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
