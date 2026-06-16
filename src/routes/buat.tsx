@@ -400,13 +400,11 @@ function BuatPage() {
             />
           ))}
         </div>
-        <button type="button" onClick={addRow} className="tap w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm text-muted-foreground hover:text-foreground rounded-2xl border border-dashed border-border">
-          <Plus className="h-4 w-4" /> Tambah
-        </button>
       </section>
 
-      {/* Inline chips: Diskon, Tag, Catatan */}
+      {/* Inline chips: Tambah item, Diskon, Tag, Catatan */}
       <ExtrasRow
+        onAddItem={addRow}
         discount={discount}
         setDiscount={setDiscount}
         tags={tags}
