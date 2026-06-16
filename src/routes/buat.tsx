@@ -504,8 +504,9 @@ const ItemRow = memo(({ item, onChange, onRemove }: ItemRowProps) => {
 });
 
 function ExtrasRow({
-  discount, setDiscount, tags, setTags, tagSuggestions, noteText, setNoteText,
+  onAddItem, discount, setDiscount, tags, setTags, tagSuggestions, noteText, setNoteText,
 }: {
+  onAddItem?: () => void;
   discount: number; setDiscount: (n: number) => void;
   tags: string[]; setTags: (v: string[]) => void; tagSuggestions: string[];
   noteText: string; setNoteText: (v: string) => void;
