@@ -400,13 +400,11 @@ function BuatPage() {
             />
           ))}
         </div>
-        <button type="button" onClick={addRow} className="tap w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm text-muted-foreground hover:text-foreground rounded-2xl border border-dashed border-border">
-          <Plus className="h-4 w-4" /> Tambah
-        </button>
       </section>
 
-      {/* Inline chips: Diskon, Tag, Catatan */}
+      {/* Inline chips: Tambah item, Diskon, Tag, Catatan */}
       <ExtrasRow
+        onAddItem={addRow}
         discount={discount}
         setDiscount={setDiscount}
         tags={tags}
@@ -506,8 +504,9 @@ const ItemRow = memo(({ item, onChange, onRemove }: ItemRowProps) => {
 });
 
 function ExtrasRow({
-  discount, setDiscount, tags, setTags, tagSuggestions, noteText, setNoteText,
+  onAddItem, discount, setDiscount, tags, setTags, tagSuggestions, noteText, setNoteText,
 }: {
+  onAddItem?: () => void;
   discount: number; setDiscount: (n: number) => void;
   tags: string[]; setTags: (v: string[]) => void; tagSuggestions: string[];
   noteText: string; setNoteText: (v: string) => void;
@@ -522,6 +521,12 @@ function ExtrasRow({
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
+      {/* Tambah item */}
+      {onAddItem && (
+        <button type="button" onClick={onAddItem} className="tap inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-4 py-1.5 text-xs font-medium shadow-pop hover:opacity-90">
+          <Plus className="h-3.5 w-3.5" /> Item
+        </button>
+      )}
       {/* Diskon */}
       {discount > 0 ? (
         <span className="inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs">
