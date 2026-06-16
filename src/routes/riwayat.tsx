@@ -1,14 +1,17 @@
 import { createFileRoute, Link, Outlet, useMatchRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, FileText, ChevronRight, Plus, Tag } from "lucide-react";
+import { Search, FileText, ChevronRight, Plus, Tag, Calendar, X } from "lucide-react";
 
 import { db, calcNoteTotals, deriveTags, type Note } from "@/lib/storage";
 import { formatIDR, formatDate } from "@/lib/format";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-type Period = "all" | "day" | "week" | "month";
-const PERIODS: { id: Period; label: string }[] = [
-  { id: "all", label: "Semua" }, { id: "day", label: "Hari ini" }, { id: "week", label: "Minggu" }, { id: "month", label: "Bulan" },
+const CalendarPicker = lazy(() => import("@/components/ui/calendar").then((m) => ({ default: m.Calendar })));
+
+type Period = "all" | "day" | "month" | "custom";
+const PERIODS: { id: Exclude<Period, "custom">; label: string }[] = [
+  { id: "all", label: "Semua" }, { id: "day", label: "Hari ini" }, { id: "month", label: "Bulan" },
 ];
 
 export const Route = createFileRoute("/riwayat")({
