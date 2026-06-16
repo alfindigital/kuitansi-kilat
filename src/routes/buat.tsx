@@ -2,8 +2,8 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback, memo, lazy, Suspense } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Plus, Trash2, X, Check, MessageCircle, ArrowLeft,
-  Image as ImageIcon, Copy, ChevronDown, Calendar, BookmarkPlus, Tag, StickyNote,
+  Plus, Trash2, X, Check, ArrowLeft,
+  ChevronDown, Calendar, BookmarkPlus, Tag, StickyNote,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -13,14 +13,11 @@ import {
   type Note, type NoteItem, type Preset,
 } from "@/lib/storage";
 import { formatIDR, formatIDRInput, parseIDRInput, toDateInput } from "@/lib/format";
-import { buildReceiptText, renderReceiptPNG, sharePNG, waLink } from "@/lib/receipt";
 import { tapHaptic } from "@/lib/haptic";
-import { Receipt as ReceiptCard } from "@/components/Receipt";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 const CalendarPicker = lazy(() => import("@/components/ui/calendar").then((m) => ({ default: m.Calendar })));
 import { cn } from "@/lib/utils";
