@@ -391,20 +391,14 @@ function BuatPage() {
         </div>
 
         <div className="space-y-2">
-          {items.map((it, i) => {
-            const isPreset = presets.some((p) => p.name.trim().toLowerCase() === it.name.trim().toLowerCase() && p.price === it.price);
-            const canSave = !!it.name.trim() && it.price > 0 && !isPreset;
-            return (
-              <ItemRow
-                key={i}
-                item={it}
-                onChange={(p) => updateItem(i, p)}
-                onRemove={items.length > 1 ? () => removeItem(i) : undefined}
-                onSavePreset={canSave ? () => savePresetMutation.mutate(it) : undefined}
-                isPreset={isPreset}
-              />
-            );
-          })}
+          {items.map((it, i) => (
+            <ItemRow
+              key={i}
+              item={it}
+              onChange={(p) => updateItem(i, p)}
+              onRemove={items.length > 1 ? () => removeItem(i) : undefined}
+            />
+          ))}
         </div>
         <button type="button" onClick={addRow} className="tap w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm text-muted-foreground hover:text-foreground rounded-2xl border border-dashed border-border">
           <Plus className="h-4 w-4" /> Tambah
@@ -451,8 +445,8 @@ function Row({ label, value, muted }: { label: React.ReactNode; value: React.Rea
   return <div className={cn("flex justify-between", muted && "text-muted-foreground")}><span>{label}</span><span className="tabular-nums">{value}</span></div>;
 }
 
-type ItemRowProps = { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void; onSavePreset?: () => void; isPreset?: boolean };
-const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: ItemRowProps) => {
+type ItemRowProps = { item: NoteItem; onChange: (p: Partial<NoteItem>) => void; onRemove?: () => void };
+const ItemRow = memo(({ item, onChange, onRemove }: ItemRowProps) => {
   const [showCost] = useState(item.cost > 0);
   return (
     <div className="group relative rounded-2xl bg-card border border-border shadow-soft p-3 pr-12 space-y-2">
@@ -501,16 +495,6 @@ const ItemRow = memo(({ item, onChange, onRemove, onSavePreset, isPreset }: Item
         </div>
       )}
       <div className="absolute top-1 right-1 flex items-center">
-        {onSavePreset && (
-          <button type="button" onClick={() => { tapHaptic(); onSavePreset(); }} className="tap inline-flex items-center justify-center w-9 h-9 text-muted-foreground hover:text-foreground rounded-full" aria-label="Simpan ke preset" title="Simpan ke preset">
-            <BookmarkPlus className="h-4 w-4" />
-          </button>
-        )}
-        {isPreset && !onSavePreset && (
-          <span className="inline-flex items-center justify-center w-9 h-9 text-primary/70" title="Sudah ada di preset" aria-label="Sudah ada di preset">
-            <BookmarkPlus className="h-4 w-4" />
-          </span>
-        )}
         {onRemove && (
           <button type="button" onClick={() => { tapHaptic(); onRemove(); }} className="tap inline-flex items-center justify-center w-9 h-9 text-muted-foreground hover:text-destructive rounded-full" aria-label="Hapus baris">
             <Trash2 className="h-4 w-4" />
