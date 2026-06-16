@@ -123,13 +123,20 @@ function DateChip({ date, onChange }: { date: string; onChange: (v: string) => v
           <Calendar className="h-3.5 w-3.5" /><span>{text}</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="end">
+      <PopoverContent className="w-auto p-0 pointer-events-auto z-50" align="end">
         <Suspense fallback={<div className="p-6 text-xs text-muted-foreground">Memuat…</div>}>
           <CalendarPicker
             mode="single"
             selected={d}
-            onSelect={(picked) => { if (picked) { onChange(toDateInput(picked.toISOString())); setOpen(false); } }}
-            initialFocus
+            defaultMonth={d}
+            onSelect={(picked) => {
+              if (!picked) return;
+              const y = picked.getFullYear();
+              const m = String(picked.getMonth() + 1).padStart(2, "0");
+              const day = String(picked.getDate()).padStart(2, "0");
+              onChange(`${y}-${m}-${day}`);
+              setOpen(false);
+            }}
             className="p-3 pointer-events-auto"
           />
         </Suspense>
