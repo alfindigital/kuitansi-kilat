@@ -495,16 +495,6 @@ const ItemRow = memo(({ item, onChange, onRemove }: ItemRowProps) => {
         </div>
       )}
       <div className="absolute top-1 right-1 flex items-center">
-        {onSavePreset && (
-          <button type="button" onClick={() => { tapHaptic(); onSavePreset(); }} className="tap inline-flex items-center justify-center w-9 h-9 text-muted-foreground hover:text-foreground rounded-full" aria-label="Simpan ke preset" title="Simpan ke preset">
-            <BookmarkPlus className="h-4 w-4" />
-          </button>
-        )}
-        {isPreset && !onSavePreset && (
-          <span className="inline-flex items-center justify-center w-9 h-9 text-primary/70" title="Sudah ada di preset" aria-label="Sudah ada di preset">
-            <BookmarkPlus className="h-4 w-4" />
-          </span>
-        )}
         {onRemove && (
           <button type="button" onClick={() => { tapHaptic(); onRemove(); }} className="tap inline-flex items-center justify-center w-9 h-9 text-muted-foreground hover:text-destructive rounded-full" aria-label="Hapus baris">
             <Trash2 className="h-4 w-4" />
