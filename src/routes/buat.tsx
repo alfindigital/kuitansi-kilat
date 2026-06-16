@@ -2,8 +2,8 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback, memo, lazy, Suspense } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Plus, Trash2, X, Check, MessageCircle, ArrowLeft,
-  Image as ImageIcon, Copy, ChevronDown, Calendar, BookmarkPlus, Tag, StickyNote,
+  Plus, Trash2, X, Check, ArrowLeft,
+  ChevronDown, Calendar, BookmarkPlus, Tag, StickyNote,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -13,14 +13,11 @@ import {
   type Note, type NoteItem, type Preset,
 } from "@/lib/storage";
 import { formatIDR, formatIDRInput, parseIDRInput, toDateInput } from "@/lib/format";
-import { buildReceiptText, renderReceiptPNG, sharePNG, waLink } from "@/lib/receipt";
 import { tapHaptic } from "@/lib/haptic";
-import { Receipt as ReceiptCard } from "@/components/Receipt";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 const CalendarPicker = lazy(() => import("@/components/ui/calendar").then((m) => ({ default: m.Calendar })));
 import { cn } from "@/lib/utils";
@@ -163,7 +160,6 @@ function BuatPage() {
   const [discount, setDiscount] = useState<number>(initial?.discount ?? 0);
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
   const [noteText, setNoteText] = useState(initial?.noteText ?? "");
-  const [savedNote, setSavedNote] = useState<Note | null>(null);
   const hadInitialDraft = useRef(!!initial && !isDraftEmpty({ customerName: initial.customerName, customerPhone: initial.customerPhone, items: initial.items, discount: initial.discount, tags: initial.tags ?? [], noteText: initial.noteText }));
   const [editingNumber, setEditingNumber] = useState<string | null>(null);
   const loadedKeyRef = useRef<string | null>(null);
@@ -189,7 +185,7 @@ function BuatPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (savedNote || editingId || fromId) return;
+    if (editingId || fromId) return;
     const draft = { date, customerName, customerPhone, items, discount, tags, noteText };
     const t = setTimeout(() => {
       try {
@@ -200,7 +196,7 @@ function BuatPage() {
       }
     }, 400);
     return () => clearTimeout(t);
-  }, [date, customerName, customerPhone, items, discount, tags, noteText, savedNote, editingId, fromId]);
+  }, [date, customerName, customerPhone, items, discount, tags, noteText, editingId, fromId]);
 
   useEffect(() => {
     if (hadInitialDraft.current) { toast.success("Draf dipulihkan"); hadInitialDraft.current = false; }
@@ -295,17 +291,10 @@ function BuatPage() {
       if (typeof window !== "undefined") { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } }
       tapHaptic(20);
       if (editingId) { toast.success("Perubahan disimpan"); navigate({ to: "/riwayat/$noteId", params: { noteId: note.id } }); }
-      else setSavedNote(note);
+      else { toast.success("Nota tersimpan"); navigate({ to: "/" }); }
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
-  function newNota() {
-    setSavedNote(null); setCustomerName(""); setCustomerPhone("");
-    setItems([emptyItem()]); setDiscount(0); setTags([]); setNoteText("");
-    setDate(toDateInput(new Date().toISOString()));
-    if (typeof window !== "undefined") { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } }
-  }
 
   return (
     <div className="space-y-4">
@@ -443,9 +432,6 @@ function BuatPage() {
         {editingId ? "Simpan perubahan" : "Simpan"}
       </Button>
 
-      {savedNote && business && (
-        <ShareSheet note={savedNote} business={business} onClose={newNota} onOpenDetail={() => navigate({ to: "/riwayat/$noteId", params: { noteId: savedNote.id } })} />
-      )}
     </div>
   );
 }
@@ -679,61 +665,6 @@ function NoteChip({ noteText, setNoteText }: { noteText: string; setNoteText: (v
 
 
 
-function ShareSheet({ note, business, onClose, onOpenDetail }: { note: Note; business: import("@/lib/storage").Business; onClose: () => void; onOpenDetail: () => void }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [busy, setBusy] = useState<string | null>(null);
-  const text = useMemo(() => buildReceiptText(note, business), [note, business]);
-  const totals = calcNoteTotals(note);
-
-  async function shareImage() {
-    if (!ref.current) return;
-    setBusy("img");
-    try { const url = await renderReceiptPNG(ref.current); await sharePNG(url, `${note.number}.png`, text); }
-    catch (e) { toast.error("Gagal membuat gambar."); console.error(e); }
-    finally { setBusy(null); }
-  }
-  async function copyText() { await navigator.clipboard.writeText(text); toast.success("Teks struk disalin"); }
-  function sendWA() { window.open(waLink(note.customerPhone, text), "_blank", "noopener"); }
-
-  return (
-    <Sheet open onOpenChange={(o) => !o && onClose()}>
-      <SheetContent side="bottom" className="rounded-t-3xl border-border">
-        <div className="mx-auto h-1 w-10 rounded-full bg-border mb-3" />
-        <SheetHeader className="text-left">
-          <SheetTitle className="font-display tracking-tight text-lg">Tersimpan</SheetTitle>
-          <p className="text-xs text-muted-foreground">{note.number}</p>
-        </SheetHeader>
-        <div className="py-4 space-y-4">
-          <div className="rounded-2xl bg-surface p-4">
-            <div className="t-eyebrow">Total</div>
-            <div className="font-display font-semibold text-2xl tracking-tight mt-1 tabular-nums">{formatIDR(totals.total)}</div>
-            {note.customerName && <div className="text-xs text-muted-foreground mt-1">untuk {note.customerName}</div>}
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <ActionTile icon={<ImageIcon className="h-5 w-5" />} label="PNG" onClick={shareImage} loading={busy === "img"} />
-            <ActionTile icon={<Copy className="h-5 w-5" />} label="Salin" onClick={copyText} />
-            <ActionTile icon={<MessageCircle className="h-5 w-5" />} label="WA" onClick={sendWA} />
-          </div>
-          <div className="flex justify-between pt-1">
-            <button onClick={onOpenDetail} className="tap text-sm text-muted-foreground hover:text-foreground">Lihat detail</button>
-            <button onClick={onClose} className="tap text-sm inline-flex items-center gap-1 font-medium"><Plus className="h-4 w-4" /> Buat lagi</button>
-          </div>
-        </div>
-        <div style={{ position: "fixed", left: -10000, top: 0 }}>
-          <ReceiptCard ref={ref} note={note} business={business} />
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
-function ActionTile({ icon, label, onClick, loading }: { icon: React.ReactNode; label: string; onClick: () => void; loading?: boolean }) {
-  return (
-    <button onClick={() => { tapHaptic(); onClick(); }} disabled={loading} className="tap flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-card border border-border shadow-soft py-4 text-sm disabled:opacity-60">
-      {icon}<span>{label}</span>
-    </button>
-  );
-}
 
 type CustomerLite = { name: string; phone?: string; count?: number };
 function CustomerSuggestInput({ placeholder, value, onChange, suggestions, onPick, maxLength, inputMode }: { placeholder: string; value: string; onChange: (v: string) => void; suggestions: CustomerLite[]; onPick: (c: CustomerLite) => void; maxLength?: number; inputMode?: "tel" | "text" | "numeric"; }) {
