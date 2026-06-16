@@ -577,51 +577,8 @@ function ExtrasRow({
       </Popover>
 
       {/* Catatan */}
-      {noteText.trim() ? (
-        <Popover>
-          <PopoverTrigger asChild>
-            <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs max-w-[60%]">
-              <StickyNote className="h-3 w-3 shrink-0" />
-              <span className="truncate">{noteText}</span>
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-72 p-2 space-y-2" align="start">
-            <Textarea
-              rows={3}
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value.slice(0, 200))}
-              maxLength={200}
-              placeholder="Catatan…"
-              className="rounded-xl border-border bg-card"
-              autoFocus
-            />
-            <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-              <button type="button" onClick={() => setNoteText("")} className="hover:text-destructive">Hapus</button>
-              <span className="tabular-nums">{noteText.length}/200</span>
-            </div>
-          </PopoverContent>
-        </Popover>
-      ) : (
-        <Popover>
-          <PopoverTrigger asChild>
-            <button type="button" className="tap inline-flex items-center gap-1 rounded-full bg-card border border-border border-dashed px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground shadow-soft">
-              <Plus className="h-3 w-3" /> Catatan
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-72 p-2 space-y-2" align="start">
-            <Textarea
-              rows={3}
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value.slice(0, 200))}
-              maxLength={200}
-              placeholder="Catatan…"
-              className="rounded-xl border-border bg-card"
-              autoFocus
-            />
-            <div className="text-right text-[10px] text-muted-foreground tabular-nums">{noteText.length}/200</div>
-          </PopoverContent>
-        </Popover>
-      )}
+      <NoteChip noteText={noteText} setNoteText={setNoteText} />
+
     </div>
   );
 }
