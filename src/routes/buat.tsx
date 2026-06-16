@@ -332,9 +332,13 @@ function BuatPage() {
             ))}
           </div>
         )}
-        <div className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden divide-y divide-border">
-          <CustomerSuggestInput placeholder="Nama" value={customerName} onChange={setCustomerName} suggestions={nameSuggestions} onPick={(c) => { setCustomerName(c.name); setCustomerPhone(c.phone || ""); }} maxLength={60} />
-          <CustomerSuggestInput placeholder="No. WhatsApp (opsional)" value={customerPhone} onChange={(v) => setCustomerPhone(v.replace(/[^\d+]/g, ""))} suggestions={phoneSuggestions} onPick={(c) => { setCustomerName(c.name); setCustomerPhone(c.phone || ""); }} maxLength={20} inputMode="tel" />
+        <div className="rounded-2xl bg-card border border-border shadow-soft overflow-hidden flex divide-x divide-border">
+          <div className="flex-1 min-w-0">
+            <CustomerSuggestInput placeholder="Nama" value={customerName} onChange={setCustomerName} suggestions={nameSuggestions} onPick={(c) => { setCustomerName(c.name); setCustomerPhone(c.phone || ""); }} maxLength={60} />
+          </div>
+          <div className="w-[140px] shrink-0">
+            <CustomerSuggestInput placeholder="No. WA" value={customerPhone} onChange={(v) => setCustomerPhone(v.replace(/[^\d+]/g, ""))} suggestions={phoneSuggestions} onPick={(c) => { setCustomerName(c.name); setCustomerPhone(c.phone || ""); }} maxLength={20} inputMode="tel" />
+          </div>
         </div>
       </section>
 
