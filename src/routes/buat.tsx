@@ -521,6 +521,12 @@ function ExtrasRow({
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
+      {/* Tambah item */}
+      {onAddItem && (
+        <button type="button" onClick={onAddItem} className="tap inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-4 py-1.5 text-xs font-medium shadow-pop hover:opacity-90">
+          <Plus className="h-3.5 w-3.5" /> Item
+        </button>
+      )}
       {/* Diskon */}
       {discount > 0 ? (
         <span className="inline-flex items-center gap-1 rounded-full bg-accent/60 px-2.5 py-1 text-xs">
