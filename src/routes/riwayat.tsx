@@ -1,14 +1,17 @@
 import { createFileRoute, Link, Outlet, useMatchRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, FileText, ChevronRight, Plus, Tag } from "lucide-react";
+import { Search, FileText, ChevronRight, Plus, Tag, Calendar, X } from "lucide-react";
 
 import { db, calcNoteTotals, deriveTags, type Note } from "@/lib/storage";
 import { formatIDR, formatDate } from "@/lib/format";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-type Period = "all" | "day" | "week" | "month";
-const PERIODS: { id: Period; label: string }[] = [
-  { id: "all", label: "Semua" }, { id: "day", label: "Hari ini" }, { id: "week", label: "Minggu" }, { id: "month", label: "Bulan" },
+const CalendarPicker = lazy(() => import("@/components/ui/calendar").then((m) => ({ default: m.Calendar })));
+
+type Period = "all" | "day" | "month" | "custom";
+const PERIODS: { id: Exclude<Period, "custom">; label: string }[] = [
+  { id: "all", label: "Semua" }, { id: "day", label: "Hari ini" }, { id: "month", label: "Bulan" },
 ];
 
 export const Route = createFileRoute("/riwayat")({
@@ -53,6 +56,8 @@ function RiwayatList() {
   const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
   const [q, setQ] = useState("");
   const [period, setPeriod] = useState<Period>("all");
+  const [customDate, setCustomDate] = useState<string | null>(null);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [tag, setTag] = useState<string | null>(null);
   const allTags = useMemo(() => deriveTags(notes), [notes]);
 
@@ -60,7 +65,6 @@ function RiwayatList() {
     const ql = q.trim().toLowerCase();
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const startOfWeek = startOfDay - ((now.getDay() + 6) % 7) * 86_400_000;
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
     return notes.filter((n) => {
       if (ql) {
@@ -72,15 +76,16 @@ function RiwayatList() {
         if (!hit) return false;
       }
       if (tag && !n.tags.includes(tag)) return false;
-      if (period !== "all") {
+      if (period === "custom" && customDate) {
+        if (n.date.slice(0, 10) !== customDate) return false;
+      } else if (period !== "all") {
         const t = new Date(n.date).getTime();
         if (period === "day" && t < startOfDay) return false;
-        if (period === "week" && t < startOfWeek) return false;
         if (period === "month" && t < startOfMonth) return false;
       }
       return true;
     });
-  }, [notes, q, period, tag]);
+  }, [notes, q, period, customDate, tag]);
 
   const summary = useMemo(() => {
     let om = 0, lb = 0;
@@ -119,11 +124,42 @@ function RiwayatList() {
 
       <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
         {PERIODS.map((p) => (
-          <button key={p.id} type="button" onClick={() => setPeriod(p.id)}
+          <button key={p.id} type="button" onClick={() => { setPeriod(p.id); setCustomDate(null); }}
             className={"tap shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium border " + (period === p.id ? "bg-primary text-primary-foreground border-primary shadow-soft" : "bg-card text-muted-foreground border-border")}>
             {p.label}
           </button>
         ))}
+        <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+          <PopoverTrigger asChild>
+            <button type="button"
+              className={"tap shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium border " + (period === "custom" ? "bg-primary text-primary-foreground border-primary shadow-soft" : "bg-card text-muted-foreground border-border")}>
+              <Calendar className="h-3.5 w-3.5" />
+              <span>{period === "custom" && customDate ? new Date(customDate + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "short" }) : "Tanggal"}</span>
+              {period === "custom" && (
+                <X className="h-3 w-3" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPeriod("all"); setCustomDate(null); }} />
+              )}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0 pointer-events-auto z-50" align="start">
+            <Suspense fallback={<div className="p-6 text-xs text-muted-foreground">Memuat…</div>}>
+              <CalendarPicker
+                mode="single"
+                selected={customDate ? new Date(customDate + "T00:00:00") : undefined}
+                defaultMonth={customDate ? new Date(customDate + "T00:00:00") : new Date()}
+                onSelect={(picked) => {
+                  if (!picked) return;
+                  const y = picked.getFullYear();
+                  const m = String(picked.getMonth() + 1).padStart(2, "0");
+                  const day = String(picked.getDate()).padStart(2, "0");
+                  setCustomDate(`${y}-${m}-${day}`);
+                  setPeriod("custom");
+                  setDatePickerOpen(false);
+                }}
+                className="p-3 pointer-events-auto"
+              />
+            </Suspense>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {allTags.length > 0 && (
@@ -161,9 +197,13 @@ function RiwayatList() {
                       <Link to="/riwayat/$noteId" params={{ noteId: n.id }} className="tap flex items-center justify-between px-4 py-3 hover:bg-accent/60">
                         <div className="min-w-0">
                           <div className="font-medium truncate text-[15px]">{n.customerName || "Tanpa nama"}</div>
-                          <div className="text-xs text-muted-foreground mt-0.5 truncate">
-                            {n.number} · {n.items.length} item
-                            {n.tags.length > 0 && <span className="ml-1">· {n.tags.join(", ")}</span>}
+                          <div className="text-xs text-muted-foreground mt-0.5 truncate flex items-center gap-1 flex-wrap">
+                            <span>{n.number} · {n.items.length} item</span>
+                            {n.tags.map((tg) => (
+                              <span key={tg} className="inline-flex items-center gap-0.5 rounded-full bg-accent text-foreground/70 px-1.5 py-0.5 text-[10px]">
+                                <Tag className="h-2.5 w-2.5" />{tg}
+                              </span>
+                            ))}
                           </div>
                         </div>
                         <div className="flex items-center gap-1.5">
