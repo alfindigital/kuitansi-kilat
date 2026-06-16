@@ -61,7 +61,7 @@ function DisplaySection() {
   const qc = useQueryClient();
   const { data: prefs } = useQuery({ queryKey: ["prefs"], queryFn: () => db.getPrefs() });
   const hide = !!prefs?.hideAmounts;
-  const { theme, toggle: toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const toggleHide = useMutation({
     mutationFn: async () => { await db.setPrefs({ hideAmounts: !hide }); },
@@ -71,18 +71,23 @@ function DisplaySection() {
 
   return (
     <Section title="Tampilan">
-      <Card className="p-3 space-y-1">
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className="tap flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-muted transition-colors"
-        >
-          {theme === "dark" ? <Sun className="h-5 w-5 text-muted-foreground" /> : <Moon className="h-5 w-5 text-muted-foreground" />}
-          <div className="min-w-0 flex-1">
-            <div className="text-sm font-medium">{theme === "dark" ? "Mode Gelap" : "Mode Terang"}</div>
-            <div className="text-xs text-muted-foreground">Ketuk untuk mengganti tema.</div>
-          </div>
-        </button>
+      <Card className="p-3 space-y-3">
+        <div className="relative grid grid-cols-2 rounded-full bg-surface p-1 text-sm">
+          {(["light", "dark"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setTheme(t)}
+              className={
+                "tap flex items-center justify-center gap-1.5 min-h-9 rounded-full font-medium " +
+                (theme === t ? "bg-card text-foreground shadow-soft" : "text-muted-foreground")
+              }
+            >
+              {t === "light" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {t === "light" ? "Terang" : "Gelap"}
+            </button>
+          ))}
+        </div>
         <button
           type="button"
           onClick={() => toggleHide.mutate()}
