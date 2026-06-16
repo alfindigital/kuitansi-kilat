@@ -457,15 +457,15 @@ const ItemRow = memo(({ item, onChange, onRemove }: ItemRowProps) => {
       />
       <div className="flex items-center gap-2 text-sm">
         <div className="inline-flex items-center rounded-full bg-surface">
-          <button type="button" onClick={() => { tapHaptic(); onChange({ qty: Math.max(1, item.qty - 1) }); }} className="tap w-11 h-11 grid place-items-center text-muted-foreground text-lg active:scale-95 select-none" aria-label="Kurangi">−</button>
+          <button type="button" onClick={() => { tapHaptic(); onChange({ qty: Math.max(1, item.qty - 1) }); }} className="tap w-9 h-11 grid place-items-center text-muted-foreground text-lg active:scale-95 select-none" aria-label="Kurangi">−</button>
           <input
             aria-label="Jumlah item"
             inputMode="decimal" enterKeyHint="next" value={item.qty}
             onChange={(e) => { const v = parseFloat(e.target.value.replace(",", ".")); onChange({ qty: Number.isFinite(v) && v > 0 ? v : 1 }); }}
             onFocus={(e) => e.target.select()}
-            className="w-12 text-center bg-transparent focus:outline-none font-medium tabular-nums text-base"
+            className="w-8 text-center bg-transparent focus:outline-none font-medium tabular-nums text-base"
           />
-          <button type="button" onClick={() => { tapHaptic(); onChange({ qty: item.qty + 1 }); }} className="tap w-11 h-11 grid place-items-center text-muted-foreground text-lg active:scale-95 select-none" aria-label="Tambah">+</button>
+          <button type="button" onClick={() => { tapHaptic(); onChange({ qty: item.qty + 1 }); }} className="tap w-9 h-11 grid place-items-center text-muted-foreground text-lg active:scale-95 select-none" aria-label="Tambah">+</button>
         </div>
         <span className="text-muted-foreground">×</span>
         <div className="relative flex-1">
