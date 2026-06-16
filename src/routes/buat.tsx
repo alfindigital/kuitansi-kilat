@@ -160,7 +160,6 @@ function BuatPage() {
   const [discount, setDiscount] = useState<number>(initial?.discount ?? 0);
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
   const [noteText, setNoteText] = useState(initial?.noteText ?? "");
-  const [savedNote, setSavedNote] = useState<Note | null>(null);
   const hadInitialDraft = useRef(!!initial && !isDraftEmpty({ customerName: initial.customerName, customerPhone: initial.customerPhone, items: initial.items, discount: initial.discount, tags: initial.tags ?? [], noteText: initial.noteText }));
   const [editingNumber, setEditingNumber] = useState<string | null>(null);
   const loadedKeyRef = useRef<string | null>(null);
