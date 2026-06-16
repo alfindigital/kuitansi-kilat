@@ -56,6 +56,8 @@ function RiwayatList() {
   const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => db.getNotes() });
   const [q, setQ] = useState("");
   const [period, setPeriod] = useState<Period>("all");
+  const [customDate, setCustomDate] = useState<string | null>(null);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [tag, setTag] = useState<string | null>(null);
   const allTags = useMemo(() => deriveTags(notes), [notes]);
 
@@ -63,7 +65,6 @@ function RiwayatList() {
     const ql = q.trim().toLowerCase();
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const startOfWeek = startOfDay - ((now.getDay() + 6) % 7) * 86_400_000;
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
     return notes.filter((n) => {
       if (ql) {
@@ -75,15 +76,16 @@ function RiwayatList() {
         if (!hit) return false;
       }
       if (tag && !n.tags.includes(tag)) return false;
-      if (period !== "all") {
+      if (period === "custom" && customDate) {
+        if (n.date.slice(0, 10) !== customDate) return false;
+      } else if (period !== "all") {
         const t = new Date(n.date).getTime();
         if (period === "day" && t < startOfDay) return false;
-        if (period === "week" && t < startOfWeek) return false;
         if (period === "month" && t < startOfMonth) return false;
       }
       return true;
     });
-  }, [notes, q, period, tag]);
+  }, [notes, q, period, customDate, tag]);
 
   const summary = useMemo(() => {
     let om = 0, lb = 0;
