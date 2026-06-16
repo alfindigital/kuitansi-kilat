@@ -200,6 +200,7 @@ function PresetSection() {
   const { data: presets = [] } = useQuery({ queryKey: ["presets"], queryFn: () => db.getPresets() });
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0);
+  const [cost, setCost] = useState(0);
 
   const save = useMutation({
     mutationFn: async (items: Preset[]) => { await db.setPresets(items); },
@@ -210,42 +211,68 @@ function PresetSection() {
   function add() {
     const nm = name.trim();
     if (!nm) return;
-    save.mutate([...presets, { id: uid(), name: nm, price, cost: 0, unit: "" }]);
-    setName(""); setPrice(0);
+    save.mutate([...presets, { id: uid(), name: nm, price, cost, unit: "" }]);
+    setName(""); setPrice(0); setCost(0);
   }
   function remove(id: string) { save.mutate(presets.filter((p) => p.id !== id)); }
+  function updateCost(id: string, newCost: number) {
+    save.mutate(presets.map((p) => (p.id === id ? { ...p, cost: newCost } : p)));
+  }
 
   return (
     <Section title="Preset">
       <Card className="p-3 space-y-3">
         <div className="space-y-2">
-          <Input aria-label="Nama preset" placeholder="Nama" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} enterKeyHint="next" className="h-11 rounded-xl" />
+          <Input aria-label="Nama preset" placeholder="Nama item" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} enterKeyHint="next" className="h-11 rounded-xl" />
           <div className="flex gap-2">
             <div className="relative flex-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Rp</span>
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-[10px] font-medium">Harga</span>
               <Input
-                aria-label="Harga preset"
-                inputMode="decimal" enterKeyHint="done" placeholder="0"
+                aria-label="Harga jual preset"
+                inputMode="decimal" enterKeyHint="next" placeholder="0"
                 value={formatIDRInput(price)}
                 onChange={(e) => setPrice(parseIDRInput(e.target.value))}
                 onFocus={(e) => e.target.select()}
-                className="h-11 rounded-xl pl-9"
+                className="h-11 rounded-xl pl-12 text-right"
+              />
+            </div>
+            <div className="relative flex-1">
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-[10px] font-medium">Modal</span>
+              <Input
+                aria-label="Modal preset"
+                inputMode="decimal" enterKeyHint="done" placeholder="0"
+                value={formatIDRInput(cost)}
+                onChange={(e) => setCost(parseIDRInput(e.target.value))}
+                onFocus={(e) => e.target.select()}
+                className="h-11 rounded-xl pl-12 text-right"
               />
             </div>
             <Button variant="outline" onClick={add} aria-label="Tambah preset item" className="tap rounded-xl h-11 w-11 p-0 shrink-0">
               <Plus className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
+          <p className="t-caption px-1">Modal dipakai untuk hitung laba otomatis.</p>
         </div>
         {presets.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-3">Belum ada preset.</p>
         ) : (
           <ul className="divide-y divide-border">
             {presets.map((p) => (
-              <li key={p.id} className="flex items-center justify-between py-2.5">
-                <div>
-                  <div className="text-sm font-medium">{p.name}</div>
-                  <div className="text-xs text-muted-foreground">{formatIDR(p.price)}</div>
+              <li key={p.id} className="flex items-center justify-between gap-2 py-2.5">
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium truncate">{p.name}</div>
+                  <div className="text-xs text-muted-foreground">Harga {formatIDR(p.price)}</div>
+                </div>
+                <div className="relative w-28 shrink-0">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-[10px]">Modal</span>
+                  <Input
+                    aria-label={`Modal ${p.name}`}
+                    inputMode="decimal" placeholder="0"
+                    value={formatIDRInput(p.cost || 0)}
+                    onChange={(e) => updateCost(p.id, parseIDRInput(e.target.value))}
+                    onFocus={(e) => e.target.select()}
+                    className="h-9 rounded-lg pl-11 text-right text-xs"
+                  />
                 </div>
                 <button onClick={() => remove(p.id)} aria-label={`Hapus preset ${p.name}`} className="tap tap-target inline-flex items-center justify-center text-muted-foreground hover:text-destructive rounded-full">
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
