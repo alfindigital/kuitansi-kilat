@@ -291,17 +291,10 @@ function BuatPage() {
       if (typeof window !== "undefined") { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } }
       tapHaptic(20);
       if (editingId) { toast.success("Perubahan disimpan"); navigate({ to: "/riwayat/$noteId", params: { noteId: note.id } }); }
-      else setSavedNote(note);
+      else { toast.success("Nota tersimpan"); navigate({ to: "/" }); }
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
-  function newNota() {
-    setSavedNote(null); setCustomerName(""); setCustomerPhone("");
-    setItems([emptyItem()]); setDiscount(0); setTags([]); setNoteText("");
-    setDate(toDateInput(new Date().toISOString()));
-    if (typeof window !== "undefined") { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } }
-  }
 
   return (
     <div className="space-y-4">
