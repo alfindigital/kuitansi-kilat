@@ -391,20 +391,14 @@ function BuatPage() {
         </div>
 
         <div className="space-y-2">
-          {items.map((it, i) => {
-            const isPreset = presets.some((p) => p.name.trim().toLowerCase() === it.name.trim().toLowerCase() && p.price === it.price);
-            const canSave = !!it.name.trim() && it.price > 0 && !isPreset;
-            return (
-              <ItemRow
-                key={i}
-                item={it}
-                onChange={(p) => updateItem(i, p)}
-                onRemove={items.length > 1 ? () => removeItem(i) : undefined}
-                onSavePreset={canSave ? () => savePresetMutation.mutate(it) : undefined}
-                isPreset={isPreset}
-              />
-            );
-          })}
+          {items.map((it, i) => (
+            <ItemRow
+              key={i}
+              item={it}
+              onChange={(p) => updateItem(i, p)}
+              onRemove={items.length > 1 ? () => removeItem(i) : undefined}
+            />
+          ))}
         </div>
         <button type="button" onClick={addRow} className="tap w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm text-muted-foreground hover:text-foreground rounded-2xl border border-dashed border-border">
           <Plus className="h-4 w-4" /> Tambah
