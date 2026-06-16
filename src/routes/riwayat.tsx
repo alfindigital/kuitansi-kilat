@@ -9,7 +9,7 @@ import { formatIDR, formatDate } from "@/lib/format";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { SkelListItem, Skel } from "@/components/Skeleton";
+import { SkelListItem } from "@/components/Skeleton";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 
