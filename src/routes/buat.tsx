@@ -432,9 +432,6 @@ function BuatPage() {
         {editingId ? "Simpan perubahan" : "Simpan"}
       </Button>
 
-      {savedNote && business && (
-        <ShareSheet note={savedNote} business={business} onClose={newNota} onOpenDetail={() => navigate({ to: "/riwayat/$noteId", params: { noteId: savedNote.id } })} />
-      )}
     </div>
   );
 }
