@@ -35,13 +35,13 @@ export const Route = createFileRoute("/buat")({
       { name: "description", content: "Buat nota & invoice online dalam hitungan detik. Tambah item, diskon, lalu kirim struk langsung ke pelanggan via WhatsApp. Gratis, tanpa registrasi." },
       { property: "og:title", content: "Bikin Nota Online Gratis — Cetak & Kirim WA · Notaku" },
       { property: "og:description", content: "Buat nota & invoice online dalam hitungan detik. Tambah item, diskon, kirim struk langsung ke pelanggan via WhatsApp. Gratis, tanpa registrasi." },
-      { property: "og:url", content: "https://notaq.lovable.app/buat" },
-      { property: "og:image", content: "https://notaq.lovable.app/og-image.jpg" },
+      { property: "og:url", content: `${SITE_URL}/buat" },
+      { property: "og:image", content: `${SITE_URL}/og-image.jpg` },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { name: "twitter:image", content: "https://notaq.lovable.app/og-image.jpg" },
+      { name: "twitter:image", content: `${SITE_URL}/og-image.jpg` },
     ],
-    links: [{ rel: "canonical", href: "https://notaq.lovable.app/buat" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/buat" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -49,8 +49,8 @@ export const Route = createFileRoute("/buat")({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Beranda", item: "https://notaq.lovable.app/" },
-            { "@type": "ListItem", position: 2, name: "Buat Nota", item: "https://notaq.lovable.app/buat" },
+            { "@type": "ListItem", position: 1, name: "Beranda", item: `${SITE_URL}/" },
+            { "@type": "ListItem", position: 2, name: "Buat Nota", item: `${SITE_URL}/buat" },
           ],
         }),
       },

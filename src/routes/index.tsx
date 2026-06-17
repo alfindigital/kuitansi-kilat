@@ -19,13 +19,13 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Aplikasi nota dan struk gratis untuk UMKM Indonesia. Catat omset, cetak struk, kirim ke pelanggan via WhatsApp — tanpa login, data aman di HP." },
       { property: "og:title", content: "Notaku — Aplikasi Nota & Struk UMKM Gratis Tanpa Login" },
       { property: "og:description", content: "Aplikasi nota dan struk gratis untuk UMKM. Catat omset, cetak struk, kirim ke pelanggan via WhatsApp — tanpa login, data aman di HP." },
-      { property: "og:url", content: "https://notaq.lovable.app/" },
-      { property: "og:image", content: "https://notaq.lovable.app/og-image.jpg" },
+      { property: "og:url", content: `${SITE_URL}/" },
+      { property: "og:image", content: `${SITE_URL}/og-image.jpg` },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { name: "twitter:image", content: "https://notaq.lovable.app/og-image.jpg" },
+      { name: "twitter:image", content: `${SITE_URL}/og-image.jpg` },
     ],
-    links: [{ rel: "canonical", href: "https://notaq.lovable.app/" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/" }],
     scripts: [
       {
         type: "application/ld+json",
