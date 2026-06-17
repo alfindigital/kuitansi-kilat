@@ -484,11 +484,11 @@ const ItemRow = memo(({ item, presets = [], onChange, onRemove }: ItemRowProps) 
           <input
             aria-label="Jumlah item"
             inputMode="decimal" enterKeyHint="next" value={item.qty}
-            onChange={(e) => { const v = parseFloat(e.target.value.replace(",", ".")); onChange({ qty: Number.isFinite(v) && v > 0 ? v : 1 }); }}
+            onChange={(e) => { const v = parseFloat(e.target.value.replace(",", ".")); onChange({ qty: Number.isFinite(v) && v > 0 ? Math.min(99999, v) : 1 }); }}
             onFocus={(e) => e.target.select()}
             className="w-8 text-center bg-transparent focus:outline-none font-medium tabular-nums text-base"
           />
-          <button type="button" onClick={() => { tapHaptic(); onChange({ qty: item.qty + 1 }); }} className="tap w-9 h-11 grid place-items-center text-muted-foreground text-lg active:scale-95 select-none" aria-label="Tambah">+</button>
+          <button type="button" onClick={() => { tapHaptic(); onChange({ qty: Math.min(99999, item.qty + 1) }); }} className="tap w-9 h-11 grid place-items-center text-muted-foreground text-lg active:scale-95 select-none" aria-label="Tambah">+</button>
         </div>
         <span className="text-muted-foreground">×</span>
         <div className="relative flex-1">
