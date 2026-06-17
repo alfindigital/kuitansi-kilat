@@ -31,13 +31,13 @@ export const Route = createFileRoute("/riwayat")({
       { name: "description", content: "Lihat semua nota tersimpan, rekap omset harian dan bulanan, plus laba kotor usaha kamu. Filter cepat per tanggal dan tag — semua di HP." },
       { property: "og:title", content: "Riwayat Nota & Rekap Omset Harian UMKM · Notaku" },
       { property: "og:description", content: "Lihat semua nota tersimpan, rekap omset harian dan bulanan, plus laba kotor usaha kamu. Filter cepat per tanggal dan tag." },
-      { property: "og:url", content: `${SITE_URL}/riwayat" },
+      { property: "og:url", content: `${SITE_URL}/riwayat` },
       { property: "og:image", content: `${SITE_URL}/og-image.jpg` },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { name: "twitter:image", content: `${SITE_URL}/og-image.jpg` },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/riwayat" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/riwayat` }],
     scripts: [
       {
         type: "application/ld+json",
@@ -45,8 +45,8 @@ export const Route = createFileRoute("/riwayat")({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Beranda", item: `${SITE_URL}/" },
-            { "@type": "ListItem", position: 2, name: "Riwayat", item: `${SITE_URL}/riwayat" },
+            { "@type": "ListItem", position: 1, name: "Beranda", item: `${SITE_URL}/` },
+            { "@type": "ListItem", position: 2, name: "Riwayat", item: `${SITE_URL}/riwayat` },
           ],
         }),
       },

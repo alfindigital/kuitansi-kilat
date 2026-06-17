@@ -19,13 +19,13 @@ export const Route = createFileRoute("/pengaturan")({
       { name: "description", content: "Atur identitas usaha, logo, preset item, dan pelanggan. Backup & restore data nota Notaku — semua tersimpan lokal di perangkat kamu." },
       { property: "og:title", content: "Pengaturan Bisnis & Backup Data Nota · Notaku" },
       { property: "og:description", content: "Kelola profil bisnis, preset item, pelanggan, dan backup data lokal Notaku." },
-      { property: "og:url", content: `${SITE_URL}/pengaturan" },
+      { property: "og:url", content: `${SITE_URL}/pengaturan` },
       { property: "og:image", content: `${SITE_URL}/og-image.jpg` },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { name: "twitter:image", content: `${SITE_URL}/og-image.jpg` },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/pengaturan" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/pengaturan` }],
     scripts: [
       {
         type: "application/ld+json",
@@ -33,8 +33,8 @@ export const Route = createFileRoute("/pengaturan")({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Beranda", item: `${SITE_URL}/" },
-            { "@type": "ListItem", position: 2, name: "Pengaturan", item: `${SITE_URL}/pengaturan" },
+            { "@type": "ListItem", position: 1, name: "Beranda", item: `${SITE_URL}/` },
+            { "@type": "ListItem", position: 2, name: "Pengaturan", item: `${SITE_URL}/pengaturan` },
           ],
         }),
       },
