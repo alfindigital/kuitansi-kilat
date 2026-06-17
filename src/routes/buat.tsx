@@ -419,7 +419,7 @@ function BuatPage() {
       <div className="rounded-2xl bg-card border border-border shadow-soft p-3 space-y-1.5 text-sm">
         <Row label="Subtotal" value={formatIDR(totals.subtotal)} muted />
         {discount > 0 && <Row label="Diskon" value={"− " + formatIDR(discount)} muted />}
-        <Row label="Laba" value={totals.modal > 0 ? formatIDR(totals.laba) : "Belum valid"} muted />
+        
         <div className="h-px bg-border my-1" />
         <div className="flex items-end justify-between">
           <span className="text-muted-foreground">Total</span>
