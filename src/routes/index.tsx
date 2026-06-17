@@ -83,7 +83,10 @@ function Beranda() {
 
   return (
     <div className="space-y-5">
+      <h1 className="sr-only">Notaku — Dashboard Nota & Rekap Omset UMKM</h1>
       <PullToRefreshIndicator {...ptr} />
+
+
 
 
       <div className="relative grid grid-cols-2 rounded-full bg-surface p-1 text-sm" role="tablist">

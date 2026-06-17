@@ -98,8 +98,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     scripts: [
       {
         children:
-          "(function(){var l=document.querySelector('link[data-font=\"google\"]');if(l){if(l.sheet)l.media='all';else l.addEventListener('load',function(){l.media='all'});}})();",
+          "(function(){try{var t=localStorage.getItem('notaku-theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}var l=document.querySelector('link[data-font=\"google\"]');if(l){if(l.sheet)l.media='all';else l.addEventListener('load',function(){l.media='all'});}})();",
       },
+
       {
         type: "application/ld+json",
         children: JSON.stringify({
