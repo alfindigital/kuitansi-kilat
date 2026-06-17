@@ -325,6 +325,9 @@ function PresetSection() {
 function BackupSection() {
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [importChoiceOpen, setImportChoiceOpen] = useState(false);
+  const [replaceConfirmOpen, setReplaceConfirmOpen] = useState(false);
+  const [wipeConfirmOpen, setWipeConfirmOpen] = useState(false);
 
   async function doExport() {
     try {
@@ -351,27 +354,25 @@ function BackupSection() {
       toast.success("Berhasil import.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Gagal import: format tidak valid.");
-      console.error(e);
+      if (import.meta.env.DEV) console.error(e);
     }
   }
 
-  function confirmReplace(): boolean {
-    const typed = prompt('Mode REPLACE akan MENIMPA semua data.\n\nKetik "REPLACE" untuk lanjut:');
-    if (typed?.trim().toUpperCase() !== "REPLACE") {
-      toast.info("Dibatalkan.");
-      return false;
-    }
-    return true;
-  }
-  function confirmWipe(): boolean {
-    const typed = prompt('Hapus SEMUA data Notaku? Tidak bisa dibatalkan.\n\nKetik "HAPUS" untuk lanjut:');
-    if (typed?.trim().toUpperCase() !== "HAPUS") {
-      toast.info("Dibatalkan.");
-      return false;
-    }
-    return true;
+  function triggerFilePicker(mode: "merge" | "replace") {
+    if (!fileRef.current) return;
+    fileRef.current.setAttribute("data-mode", mode);
+    fileRef.current.click();
   }
 
+  async function doWipe() {
+    try {
+      await db.wipe();
+      qc.invalidateQueries();
+      toast.success("Data direset.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Gagal reset.");
+    }
+  }
 
   return (
     <Section title="Cadangan">
@@ -381,29 +382,14 @@ function BackupSection() {
           <Button
             variant="outline"
             className="tap rounded-xl"
-            onClick={() => {
-              const useReplace = confirm("OK = Replace semua data. Cancel = Merge (tambah, tidak menimpa).");
-              if (useReplace && !confirmReplace()) return;
-              const mode: "merge" | "replace" = useReplace ? "replace" : "merge";
-              fileRef.current?.setAttribute("data-mode", mode);
-              fileRef.current?.click();
-            }}
+            onClick={() => setImportChoiceOpen(true)}
           >
             <Upload className="h-4 w-4" /> Import
           </Button>
           <Button
             variant="outline"
             className="tap rounded-xl text-destructive hover:text-destructive"
-            onClick={async () => {
-              if (!confirmWipe()) return;
-              try {
-                await db.wipe();
-                qc.invalidateQueries();
-                toast.success("Data direset.");
-              } catch (e) {
-                toast.error(e instanceof Error ? e.message : "Gagal reset.");
-              }
-            }}
+            onClick={() => setWipeConfirmOpen(true)}
           >
             <RotateCcw className="h-4 w-4" /> Reset
           </Button>
@@ -418,6 +404,47 @@ function BackupSection() {
           }}
         />
       </Card>
+
+      <ChoiceModal
+        open={importChoiceOpen}
+        onClose={() => setImportChoiceOpen(false)}
+        title="Mode import"
+        description="Pilih cara menggabungkan data dari file."
+        options={[
+          {
+            label: "Merge",
+            description: "Tambah data baru, tidak menimpa yang ada.",
+            onSelect: () => triggerFilePicker("merge"),
+          },
+          {
+            label: "Replace",
+            description: "Timpa SEMUA data dengan isi file.",
+            variant: "destructive",
+            onSelect: () => setReplaceConfirmOpen(true),
+          },
+        ]}
+      />
+
+      <TypedConfirmModal
+        open={replaceConfirmOpen}
+        onClose={() => setReplaceConfirmOpen(false)}
+        title="Konfirmasi Replace"
+        description="Mode REPLACE akan MENIMPA semua data Notaku dengan isi file."
+        keyword="REPLACE"
+        confirmLabel="Pilih file"
+        onConfirm={() => triggerFilePicker("replace")}
+      />
+
+      <TypedConfirmModal
+        open={wipeConfirmOpen}
+        onClose={() => setWipeConfirmOpen(false)}
+        title="Hapus semua data?"
+        description="Tindakan ini menghapus seluruh data Notaku di perangkat ini dan tidak bisa dibatalkan."
+        keyword="HAPUS"
+        confirmLabel="Hapus semua"
+        onConfirm={doWipe}
+      />
     </Section>
   );
 }
+
