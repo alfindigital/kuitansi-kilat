@@ -61,7 +61,7 @@ function NoteDetail() {
     try {
       const url = await renderReceiptPNG(ref.current);
       await sharePNG(url, `${note!.number}.png`, text);
-    } catch (e) { toast.error("Gagal membuat gambar."); console.error(e); }
+    } catch (e) { toast.error("Gagal membuat gambar."); if (import.meta.env.DEV) console.error(e); }
     finally { setBusy(false); }
   }
   async function copyText() {

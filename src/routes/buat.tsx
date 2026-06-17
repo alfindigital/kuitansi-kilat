@@ -21,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 const CalendarPicker = lazy(() => import("@/components/ui/calendar").then((m) => ({ default: m.Calendar })));
 import { cn } from "@/lib/utils";
+import { SITE_URL } from "@/lib/site";
 
 type SearchParams = { edit?: string; from?: string };
 
@@ -35,13 +36,13 @@ export const Route = createFileRoute("/buat")({
       { name: "description", content: "Buat nota & invoice online dalam hitungan detik. Tambah item, diskon, lalu kirim struk langsung ke pelanggan via WhatsApp. Gratis, tanpa registrasi." },
       { property: "og:title", content: "Bikin Nota Online Gratis — Cetak & Kirim WA · Notaku" },
       { property: "og:description", content: "Buat nota & invoice online dalam hitungan detik. Tambah item, diskon, kirim struk langsung ke pelanggan via WhatsApp. Gratis, tanpa registrasi." },
-      { property: "og:url", content: "https://notaq.lovable.app/buat" },
-      { property: "og:image", content: "https://notaq.lovable.app/og-image.jpg" },
+      { property: "og:url", content: `${SITE_URL}/buat` },
+      { property: "og:image", content: `${SITE_URL}/og-image.jpg` },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { name: "twitter:image", content: "https://notaq.lovable.app/og-image.jpg" },
+      { name: "twitter:image", content: `${SITE_URL}/og-image.jpg` },
     ],
-    links: [{ rel: "canonical", href: "https://notaq.lovable.app/buat" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/buat` }],
     scripts: [
       {
         type: "application/ld+json",
@@ -49,8 +50,8 @@ export const Route = createFileRoute("/buat")({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Beranda", item: "https://notaq.lovable.app/" },
-            { "@type": "ListItem", position: 2, name: "Buat Nota", item: "https://notaq.lovable.app/buat" },
+            { "@type": "ListItem", position: 1, name: "Beranda", item: `${SITE_URL}/` },
+            { "@type": "ListItem", position: 2, name: "Buat Nota", item: `${SITE_URL}/buat` },
           ],
         }),
       },
@@ -484,11 +485,11 @@ const ItemRow = memo(({ item, presets = [], onChange, onRemove }: ItemRowProps) 
           <input
             aria-label="Jumlah item"
             inputMode="decimal" enterKeyHint="next" value={item.qty}
-            onChange={(e) => { const v = parseFloat(e.target.value.replace(",", ".")); onChange({ qty: Number.isFinite(v) && v > 0 ? v : 1 }); }}
+            onChange={(e) => { const v = parseFloat(e.target.value.replace(",", ".")); onChange({ qty: Number.isFinite(v) && v > 0 ? Math.min(99999, v) : 1 }); }}
             onFocus={(e) => e.target.select()}
             className="w-8 text-center bg-transparent focus:outline-none font-medium tabular-nums text-base"
           />
-          <button type="button" onClick={() => { tapHaptic(); onChange({ qty: item.qty + 1 }); }} className="tap w-9 h-11 grid place-items-center text-muted-foreground text-lg active:scale-95 select-none" aria-label="Tambah">+</button>
+          <button type="button" onClick={() => { tapHaptic(); onChange({ qty: Math.min(99999, item.qty + 1) }); }} className="tap w-9 h-11 grid place-items-center text-muted-foreground text-lg active:scale-95 select-none" aria-label="Tambah">+</button>
         </div>
         <span className="text-muted-foreground">×</span>
         <div className="relative flex-1">
