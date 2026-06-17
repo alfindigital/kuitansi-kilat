@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SeoRouteImport } from './routes/seo'
 import { Route as RiwayatRouteImport } from './routes/riwayat'
 import { Route as PengaturanRouteImport } from './routes/pengaturan'
 import { Route as BuatRouteImport } from './routes/buat'
@@ -20,11 +19,6 @@ import { Route as RiwayatNoteIdRouteImport } from './routes/riwayat.$noteId'
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SeoRoute = SeoRouteImport.update({
-  id: '/seo',
-  path: '/seo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RiwayatRoute = RiwayatRouteImport.update({
@@ -58,7 +52,6 @@ export interface FileRoutesByFullPath {
   '/buat': typeof BuatRoute
   '/pengaturan': typeof PengaturanRoute
   '/riwayat': typeof RiwayatRouteWithChildren
-  '/seo': typeof SeoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/riwayat/$noteId': typeof RiwayatNoteIdRoute
 }
@@ -67,7 +60,6 @@ export interface FileRoutesByTo {
   '/buat': typeof BuatRoute
   '/pengaturan': typeof PengaturanRoute
   '/riwayat': typeof RiwayatRouteWithChildren
-  '/seo': typeof SeoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/riwayat/$noteId': typeof RiwayatNoteIdRoute
 }
@@ -77,7 +69,6 @@ export interface FileRoutesById {
   '/buat': typeof BuatRoute
   '/pengaturan': typeof PengaturanRoute
   '/riwayat': typeof RiwayatRouteWithChildren
-  '/seo': typeof SeoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/riwayat/$noteId': typeof RiwayatNoteIdRoute
 }
@@ -88,7 +79,6 @@ export interface FileRouteTypes {
     | '/buat'
     | '/pengaturan'
     | '/riwayat'
-    | '/seo'
     | '/sitemap.xml'
     | '/riwayat/$noteId'
   fileRoutesByTo: FileRoutesByTo
@@ -97,7 +87,6 @@ export interface FileRouteTypes {
     | '/buat'
     | '/pengaturan'
     | '/riwayat'
-    | '/seo'
     | '/sitemap.xml'
     | '/riwayat/$noteId'
   id:
@@ -106,7 +95,6 @@ export interface FileRouteTypes {
     | '/buat'
     | '/pengaturan'
     | '/riwayat'
-    | '/seo'
     | '/sitemap.xml'
     | '/riwayat/$noteId'
   fileRoutesById: FileRoutesById
@@ -116,7 +104,6 @@ export interface RootRouteChildren {
   BuatRoute: typeof BuatRoute
   PengaturanRoute: typeof PengaturanRoute
   RiwayatRoute: typeof RiwayatRouteWithChildren
-  SeoRoute: typeof SeoRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
@@ -127,13 +114,6 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/seo': {
-      id: '/seo'
-      path: '/seo'
-      fullPath: '/seo'
-      preLoaderRoute: typeof SeoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/riwayat': {
@@ -190,7 +170,6 @@ const rootRouteChildren: RootRouteChildren = {
   BuatRoute: BuatRoute,
   PengaturanRoute: PengaturanRoute,
   RiwayatRoute: RiwayatRouteWithChildren,
-  SeoRoute: SeoRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
