@@ -11,6 +11,7 @@ import { formatIDR, formatDateID } from "@/lib/format";
 import { SkelHero, SkelListItem, Skel } from "@/components/Skeleton";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
+import { SITE_URL } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
   head: () => ({

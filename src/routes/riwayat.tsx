@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { SkelListItem } from "@/components/Skeleton";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
+import { SITE_URL } from "@/lib/site";
 
 const CalendarPicker = lazy(() => import("@/components/ui/calendar").then((m) => ({ default: m.Calendar })));
 

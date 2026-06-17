@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { SITE_URL } from "@/lib/site";
+import { ConfirmModal, TypedConfirmModal, ChoiceModal } from "@/components/Modal";
 
 export const Route = createFileRoute("/pengaturan")({
   head: () => ({
